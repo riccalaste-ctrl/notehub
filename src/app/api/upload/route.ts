@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+export const dynamic = 'force-dynamic';
 import { supabaseAdmin } from '@/lib/supabase';
 import { z } from 'zod';
 
@@ -22,6 +23,10 @@ const ALLOWED_TYPES = [
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 
 export async function POST(request: NextRequest) {
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
+  }
+
   try {
     const body = await request.json();
     const validation = uploadSchema.safeParse(body);

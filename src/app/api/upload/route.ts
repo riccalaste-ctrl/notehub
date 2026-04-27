@@ -23,11 +23,7 @@ const ALLOWED_TYPES = [
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 
 export async function POST(request: NextRequest) {
-  if (!supabaseAdmin) {
-    return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
-  }
-
-  try {
+  await supabaseAdmin!
     const body = await request.json();
     const validation = uploadSchema.safeParse(body);
 

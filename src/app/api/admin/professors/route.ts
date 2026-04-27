@@ -12,11 +12,7 @@ export async function GET() {
   const authError = await requireAuth();
   if (authError) return authError;
 
-  if (!supabaseAdmin) {
-    return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
-  }
-
-  try {
+  await supabaseAdmin!
     const { data, error } = await supabaseAdmin!
       .from('professors')
       .select('*')

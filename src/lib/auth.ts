@@ -7,7 +7,7 @@ export async function isAdminAuthenticated(): Promise<boolean> {
   return session?.value === 'authenticated';
 }
 
-export async function requireAuth() {
+export async function requireAuth(): Promise<NextResponse | undefined> {
   const isAuth = await isAdminAuthenticated();
   if (!isAuth) {
     return NextResponse.json(
@@ -15,5 +15,4 @@ export async function requireAuth() {
       { status: 401 }
     );
   }
-  return null;
 }

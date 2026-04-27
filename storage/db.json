@@ -1,0 +1,63 @@
+{
+  "subjects": [
+    {
+      "id": "italiano",
+      "name": "Italiano",
+      "color": "#ef4444",
+      "order": 0,
+      "storageAccountId": "gdrive_65ac95ce",
+      "folderId": "10Q6F_ksVv1Bxe-bXFMLUQGypP0S-hHph"
+    },
+    {
+      "id": "storia",
+      "name": "Storia",
+      "color": "#f59e0b",
+      "order": 1,
+      "storageAccountId": "",
+      "folderId": ""
+    },
+    {
+      "id": "inglese",
+      "name": "Inglese",
+      "color": "#14b8a6",
+      "order": 2,
+      "storageAccountId": "",
+      "folderId": ""
+    },
+    {
+      "id": "scienze",
+      "name": "Scienze",
+      "color": "#22c55e",
+      "order": 3,
+      "storageAccountId": "",
+      "folderId": ""
+    },
+    {
+      "id": "fisica",
+      "name": "Fisica",
+      "color": "#8b5cf6",
+      "order": 4,
+      "storageAccountId": "",
+      "folderId": ""
+    },
+    {
+      "id": "latino",
+      "name": "Latino",
+      "color": "#ec4899",
+      "order": 5,
+      "storageAccountId": "",
+      "folderId": ""
+    }
+  ],
+  "storageAccounts": [
+    {
+      "id": "gdrive_65ac95ce",
+      "label": "prova",
+      "email": "rickstella00@gmail.com",
+      "clientId": "949943274307-lnitb5bcv3ffq87cc50kko04krprudpt.apps.googleusercontent.com",
+      "clientSecret": "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",
+      "refreshToken": "https://www.googleapis.com/oauth2/v1/certs"
+    }
+  ],
+  "metrics": {}
+}

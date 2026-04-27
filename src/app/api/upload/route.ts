@@ -23,7 +23,7 @@ const ALLOWED_TYPES = [
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 
 export async function POST(request: NextRequest) {
-  await supabaseAdmin!
+  try {
     const body = await request.json();
     const validation = uploadSchema.safeParse(body);
 

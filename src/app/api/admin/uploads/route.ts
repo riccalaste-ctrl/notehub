@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const authError = await requireAuth();
   if (authError) return authError;
 
-  await supabaseAdmin!
+  try {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '100');
     const offset = parseInt(searchParams.get('offset') || '0');

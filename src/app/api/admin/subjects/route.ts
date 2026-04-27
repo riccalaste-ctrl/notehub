@@ -16,7 +16,7 @@ export async function GET() {
   const authError = await requireAuth();
   if (authError) return authError;
 
-  await supabaseAdmin!
+  try {
     const { data, error } = await supabaseAdmin
       .from('subjects')
       .select('*')

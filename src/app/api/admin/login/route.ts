@@ -15,7 +15,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    cookies().set('admin_session', 'authenticated', {
+    const cookieStore = await cookies();
+    cookieStore.set('admin_session', 'authenticated', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

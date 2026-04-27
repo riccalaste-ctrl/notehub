@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SearchBar from '@/components/SearchBar';
 import FileCard from '@/components/FileCard';
-import FileListSkeleton from '@/components/Skeleton';
+import { FileListSkeleton } from '@/components/Skeleton';
 import UploadModal from '@/components/UploadModal';
 import Toast, { useToast } from '@/components/Toast';
 

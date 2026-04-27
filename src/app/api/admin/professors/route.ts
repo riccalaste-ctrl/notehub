@@ -8,7 +8,7 @@ const professorSchema = z.object({
 });
 
 export async function GET() {
-  const authError = requireAuth();
+  const authError = await requireAuth();
   if (authError) return authError;
 
   try {
@@ -30,7 +30,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const authError = requireAuth();
+  const authError = await requireAuth();
   if (authError) return authError;
 
   try {
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const authError = requireAuth();
+  const authError = await requireAuth();
   if (authError) return authError;
 
   try {
@@ -97,7 +97,7 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const authError = requireAuth();
+  const authError = await requireAuth();
   if (authError) return authError;
 
   try {

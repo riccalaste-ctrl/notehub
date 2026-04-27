@@ -1,0 +1,137 @@
+'use client';
+
+interface FileCardProps {
+  file: {
+    id: string;
+    original_filename: string;
+    subject_name?: string;
+    subject_slug?: string;
+    professor_name?: string;
+    created_at: string;
+    mime_type: string;
+    size_bytes: number;
+    download_url?: string;
+    view_url?: string;
+  };
+}
+
+function getFileIcon(mimeType: string) {
+  if (mimeType.includes('pdf')) {
+    return (
+      <svg className="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
+        <path d="M8.5 15.5c0 .83-.67 1.5-1.5 1.5H5v-2h1.5c.28 0 .5-.22.5-.5v-1c0-.28-.22-.5-.5-.5H5v-2h2c.83 0 1.5.67 1.5 1.5v1zm3 1.5c0 .83-.67 1.5-1.5 1.5h-2v-2h2v1c0 .28.22.5.5.5h1v-2h-1c-.83 0-1.5.67-1.5 1.5v1zm2-3.5c0-.83.67-1.5 1.5-1.5h1v2h-1c-.28 0-.5.22-.5.5v1c0 .28.22.5.5.5h1.5v2h-1.5c-.83 0-1.5-.67-1.5-1.5v-3zm6.5 2.5h-2v-2h2v1c0 .28.22.5.5.5h1v-2h-1c-.83 0-1.5-.67-1.5-1.5v-1c0-.83.67-1.5 1.5-1.5h2v2h-2v-1c0-.28-.22-.5-.5-.5h-1v2h1c.83 0 1.5.67 1.5 1.5v1c0 .83-.67 1.5-1.5 1.5z"/>
+      </svg>
+    );
+  }
+  if (mimeType.includes('word') || mimeType.includes('document')) {
+    return (
+      <svg className="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
+        <path d="M8 12h8v1H8zm0 2h8v1H8zm0 2h5v1H8z"/>
+      </svg>
+    );
+  }
+  if (mimeType.includes('image')) {
+    return (
+      <svg className="w-8 h-8 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+      </svg>
+    );
+  }
+  return (
+    <svg className="w-8 h-8 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
+    </svg>
+  );
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+}
+
+export default function FileCard({ file }: FileCardProps) {
+  const handleDownload = () => {
+    if (file.download_url) {
+      window.open(file.download_url, '_blank');
+    }
+  };
+
+  const handleView = () => {
+    if (file.view_url) {
+      window.open(file.view_url, '_blank');
+    }
+  };
+
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 hover:shadow-md transition-shadow">
+      <div className="flex items-start space-x-4">
+        <div className="flex-shrink-0">
+          {getFileIcon(file.mime_type)}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm font-medium text-slate-900 dark:text-white truncate" title={file.original_filename}>
+            {file.original_filename}
+          </h3>
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+            {file.subject_name && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300">
+                {file.subject_name}
+              </span>
+            )}
+            {file.professor_name && (
+              <span className="inline-flex items-center">
+                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                {file.professor_name}
+              </span>
+            )}
+            <span className="inline-flex items-center">
+              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              {formatDate(file.created_at)}
+            </span>
+            <span>{formatFileSize(file.size_bytes)}</span>
+          </div>
+        </div>
+        <div className="flex-shrink-0 flex space-x-2">
+          {file.view_url && (
+            <button
+              onClick={handleView}
+              className="p-2 text-slate-500 hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+              title="Visualizza"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </button>
+          )}
+          {file.download_url && (
+            <button
+              onClick={handleDownload}
+              className="p-2 text-slate-500 hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+              title="Scarica"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

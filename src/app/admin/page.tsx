@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/components/Toast';
+import Toast, { useToast } from '@/components/Toast';
 
 interface Subject {
   id: string;

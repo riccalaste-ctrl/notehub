@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/components/Toast';
+import Toast, { useToast } from '@/components/Toast';
 
 export default function AdminLoginPage() {
   const [password, setPassword] = useState('');

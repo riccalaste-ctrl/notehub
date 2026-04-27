@@ -17,7 +17,7 @@ export async function GET() {
   }
 
   try {
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin!
       .from('professors')
       .select('*')
       .order('name');
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin!
       .from('professors')
       .insert({ name: validation.data.name })
       .select()
@@ -82,7 +82,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin!
       .from('professors')
       .update({ name })
       .eq('id', id)
@@ -116,7 +116,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const { error } = await supabaseAdmin
+    const { error } = await supabaseAdmin!
       .from('professors')
       .delete()
       .eq('id', id);

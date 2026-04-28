@@ -1,30 +1,66 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { z } from 'zod';
+import bcrypt from 'bcryptjs';
+import { createJWT } from '@/lib/jwt';
+import { setAdminCookie } from '@/lib/auth';
+
+const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { password } = body;
+    const validation = loginSchema.safeParse(body);
 
-    const adminPassword = process.env.ADMIN_PASSWORD;
-
-    if (!adminPassword || password !== adminPassword) {
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Invalid password' },
+        { error: 'Invalid email or password' },
+        { status: 400 }
+      );
+    }
+
+    const { email, password } = validation.data;
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@notehub.local';
+    const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
+
+    // Security: don't reveal if email exists
+    if (email !== adminEmail) {
+      return NextResponse.json(
+        { error: 'Invalid email or password' },
         { status: 401 }
       );
     }
 
-    const cookieStore = await cookies();
-    cookieStore.set('admin_session', 'authenticated', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24, // 24 hours
-      path: '/',
-    });
+    if (!adminPasswordHash) {
+      console.error('ADMIN_PASSWORD_HASH not configured');
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
 
-    return NextResponse.json({ success: true });
+    const passwordMatch = await bcrypt.compare(password, adminPasswordHash);
+
+    if (!passwordMatch) {
+      return NextResponse.json(
+        { error: 'Invalid email or password' },
+        { status: 401 }
+      );
+    }
+
+    // Create JWT token
+    const jwt = await createJWT(email, 'admin');
+
+    // Set cookie
+    await setAdminCookie(jwt);
+
+    return NextResponse.json({ 
+      success: true,
+      message: 'Login successful',
+      token: jwt 
+    });
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(
@@ -32,4 +68,11 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+export async function POST_LOGOUT(request: NextRequest) {
+  const cookieStore = await (await import('next/headers')).cookies();
+  cookieStore.delete('notehub_admin_jwt');
+
+  return NextResponse.json({ success: true, message: 'Logged out successfully' });
 }

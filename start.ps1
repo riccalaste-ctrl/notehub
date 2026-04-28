@@ -1,24 +1,26 @@
+#!/usr/bin/env pwsh
+<#
+.SYNOPSIS
+Start NoteHub development server
+#>
+
 $nodeCommand = Get-Command node -ErrorAction SilentlyContinue
-$nodePath = $null
 
-if ($nodeCommand) {
-  $nodePath = $nodeCommand.Source
+if (-not $nodeCommand) {
+  Write-Error "Node.js non trovato. Installa Node.js da https://nodejs.org/"
+  exit 1
 }
 
-if (-not $nodePath) {
-  $candidate = Get-ChildItem -Path "$env:ProgramFiles\WindowsApps" -Directory -Filter "OpenAI.Codex_*" -ErrorAction SilentlyContinue |
-    Sort-Object Name -Descending |
-    ForEach-Object { Join-Path $_.FullName "app\resources\node.exe" } |
-    Where-Object { Test-Path $_ } |
-    Select-Object -First 1
+Write-Host "🚀 Avvio NoteHub in modalità sviluppo..." -ForegroundColor Green
+Write-Host "📂 Directory: $(Get-Location)" -ForegroundColor Cyan
 
-  if ($candidate) {
-    $nodePath = $candidate
-  }
+# Install dependencies if needed
+if (-not (Test-Path "node_modules")) {
+  Write-Host "📦 Installazione dipendenze..." -ForegroundColor Yellow
+  npm install
 }
 
-if (-not $nodePath) {
-  throw "Node non trovato. Installa Node.js oppure avvia il progetto da Codex Desktop."
-}
+# Start Next.js dev server
+Write-Host "⏳ Avvio server Next.js..." -ForegroundColor Yellow
+npm run dev
 
-& $nodePath "$PSScriptRoot\server.js"

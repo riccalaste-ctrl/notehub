@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Toast, { useToast } from '@/components/Toast';
+import Link from 'next/link';
 
 interface Subject {
   id: string;
@@ -289,9 +290,9 @@ export default function AdminPage() {
             <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
               <p className="text-center text-sm text-slate-600 dark:text-slate-400">
                 Torna alla{' '}
-                <a href="/" className="text-primary-600 hover:text-primary-700 font-medium transition">
+                <Link href="/" className="text-primary-600 hover:text-primary-700 font-medium transition">
                   home
-                </a>
+                </Link>
               </p>
             </div>
           </div>

@@ -30,7 +30,6 @@ const nextConfig: NextConfig = {
       {
         source: '/api/:path*',
         headers: [
-          { key: 'Cache-Control', value: 'no-store, must-revalidate' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           { key: 'X-XSS-Protection', value: '1; mode=block' },
@@ -44,18 +43,18 @@ const nextConfig: NextConfig = {
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
         ],
       },
+      {
+        source: '/(?!api/).*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=300, stale-while-revalidate=600' },
+        ],
+      },
     ];
   },
 
   // Redirects
   async redirects() {
-    return [
-      {
-        source: '/admin/login',
-        destination: '/admin',
-        permanent: false,
-      },
-    ];
+    return [];
   },
 
   // Rewrites for API versioning (if needed in future)

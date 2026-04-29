@@ -86,7 +86,7 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
     setError('');
   };
 
-  const handleSubmit = async (e: React.FormEvent()) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!file || !selectedSubject) {
       setError('Seleziona un file e una materia');

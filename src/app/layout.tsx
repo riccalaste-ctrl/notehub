@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
+
 export const metadata: Metadata = {
-  title: "NoteHub - Condividi appunti scolastici",
-  description: "Piattaforma gratuita per condividere appunti tra studenti",
+  title: "NoteHub - The Digital Agora",
+  description: "Piattaforma premium per professionisti della conoscenza",
 };
 
 export default function RootLayout({
@@ -12,8 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="it">
-      <body className="min-h-screen flex flex-col">
+    <html lang="it" className={`${inter.variable} dark`}>
+      <body className="min-h-screen flex flex-col font-sans antialiased">
         {children}
       </body>
     </html>

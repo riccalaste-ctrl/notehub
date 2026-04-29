@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Subject {
   id: string;
@@ -36,7 +37,7 @@ const ALLOWED_TYPES = [
   'image/png',
 ];
 
-const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
 export default function UploadModal({ isOpen, onClose, subjects, professors, subjectProfessors }: UploadModalProps) {
   const [uploading, setUploading] = useState(false);
@@ -85,7 +86,7 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
     setError('');
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent()) => {
     e.preventDefault();
     if (!file || !selectedSubject) {
       setError('Seleziona un file e una materia');
@@ -133,159 +134,177 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={onClose} />
-        
-        <div className="relative bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-md p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-              Carica appunti
-            </h2>
-            <button
-              onClick={onClose}
-              className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            onClick={onClose}
+          />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              className="glass rounded-3xl w-full max-w-md p-6 border border-white/20 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          {success ? (
-            <div className="text-center py-8">
-              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <p className="text-green-600 dark:text-green-400 font-medium">Upload completato!</p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Il tuo nome (facoltativo)
-                </label>
-                <input
-                  type="text"
-                  value={uploaderName}
-                  onChange={(e) => setUploaderName(e.target.value)}
-                  placeholder="Anonimo"
-                  maxLength={100}
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Materia *
-                </label>
-                <select
-                  value={selectedSubject}
-                  onChange={(e) => {
-                    setSelectedSubject(e.target.value);
-                    setSelectedProfessor('');
-                  }}
-                  required
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                >
-                  <option value="">Seleziona materia</option>
-                  {subjects.filter(s => s.enabled).map((subject) => (
-                    <option key={subject.id} value={subject.id}>
-                      {subject.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {selectedSubject && filteredProfessors.length > 0 && (
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                    Professore
-                  </label>
-                  <select
-                    value={selectedProfessor}
-                    onChange={(e) => setSelectedProfessor(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                  >
-                    <option value="">Seleziona professore</option>
-                    {filteredProfessors.map((professor) => (
-                      <option key={professor.id} value={professor.id}>
-                        {professor.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  File *
-                </label>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  onChange={handleFileChange}
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                  required
-                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                />
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  Max 20MB. Permessi: PDF, DOC, DOCX, JPG, PNG
-                </p>
-              </div>
-
-              {file && (
-                <div className="p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                  <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
-                    {file.name}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {(file.size / 1024 / 1024).toFixed(2)} MB
-                  </p>
-                </div>
-              )}
-
-              {error && (
-                <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-lg">
-                  {error}
-                </div>
-              )}
-
-              <div className="flex justify-end space-x-3 pt-2">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-semibold text-white">
+                  Carica Appunti
+                </h2>
                 <button
-                  type="button"
                   onClick={onClose}
-                  className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"
+                  className="p-2 text-silk-400 hover:text-white rounded-xl hover:bg-white/10 premium-transition"
                 >
-                  Annulla
-                </button>
-                <button
-                  type="submit"
-                  disabled={uploading || !file || !selectedSubject}
-                  className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-                >
-                  {uploading ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      Caricamento...
-                    </>
-                  ) : (
-                    'Carica'
-                  )}
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
               </div>
-            </form>
-          )}
-        </div>
-      </div>
-    </div>
+
+              {success ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center py-8"
+                >
+                  <div className="w-16 h-16 rounded-3xl bg-green-500/20 flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <p className="text-green-400 font-medium">Upload completato!</p>
+                </motion.div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-silk-300 mb-1">
+                      Il tuo nome (facoltativo)
+                    </label>
+                    <input
+                      type="text"
+                      value={uploaderName}
+                      onChange={(e) => setUploaderName(e.target.value)}
+                      placeholder="Anonimo"
+                      maxLength={100}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-silk-500 outline-none focus:border-cobalt/50 focus:ring-1 focus:ring-cobalt/50 premium-transition"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-silk-300 mb-1">
+                      Materia *
+                    </label>
+                    <select
+                      value={selectedSubject}
+                      onChange={(e) => {
+                        setSelectedSubject(e.target.value);
+                        setSelectedProfessor('');
+                      }}
+                      required
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white outline-none focus:border-cobalt/50 premium-transition [&>option]:bg-charcoal"
+                    >
+                      <option value="">Seleziona materia</option>
+                      {subjects.filter(s => s.enabled).map((subject) => (
+                        <option key={subject.id} value={subject.id}>
+                          {subject.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {selectedSubject && filteredProfessors.length > 0 && (
+                    <div>
+                      <label className="block text-sm font-medium text-silk-300 mb-1">
+                        Professore
+                      </label>
+                      <select
+                        value={selectedProfessor}
+                        onChange={(e) => setSelectedProfessor(e.target.value)}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white outline-none focus:border-cobalt/50 premium-transition [&>option]:bg-charcoal"
+                      >
+                        <option value="">Seleziona professore</option>
+                        {filteredProfessors.map((professor) => (
+                          <option key={professor.id} value={professor.id}>
+                            {professor.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-sm font-medium text-silk-300 mb-1">
+                      File *
+                    </label>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      onChange={handleFileChange}
+                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                      required
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white outline-none focus:border-cobalt/50 premium-transition file:mr-4 file:py-1 file:px-3 file:rounded-xl file:border-0 file:bg-cobalt/20 file:text-cobalt-light file:text-sm file:cursor-pointer"
+                    />
+                    <p className="mt-1 text-xs text-silk-500">
+                      Max 20MB. Permessi: PDF, DOC, DOCX, JPG, PNG
+                    </p>
+                  </div>
+
+                  {file && (
+                    <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
+                      <p className="text-sm font-medium text-white truncate">
+                        {file.name}
+                      </p>
+                      <p className="text-xs text-silk-400">
+                        {(file.size / 1024 / 1024).toFixed(2)} MB
+                      </p>
+                    </div>
+                  )}
+
+                  {error && (
+                    <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-2xl">
+                      {error}
+                    </div>
+                  )}
+
+                  <div className="flex justify-end space-x-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="px-5 py-2.5 text-sm font-medium text-silk-300 hover:text-white rounded-2xl hover:bg-white/10 premium-transition"
+                    >
+                      Annulla
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={uploading || !file || !selectedSubject}
+                      className="px-5 py-2.5 text-sm font-medium text-white bg-cobalt hover:bg-cobalt-light rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center premium-transition shadow-lg shadow-cobalt/25"
+                    >
+                      {uploading ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                          Caricamento...
+                        </>
+                      ) : (
+                        'Carica'
+                      )}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </motion.div>
+          </div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }

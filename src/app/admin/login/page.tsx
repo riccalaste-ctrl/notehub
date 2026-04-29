@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Toast, { useToast } from '@/components/Toast';
@@ -44,7 +44,7 @@ export default function AdminLoginPage() {
   };
 
   // Load remembered email
-  useState(() => {
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const rememberedEmail = localStorage.getItem('notehub_remember_email');
       if (rememberedEmail) {
@@ -160,7 +160,7 @@ export default function AdminLoginPage() {
         </div>
       </div>
 
-      <Toast {...toast} onClose={hideToast} />
+      {toast && <Toast {...toast} onClose={hideToast} />}
     </div>
   );
 }

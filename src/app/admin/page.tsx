@@ -541,7 +541,7 @@ export default function AdminPage() {
         )}
       </main>
 
-      <Toast {...toast} onClose={hideToast} />
+      {toast && <Toast {...toast} onClose={hideToast} />}
     </div>
   );
 }

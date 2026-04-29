@@ -37,7 +37,7 @@ export async function createSessionToken(): Promise<string> {
 export async function verifySessionToken(token: string): Promise<AdminSession> {
   try {
     const verified = await jwtVerify(token, JWT_SECRET);
-    return verified.payload as AdminSession;
+    return verified.payload as unknown as AdminSession;
   } catch (error) {
     throw new AuthenticationError('Token non valido o scaduto');
   }

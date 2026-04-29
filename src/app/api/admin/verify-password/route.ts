@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { createJWT, setAdminCookie } from '@/lib/auth';
+import { createJWT } from '@/lib/jwt';
+import { setAdminCookie } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {

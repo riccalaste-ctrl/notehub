@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { createJWT } from '@/lib/jwt';
-import { setAdminCookie } from '@/lib/auth';
+import { serialize } from 'cookie';
+
+const ADMIN_JWT_COOKIE = 'notehub_admin_jwt';
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,9 +20,22 @@ export async function POST(request: NextRequest) {
     }
 
     const jwt = await createJWT('admin@notehub.local', 'admin');
-    await setAdminCookie(jwt);
 
-    return NextResponse.json({ success: true });
+    const cookie = serialize(ADMIN_JWT_COOKIE, jwt, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24,
+      path: '/',
+    });
+
+    return new NextResponse(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Set-Cookie': cookie,
+      },
+    });
   } catch (error) {
     console.error('Verify password error:', error);
     return NextResponse.json({ error: 'Errore interno' }, { status: 500 });

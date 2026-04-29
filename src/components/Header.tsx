@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import AdminPasswordModal from './AdminPasswordModal';
 
 interface HeaderProps {
   onOpenUpload?: () => void;
@@ -9,6 +10,7 @@ interface HeaderProps {
 
 export default function Header({ onOpenUpload }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [adminModalOpen, setAdminModalOpen] = useState(false);
 
   return (
     <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
@@ -35,9 +37,9 @@ export default function Header({ onOpenUpload }: HeaderProps) {
                 Carica
               </button>
             )}
-            <Link href="/admin-login" className="text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400">
+            <button onClick={() => setAdminModalOpen(true)} className="text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400">
               Admin
-            </Link>
+            </button>
           </nav>
 
           <button
@@ -69,12 +71,13 @@ export default function Header({ onOpenUpload }: HeaderProps) {
                 Carica file
               </button>
             )}
-            <Link href="/admin-login" className="block px-4 py-2 text-slate-600 dark:text-slate-300">
+            <button onClick={() => { setAdminModalOpen(true); setMenuOpen(false); }} className="block w-full text-left px-4 py-2 text-slate-600 dark:text-slate-300">
               Admin
-            </Link>
+            </button>
           </div>
         </div>
       )}
+      <AdminPasswordModal isOpen={adminModalOpen} onClose={() => setAdminModalOpen(false)} />
     </header>
   );
 }

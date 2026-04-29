@@ -18,15 +18,13 @@ async function verifyAdminToken(token: string): Promise<boolean> {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Protect all /admin page routes (but NOT /admin-login)
+  // Protect all /admin page routes
   const isAdminRoute = pathname === '/admin' || pathname.startsWith('/admin/');
   if (isAdminRoute) {
     const adminToken = request.cookies.get(ADMIN_JWT_COOKIE);
 
     if (!adminToken || !(await verifyAdminToken(adminToken.value))) {
-      const loginUrl = new URL('/admin-login', request.url);
-      loginUrl.searchParams.set('from', pathname);
-      return NextResponse.redirect(loginUrl);
+      return NextResponse.redirect(new URL('/', request.url));
     }
   }
 

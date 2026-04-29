@@ -47,7 +47,7 @@ export default function AdminPage() {
         if (!cancelled) {
           if (res.status === 401 || res.status === 403) {
             setAuthStatus('unauthenticated');
-            router.push('/admin/login');
+            router.push('/admin-login');
           } else {
             setAuthStatus('authenticated');
           }
@@ -55,7 +55,7 @@ export default function AdminPage() {
       } catch {
         if (!cancelled) {
           setAuthStatus('unauthenticated');
-          router.push('/admin/login');
+          router.push('/admin-login');
         }
       }
     };
@@ -96,7 +96,7 @@ export default function AdminPage() {
   const handleLogout = async () => {
     try {
       await fetch('/api/admin/logout', { method: 'POST' });
-      router.push('/admin/login');
+      router.push('/admin-login');
     } catch {
       showToast('Errore nel logout', 'error');
     }

@@ -43,7 +43,6 @@ export default function AdminLoginPage() {
     }
   };
 
-  // Load remembered email
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const rememberedEmail = localStorage.getItem('notehub_remember_email');
@@ -57,9 +56,7 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 px-4">
       <div className="max-w-md w-full">
-        {/* Card */}
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 border border-slate-200 dark:border-slate-700">
-          {/* Header */}
           <div className="text-center mb-8">
             <div className="w-14 h-14 bg-gradient-to-br from-primary-600 to-primary-700 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
               <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,9 +71,7 @@ export default function AdminLoginPage() {
             </p>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email Field */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Email
@@ -92,7 +87,6 @@ export default function AdminLoginPage() {
               />
             </div>
 
-            {/* Password Field */}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Password
@@ -108,7 +102,6 @@ export default function AdminLoginPage() {
               />
             </div>
 
-            {/* Remember Me */}
             <div className="flex items-center">
               <input
                 type="checkbox"
@@ -123,7 +116,6 @@ export default function AdminLoginPage() {
               </label>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading || !email || !password}
@@ -143,7 +135,6 @@ export default function AdminLoginPage() {
             </button>
           </form>
 
-          {/* Footer */}
           <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
             <p className="text-center text-sm text-slate-600 dark:text-slate-400">
               Torna alla{' '}
@@ -154,9 +145,8 @@ export default function AdminLoginPage() {
           </div>
         </div>
 
-        {/* Footer Info */}
         <div className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
-          <p>🔒 Questa area è protetta. Accedi solo se sei un amministratore.</p>
+          <p>🔒 Questa area e' protetta. Accedi solo se sei un amministratore.</p>
         </div>
       </div>
 

@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import SearchBar from '@/components/SearchBar';
 import FileCard from '@/components/FileCard';
 import { FileListSkeleton } from '@/components/Skeleton';
 import UploadModal from '@/components/UploadModal';
@@ -72,6 +71,7 @@ export default function HomePage() {
   const [uploads, setUploads] = useState<Upload[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [filters, setFilters] = useState({
     search: '',
     subjectId: '',
@@ -134,7 +134,7 @@ export default function HomePage() {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [filters, fetchData]);
+  }, [filters, fetchData, refreshKey]);
 
   const filteredProfessors = useMemo(() => {
     if (!filters.subjectId) return professors;
@@ -143,16 +143,6 @@ export default function HomePage() {
       .map((sp) => sp.professor_id);
     return professors.filter((p) => prof_ids.includes(p.id));
   }, [filters.subjectId, professors, subjectProfessors]);
-
-  const handleSearch = (query: string) => {
-    setFilters((prev) => ({ ...prev, search: query, subjectId: '', professorId: '' }));
-  };
-
-  const handleUploadSuccess = async () => {
-    showToast('File caricato con successo!', 'success');
-    setUploadModalOpen(false);
-    await fetchData();
-  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
@@ -191,9 +181,17 @@ export default function HomePage() {
 
         {/* Search and Filters */}
         <div id="filtri" className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6 mb-8">
-          <SearchBar onSearch={handleSearch} />
+          <div className="mb-4">
+            <input
+              type="text"
+              value={filters.search}
+              onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
+              placeholder="Cerca file..."
+              className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            />
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <select
               value={filters.subjectId}
               onChange={(e) => setFilters((prev) => ({ ...prev, subjectId: e.target.value, professorId: '' }))}
@@ -264,149 +262,17 @@ export default function HomePage() {
 
       <UploadModal
         isOpen={uploadModalOpen}
-        onClose={() => setUploadModalOpen(false)}
-        onSuccess={handleUploadSuccess}
+        onClose={() => {
+          setUploadModalOpen(false);
+          setRefreshKey((k) => k + 1);
+        }}
         subjects={subjects.filter((s) => s.enabled)}
         professors={professors}
         subjectProfessors={subjectProfessors}
       />
 
-      <Toast {...toast} onClose={hideToast} />
+      {toast && <Toast {...toast} onClose={hideToast} />}
       <Footer />
     </div>
-  );
-}
-
-      if (filters.subjectId) params.set('subject_id', filters.subjectId);
-      if (filters.professorId) params.set('professor_id', filters.professorId);
-      if (filters.dateFrom) params.set('date_from', filters.dateFrom);
-      if (filters.dateTo) params.set('date_to', filters.dateTo);
-
-      const response = await fetch(`/api/files?${params.toString()}`);
-      const data = await response.json();
-      
-      if (data.uploads) {
-        setUploads(data.uploads);
-      }
-    } catch (error) {
-      console.error('Error fetching files:', error);
-      showToast('Errore nel caricamento dei file', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }, [filters, showToast]);
-
-  const fetchMetadata = useCallback(async () => {
-    try {
-      const [subjectsRes, professorsRes] = await Promise.all([
-        fetch('/api/admin/subjects'),
-        fetch('/api/admin/professors'),
-      ]);
-
-      const subjectsData = await subjectsRes.json();
-      const professorsData = await professorsRes.json();
-
-      if (subjectsData.subjects) {
-        setSubjects(subjectsData.subjects);
-      }
-      if (professorsData.professors) {
-        setProfessors(professorsData.professors);
-      }
-
-      const associationsRes = await fetch('/api/admin/subject-professors');
-      const associationsData = await associationsRes.json();
-      if (associationsData.associations) {
-        setSubjectProfessors(associationsData.associations);
-      }
-    } catch (error) {
-      console.error('Error fetching metadata:', error);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchMetadata();
-  }, [fetchMetadata]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const handleFilterChange = useCallback((newFilters: typeof filters) => {
-    setFilters(newFilters);
-  }, []);
-
-  return (
-    <>
-      <Header onOpenUpload={() => setUploadModalOpen(true)} />
-      
-      <main className="flex-1">
-        <section className="bg-gradient-to-br from-primary-600 to-primary-800 text-white py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              NoteHub
-            </h1>
-            <p className="text-xl md:text-2xl text-primary-100 mb-8">
-              Condividi e trova appunti della scuola
-            </p>
-            <p className="text-primary-200 max-w-2xl mx-auto">
-              Accedi gratuitamente a migliaia di appunti condivisi da studenti come te.
-              Trova_materiale per ogni materia e professore.
-            </p>
-          </div>
-        </section>
-
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <SearchBar
-            subjects={subjects}
-            professors={professors}
-            filters={filters}
-            onFilterChange={handleFilterChange}
-          />
-
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-              {uploads.length > 0 
-                ? `${uploads.length} file trovato${uploads.length !== 1 ? 'i' : ''}`
-                : 'Nessun file'}
-            </h2>
-          </div>
-
-          {loading ? (
-            <FileListSkeleton count={5} />
-          ) : uploads.length > 0 ? (
-            <div className="space-y-3">
-              {uploads.map((upload) => (
-                <FileCard key={upload.id} file={upload} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <p className="text-slate-500 dark:text-slate-400">
-                Nessun file trovato. Prova a modificare i filtri di ricerca.
-              </p>
-            </div>
-          )}
-        </section>
-      </main>
-
-      <Footer />
-
-      <UploadModal
-        isOpen={uploadModalOpen}
-        onClose={() => setUploadModalOpen(false)}
-        subjects={subjects}
-        professors={professors}
-        subjectProfessors={subjectProfessors}
-      />
-
-      {toast && (
-        <Toast message={toast.message} type={toast.type} onClose={hideToast} />
-      )}
-    </>
   );
 }

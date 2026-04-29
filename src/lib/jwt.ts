@@ -26,7 +26,7 @@ export async function createJWT(email: string, role: 'admin' | 'user' = 'user'):
 export async function verifyJWT(token: string): Promise<JWTPayload | null> {
   try {
     const verified = await jwtVerify(token, secret);
-    return verified.payload as JWTPayload;
+    return verified.payload as unknown as JWTPayload;
   } catch (error) {
     return null;
   }

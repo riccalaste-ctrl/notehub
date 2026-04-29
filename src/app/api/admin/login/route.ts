@@ -69,10 +69,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
-export async function POST_LOGOUT(request: NextRequest) {
-  const cookieStore = await (await import('next/headers')).cookies();
-  cookieStore.delete('notehub_admin_jwt');
-
-  return NextResponse.json({ success: true, message: 'Logged out successfully' });
-}

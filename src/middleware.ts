@@ -18,17 +18,6 @@ async function verifyAdminToken(token: string): Promise<boolean> {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Protect all /admin page routes
-  const isAdminRoute = pathname === '/admin' || pathname.startsWith('/admin/');
-  if (isAdminRoute) {
-    const adminToken = request.cookies.get(ADMIN_JWT_COOKIE);
-
-    if (!adminToken || !(await verifyAdminToken(adminToken.value))) {
-      return NextResponse.redirect(new URL('/', request.url));
-    }
-  }
-
-  // Require authentication for admin API routes (excluding login and verify-password)
   const isPublicAdminAPI = pathname === '/api/admin/login' || pathname === '/api/admin/verify-password';
   if (pathname.startsWith('/api/admin') && !isPublicAdminAPI) {
     const adminToken = request.cookies.get(ADMIN_JWT_COOKIE);
@@ -46,8 +35,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/admin',
-    '/admin/:path*',
     '/api/admin/:path*',
   ],
 };

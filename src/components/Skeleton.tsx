@@ -1,19 +1,37 @@
+import { motion } from 'framer-motion';
+
 export function FileCardSkeleton() {
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 animate-pulse">
+    <div className="glass rounded-2xl p-5 border border-white/10">
       <div className="flex items-start space-x-4">
-        <div className="w-8 h-8 bg-slate-200 dark:bg-slate-700 rounded" />
+        <motion.div
+          animate={{ opacity: [0.3, 0.6, 0.3] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: [0.4, 0, 0.2, 1] }}
+          className="w-10 h-10 rounded-2xl bg-white/10"
+        />
         <div className="flex-1">
-          <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4 mb-2" />
+          <motion.div
+            animate={{ opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: [0.4, 0, 0.2, 1] }}
+            className="h-4 bg-white/10 rounded-lg w-3/4 mb-3"
+          />
           <div className="flex space-x-4">
-            <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-20" />
-            <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-24" />
-            <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-16" />
+            <motion.div
+              animate={{ opacity: [0.3, 0.6, 0.3] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: [0.4, 0, 0.2, 1] }}
+              className="h-3 bg-white/10 rounded-lg w-20"
+            />
+            <motion.div
+              animate={{ opacity: [0.3, 0.6, 0.3] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: [0.4, 0, 0.2, 1] }}
+              className="h-3 bg-white/10 rounded-lg w-24"
+            />
+            <motion.div
+              animate={{ opacity: [0.3, 0.6, 0.3] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: [0.4, 0, 0.2, 1] }}
+              className="h-3 bg-white/10 rounded-lg w-16"
+            />
           </div>
-        </div>
-        <div className="flex space-x-2">
-          <div className="w-8 h-8 bg-slate-200 dark:bg-slate-700 rounded" />
-          <div className="w-8 h-8 bg-slate-200 dark:bg-slate-700 rounded" />
         </div>
       </div>
     </div>
@@ -22,7 +40,7 @@ export function FileCardSkeleton() {
 
 export function FileListSkeleton({ count = 5 }: { count?: number }) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {Array.from({ length: count }).map((_, i) => (
         <FileCardSkeleton key={i} />
       ))}

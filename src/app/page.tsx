@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import FileCard from '@/components/FileCard';
 import { FileListSkeleton } from '@/components/Skeleton';
 import UploadModal from '@/components/UploadModal';
 import Toast, { useToast } from '@/components/Toast';
+import CommandBar from '@/components/CommandBar';
 
 interface Subject {
   id: string;
@@ -51,7 +53,7 @@ function formatDate(dateString: string): string {
   if (minutes < 60) return `${minutes}m fa`;
   if (hours < 24) return `${hours}h fa`;
   if (days < 7) return `${days}g fa`;
-  
+
   const months = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
   return `${date.getDate()} ${months[date.getMonth()]}`;
 }
@@ -64,6 +66,17 @@ function formatFileSize(bytes: number): string {
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
 }
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+      delayChildren: 0.1,
+    },
+  },
+};
+
 export default function HomePage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [professors, setProfessors] = useState<Professor[]>([]);
@@ -71,6 +84,7 @@ export default function HomePage() {
   const [uploads, setUploads] = useState<Upload[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [commandBarOpen, setCommandBarOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [filters, setFilters] = useState({
     search: '',
@@ -136,6 +150,18 @@ export default function HomePage() {
     return () => clearTimeout(timer);
   }, [filters, fetchData, refreshKey]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setCommandBarOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const filteredProfessors = useMemo(() => {
     if (!filters.subjectId) return professors;
     const prof_ids = subjectProfessors
@@ -144,50 +170,70 @@ export default function HomePage() {
     return professors.filter((p) => prof_ids.includes(p.id));
   }, [filters.subjectId, professors, subjectProfessors]);
 
+  const handleCommandSearch = (query: string) => {
+    setFilters((prev) => ({ ...prev, search: query }));
+    setCommandBarOpen(false);
+  };
+
   return (
-    <div className="min-h-screen flex flex-col bg-lime-500">
+    <div className="min-h-screen flex flex-col bg-charcoal">
       <Header onOpenUpload={() => setUploadModalOpen(true)} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Hero Section */}
-        <div className="mb-12">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">
-              Accedi ai vostri appunti
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
+          className="mb-12"
+        >
+          <div className="text-center mb-10">
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+              The Digital Agora
             </h1>
-            <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
-              La piattaforma dove gli studenti condividono appunti, dispense e risorse scolastiche in modo ordinato e efficiente.
+            <p className="text-lg text-silk-400 max-w-2xl mx-auto leading-relaxed">
+              Piattaforma premium per professionisti della conoscenza.
+              Accedi, condividi, apprendi.
             </p>
           </div>
 
           <div className="flex gap-4 justify-center mb-8">
             <button
               onClick={() => setUploadModalOpen(true)}
-              className="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
+              className="inline-flex items-center px-6 py-3 bg-cobalt hover:bg-cobalt-light text-white rounded-2xl font-semibold premium-transition shadow-lg shadow-cobalt/25 hover:shadow-cobalt/40 hover:scale-[1.02]"
             >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
               </svg>
               Carica File
             </button>
-            <a
-              href="#filtri"
-              className="inline-flex items-center px-6 py-3 border-2 border-primary-600 text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg font-semibold transition-colors"
+            <button
+              onClick={() => setCommandBarOpen(true)}
+              className="inline-flex items-center px-6 py-3 border-2 border-silk-700 text-silk-300 hover:border-cobalt hover:text-white rounded-2xl font-semibold premium-transition hover:bg-cobalt/10"
             >
-              Sfoglia File
-            </a>
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              Cerca (⌘K)
+            </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Search and Filters */}
-        <div id="filtri" className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6 mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
+          id="filtri"
+          className="glass rounded-3xl p-6 mb-8 border border-white/10"
+        >
           <div className="mb-4">
             <input
               type="text"
               value={filters.search}
               onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
               placeholder="Cerca file..."
-              className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              className="w-full px-5 py-3 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-silk-500 outline-none focus:border-cobalt/50 focus:ring-1 focus:ring-cobalt/50 premium-transition"
             />
           </div>
 
@@ -195,7 +241,7 @@ export default function HomePage() {
             <select
               value={filters.subjectId}
               onChange={(e) => setFilters((prev) => ({ ...prev, subjectId: e.target.value, professorId: '' }))}
-              className="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+              className="px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white outline-none focus:border-cobalt/50 premium-transition [&>option]:bg-charcoal"
             >
               <option value="">Tutte le materie</option>
               {subjects.filter((s) => s.enabled).map((s) => (
@@ -208,7 +254,7 @@ export default function HomePage() {
             <select
               value={filters.professorId}
               onChange={(e) => setFilters((prev) => ({ ...prev, professorId: e.target.value }))}
-              className="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+              className="px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white outline-none focus:border-cobalt/50 premium-transition [&>option]:bg-charcoal"
             >
               <option value="">Tutti i professori</option>
               {filteredProfessors.map((p) => (
@@ -221,43 +267,54 @@ export default function HomePage() {
             {(filters.search || filters.subjectId || filters.professorId) && (
               <button
                 onClick={() => setFilters({ search: '', subjectId: '', professorId: '', dateFrom: '', dateTo: '' })}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-900 dark:text-white rounded-lg transition-colors"
+                className="px-4 py-3 bg-white/5 hover:bg-white/10 text-silk-300 rounded-2xl premium-transition border border-white/10"
               >
                 Ripristina Filtri
               </button>
             )}
           </div>
-        </div>
+        </motion.div>
 
         {/* Files Grid */}
-        <div>
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
           {loading ? (
             <FileListSkeleton />
           ) : uploads.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {uploads.map((upload) => (
-                <FileCard key={upload.id} file={upload} />
+              {uploads.map((upload, index) => (
+                <FileCard key={upload.id} file={upload} index={index} />
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <svg className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Nessun file trovato</h3>
-              <p className="text-slate-600 dark:text-slate-300 mb-6">Prova a modificare i filtri o carica il primo file!</p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+              className="text-center py-16"
+            >
+              <div className="w-20 h-20 rounded-3xl bg-white/5 flex items-center justify-center mx-auto mb-6">
+                <svg className="w-10 h-10 text-silk-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">Nessun file trovato</h3>
+              <p className="text-silk-400 mb-6">Prova a modificare i filtri o carica il primo file!</p>
               <button
                 onClick={() => setUploadModalOpen(true)}
-                className="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
+                className="inline-flex items-center px-5 py-3 bg-cobalt hover:bg-cobalt-light text-white rounded-2xl premium-transition shadow-lg shadow-cobalt/25"
               >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
                 Carica il primo file
               </button>
-            </div>
+            </motion.div>
           )}
-        </div>
+        </motion.div>
       </main>
 
       <UploadModal
@@ -269,6 +326,12 @@ export default function HomePage() {
         subjects={subjects.filter((s) => s.enabled)}
         professors={professors}
         subjectProfessors={subjectProfessors}
+      />
+
+      <CommandBar
+        isOpen={commandBarOpen}
+        onClose={() => setCommandBarOpen(false)}
+        onSearch={handleCommandSearch}
       />
 
       {toast && <Toast {...toast} onClose={hideToast} />}

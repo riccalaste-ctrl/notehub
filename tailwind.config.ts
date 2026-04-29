@@ -9,19 +9,34 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
-          950: '#172554',
+        charcoal: '#121212',
+        cobalt: {
+          DEFAULT: '#2E5BFF',
+          light: '#5B7DFF',
+          dark: '#1A3FD9',
         },
+        silk: {
+          50: '#fafafa',
+          100: '#f5f5f5',
+          200: '#e5e5e5',
+          300: '#d4d4d4',
+          400: '#a3a3a3',
+          500: '#737373',
+          600: '#525252',
+          700: '#404040',
+          800: '#262626',
+          900: '#171717',
+        },
+      },
+      borderRadius: {
+        '2xl': '24px',
+        '3xl': '32px',
+      },
+      transitionTimingFunction: {
+        'premium': 'cubic-bezier(0.4, 0, 0.2, 1)',
+      },
+      fontFamily: {
+        'sans': ['Inter', 'SF Pro Display', 'system-ui', '-apple-system', 'sans-serif'],
       },
     },
   },

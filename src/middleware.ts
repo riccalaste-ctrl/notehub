@@ -30,8 +30,9 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Require authentication for admin API routes (excluding login)
-  if (pathname.startsWith('/api/admin') && pathname !== '/api/admin/login') {
+  // Require authentication for admin API routes (excluding login and verify-password)
+  const isPublicAdminAPI = pathname === '/api/admin/login' || pathname === '/api/admin/verify-password';
+  if (pathname.startsWith('/api/admin') && !isPublicAdminAPI) {
     const adminToken = request.cookies.get(ADMIN_JWT_COOKIE);
 
     if (!adminToken || !(await verifyAdminToken(adminToken.value))) {

@@ -19,13 +19,7 @@
       "destination": "/api/$1"
     }
   ],
-  "redirects": [
-    {
-      "source": "/admin/login",
-      "destination": "/admin",
-      "permanent": false
-    }
-  ],
+  "redirects": [],
   "headers": [
     {
       "source": "/api/(.*)",

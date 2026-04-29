@@ -35,7 +35,7 @@ export default function Header({ onOpenUpload }: HeaderProps) {
                 Carica
               </button>
             )}
-            <Link href="/admin" className="text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400">
+            <Link href="/admin/login" className="text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400">
               Admin
             </Link>
           </nav>
@@ -69,7 +69,7 @@ export default function Header({ onOpenUpload }: HeaderProps) {
                 Carica file
               </button>
             )}
-            <Link href="/admin" className="block px-4 py-2 text-slate-600 dark:text-slate-300">
+            <Link href="/admin/login" className="block px-4 py-2 text-slate-600 dark:text-slate-300">
               Admin
             </Link>
           </div>

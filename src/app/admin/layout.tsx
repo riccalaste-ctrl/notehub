@@ -1,11 +1,10 @@
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { isAdminAuthenticated } from '@/lib/auth';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies();
-  const adminToken = cookieStore.get('notehub_admin_jwt');
+  const isAuthenticated = await isAdminAuthenticated();
 
-  if (!adminToken) {
+  if (!isAuthenticated) {
     redirect('/admin/login');
   }
 

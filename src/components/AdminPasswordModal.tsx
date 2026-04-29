@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 interface AdminPasswordModalProps {
   isOpen: boolean;
@@ -32,7 +31,7 @@ export default function AdminPasswordModal({ isOpen, onClose }: AdminPasswordMod
 
       if (res.ok) {
         onClose();
-        router.push('/admin');
+        window.location.href = '/admin';
       } else {
         setError(data.error || 'Password non valida');
       }

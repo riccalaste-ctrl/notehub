@@ -3,17 +3,18 @@ import { NextRequest, NextResponse } from 'next/server';
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Proteggi le route admin
-  if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
+  // Proteggi le route admin (escluso /admin/login)
+  if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login') && !pathname.startsWith('/api/admin/login')) {
     const adminToken = request.cookies.get('notehub_admin_jwt');
 
     if (!adminToken) {
-      return NextResponse.redirect(new URL('/admin/login', request.url));
+      const loginUrl = new URL('/admin/login', request.url);
+      return NextResponse.redirect(loginUrl);
     }
   }
 
-  // Reindirizza POST non autorizzati verso logout
-  if (pathname.startsWith('/api/admin') && request.method === 'POST') {
+  // Richiedi autenticazione per API admin (escluso login)
+  if (pathname.startsWith('/api/admin') && pathname !== '/api/admin/login') {
     const adminToken = request.cookies.get('notehub_admin_jwt');
     
     if (!adminToken) {
@@ -29,9 +30,8 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Match admin routes
+    '/admin',
     '/admin/:path*',
-    // Match API admin routes
     '/api/admin/:path*',
   ],
 };

@@ -11,7 +11,6 @@ export default function AdminPasswordModal({ isOpen, onClose }: AdminPasswordMod
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const isPasswordFilled = password.length > 0;
 

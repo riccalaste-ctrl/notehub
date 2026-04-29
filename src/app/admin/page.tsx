@@ -63,7 +63,7 @@ export default function AdminPage() {
       });
 
       if (res.ok) {
-        window.location.href = '/admin';
+        setIsAuthenticated(true);
       } else {
         const data = await res.json();
         setLoginError(data.error || 'Password non valida');

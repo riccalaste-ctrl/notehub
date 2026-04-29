@@ -23,13 +23,13 @@ export default function AdminPasswordModal({ isOpen, onClose }: AdminPasswordMod
       const res = await fetch('/api/admin/verify-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify({ password }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        onClose();
         window.location.href = '/admin';
       } else {
         setError(data.error || 'Password non valida');

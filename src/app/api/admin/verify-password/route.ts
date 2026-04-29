@@ -23,19 +23,21 @@ export async function POST(request: NextRequest) {
 
     const cookie = serialize(ADMIN_JWT_COOKIE, jwt, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: true,
       sameSite: 'lax',
       maxAge: 60 * 60 * 24,
       path: '/',
     });
 
-    return new NextResponse(JSON.stringify({ success: true }), {
+    const response = NextResponse.json({ success: true, redirect: '/admin' }, {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
         'Set-Cookie': cookie,
       },
     });
+
+    return response;
   } catch (error) {
     console.error('Verify password error:', error);
     return NextResponse.json({ error: 'Errore interno' }, { status: 500 });

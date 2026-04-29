@@ -26,6 +26,7 @@ interface Upload {
 type Tab = 'dashboard' | 'subjects' | 'professors' | 'uploads';
 
 export default function AdminPage() {
+  const [authStatus, setAuthStatus] = useState<'checking' | 'authenticated' | 'unauthenticated'>('checking');
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [professors, setProfessors] = useState<Professor[]>([]);
@@ -38,6 +39,30 @@ export default function AdminPage() {
   const [professorForm, setProfessorForm] = useState({ name: '' });
   const [editingId, setEditingId] = useState<string | null>(null);
 
+  useEffect(() => {
+    let cancelled = false;
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('/api/admin/subjects', { method: 'HEAD' });
+        if (!cancelled) {
+          if (res.status === 401 || res.status === 403) {
+            setAuthStatus('unauthenticated');
+            router.push('/admin/login');
+          } else {
+            setAuthStatus('authenticated');
+          }
+        }
+      } catch {
+        if (!cancelled) {
+          setAuthStatus('unauthenticated');
+          router.push('/admin/login');
+        }
+      }
+    };
+    checkAuth();
+    return () => { cancelled = true; };
+  }, [router]);
+
   const fetchData = useCallback(async () => {
     try {
       const [subjectsRes, professorsRes, uploadsRes] = await Promise.all([
@@ -45,11 +70,6 @@ export default function AdminPage() {
         fetch('/api/admin/professors'),
         fetch('/api/admin/uploads?limit=20'),
       ]);
-
-      if (subjectsRes.status === 401) {
-        router.push('/admin/login');
-        return;
-      }
 
       if (subjectsRes.ok) {
         const data = await subjectsRes.json();
@@ -189,6 +209,20 @@ export default function AdminPage() {
       minute: '2-digit',
     });
   };
+
+  if (authStatus !== 'authenticated') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+        <div className="text-center">
+          <svg className="animate-spin h-10 w-10 text-primary-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+          <p className="text-slate-600 dark:text-slate-400">Verifica accesso...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">

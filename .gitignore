@@ -45,3 +45,4 @@ netlify.toml
 
 # Build artifacts
 *.tsbuildinfo
+.vercel

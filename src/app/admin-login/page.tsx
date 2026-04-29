@@ -146,7 +146,7 @@ export default function AdminLoginPage() {
         </div>
 
         <div className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
-          <p>🔒 Questa area e' protetta. Accedi solo se sei un amministratore.</p>
+          <p>🔒 Questa area e&apos; protetta. Accedi solo se sei un amministratore.</p>
         </div>
       </div>
 

@@ -2,7 +2,6 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   poweredByHeader: false,
   compress: true,
   
@@ -41,11 +40,6 @@ const nextConfig: NextConfig = {
         headers: [
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
-        ],
-      },
-      {
-        source: '/(?!api/).*',
-        headers: [
           { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate' },
         ],
       },
@@ -80,15 +74,7 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['@supabase/supabase-js'],
   },
 
-  // Production specific
   productionBrowserSourceMaps: false,
-  
-  // API route configurations
-  api: {
-    bodyParser: {
-      sizeLimit: '20mb',
-    },
-  },
 };
 
 export default nextConfig;

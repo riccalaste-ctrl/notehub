@@ -87,7 +87,7 @@ export default function AdminPage() {
       console.error('Fetch error:', error);
       showToast('Errore nel caricamento dei dati', 'error');
     }
-  }, [router, showToast]);
+  }, [showToast]);
 
   useEffect(() => {
     fetchData();

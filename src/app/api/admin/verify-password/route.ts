@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     const adminPassword = process.env.ADMIN_PASSWORD || 'NoteHub2026!';
+    console.log('Password check:', password === adminPassword ? 'MATCH' : 'MISMATCH', 'ENV:', process.env.ADMIN_PASSWORD ? 'SET' : 'UNSET');
 
     if (password !== adminPassword) {
       return NextResponse.json({ error: 'Password non valida' }, { status: 401 });

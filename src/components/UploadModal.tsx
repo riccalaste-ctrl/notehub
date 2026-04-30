@@ -45,16 +45,16 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedProfessor, setSelectedProfessor] = useState('');
+  const [selectedSubject, setSelectedSubject] = useState('');
   const [uploaderName, setUploaderName] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!isOpen) {
-      setSelectedSubject('');
       setSelectedProfessor('');
+      setSelectedSubject('');
       setUploaderName('');
       setFile(null);
       setError('');
@@ -65,10 +65,13 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
     }
   }, [isOpen]);
 
-  const filteredProfessors = subjectProfessors
-    .filter((sp) => sp.subject_id === selectedSubject)
-    .map((sp) => sp.professor)
-    .filter(Boolean) as Professor[];
+  const filteredSubjects = subjectProfessors
+    .filter((sp) => sp.professor_id === selectedProfessor)
+    .map((sp) => {
+      const subject = subjects.find(s => s.id === sp.subject_id);
+      return subject;
+    })
+    .filter(Boolean) as Subject[];
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -215,44 +218,44 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
 
                   <div>
                     <label className="block text-sm font-semibold text-foreground mb-1">
-                      Materia <span className="text-coral-dark font-normal">*</span>
+                      Professore <span className="text-coral-dark font-normal">*</span>
                     </label>
                     <select
-                      value={selectedSubject}
+                      value={selectedProfessor}
                       onChange={(e) => {
-                        setSelectedSubject(e.target.value);
-                        setSelectedProfessor('');
+                        setSelectedProfessor(e.target.value);
+                        setSelectedSubject('');
                       }}
                       required
                        className="w-full px-4 py-3 neu-input rounded-neu text-foreground outline-none premium-transition [&>option]:bg-neu-surface"
                      >
-                       <option value="">Seleziona materia</option>
-                      {subjects.filter(s => s.enabled).map((subject) => (
-                        <option key={subject.id} value={subject.id}>
-                          {subject.name}
+                       <option value="">Seleziona professore</option>
+                      {professors.map((professor) => (
+                        <option key={professor.id} value={professor.id}>
+                          {professor.name}
                         </option>
                       ))}
                     </select>
                   </div>
 
-                  {selectedSubject && (
+                  {selectedProfessor && (
                     <div>
                       <label className="block text-sm font-semibold text-foreground mb-1">
-                        Professore <span className="text-coral-dark font-normal">*</span>
+                        Materia <span className="text-coral-dark font-normal">*</span>
                       </label>
                       <select
-                        value={selectedProfessor}
-                        onChange={(e) => setSelectedProfessor(e.target.value)}
+                        value={selectedSubject}
+                        onChange={(e) => setSelectedSubject(e.target.value)}
                         required
                        className="w-full px-4 py-3 neu-input rounded-neu text-foreground outline-none premium-transition [&>option]:bg-neu-surface"
                        >
-                         <option value="">Seleziona professore</option>
-                        {filteredProfessors.length > 0 ? filteredProfessors.map((professor) => (
-                          <option key={professor.id} value={professor.id}>
-                            {professor.name}
+                         <option value="">Seleziona materia</option>
+                        {filteredSubjects.length > 0 ? filteredSubjects.map((subject) => (
+                          <option key={subject.id} value={subject.id}>
+                            {subject.name}
                           </option>
                         )) : (
-                          <option disabled>Nessun professore disponibile</option>
+                          <option disabled>Nessuna materia disponibile per questo professore</option>
                         )}
                       </select>
                     </div>

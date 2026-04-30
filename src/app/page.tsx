@@ -136,18 +136,18 @@ export default function DashboardPage() {
             transition={{ delay: 0.1 }}
             className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10"
           >
-            <div className="neu-card p-5 bg-[#1E3A5F]">
+            <div className="neu-card p-5 bg-[#5B8DB8]">
               <div className="flex items-center gap-3">
                 <div className="size-10 rounded-neu bg-blue-400/30 flex items-center justify-center">
                   <BookOpen className="size-5 text-white" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-white">{subjects.length}</p>
-                  <p className="text-xs text-blue-200">Materie</p>
+                  <p className="text-xs text-blue-100">Materie</p>
                 </div>
               </div>
             </div>
-            <div className="neu-card p-5 bg-[#4A1942]">
+            <div className="neu-card p-5 bg-[#9B72B0]">
               <div className="flex items-center gap-3">
                 <div className="size-10 rounded-neu bg-yellow-400/30 flex items-center justify-center">
                   <FileText className="size-5 text-white" />
@@ -156,18 +156,18 @@ export default function DashboardPage() {
                   <p className="text-2xl font-bold text-white">
                     {Object.values(uploadCounts).reduce((a, b) => a + b, 0)}
                   </p>
-                  <p className="text-xs text-purple-200">File totali</p>
+                  <p className="text-xs text-purple-100">File totali</p>
                 </div>
               </div>
             </div>
-            <Link href="/consigli" className="neu-card p-5 bento-card block bg-[#1B4332]">
+            <Link href="/consigli" className="neu-card p-5 bento-card block bg-[#52B788]">
               <div className="flex items-center gap-3">
                 <div className="size-10 rounded-neu bg-mint/30 flex items-center justify-center">
                   <TrendingUp className="size-5 text-white" />
                 </div>
                 <div>
                   <p className="text-sm font-bold text-white">Consigli</p>
-                  <p className="text-xs text-green-200">Scopri di più →</p>
+                  <p className="text-xs text-green-100">Scopri di più →</p>
                 </div>
               </div>
             </Link>

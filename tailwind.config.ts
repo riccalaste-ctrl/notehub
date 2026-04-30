@@ -9,6 +9,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        navy: {
+          DEFAULT: '#0a0e27',
+          light: '#1a1e37',
+        },
         charcoal: '#121212',
         cobalt: {
           DEFAULT: '#2E5BFF',

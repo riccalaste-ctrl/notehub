@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 
 export function FileCardSkeleton() {
   return (
-    <div className="glass rounded-2xl p-5 border border-white/10">
+    <div className="glass rounded-3xl p-5 border border-white/10">
       <div className="flex items-start space-x-4">
         <motion.div
           animate={{ opacity: [0.3, 0.6, 0.3] }}

@@ -70,7 +70,7 @@ module.exports = {
         'neu-sidebar': '8px 0 24px rgba(163, 177, 198, 0.6), -8px 0 24px #FFFFFF',
         'neu-badge': '2px 2px 6px rgba(163, 177, 198, 0.6), -2px -2px 6px #FFFFFF',
         'mint': '0 8px 24px rgba(168,213,186,0.4)',
-        'lavender': '0 8px 24px rgba(184,164,227,0.35)',
+        'lavender': '0 8px 24px rgba(255,140,66,0.35)',
         'coral': '0 8px 24px rgba(255,181,160,0.45)',
       },
     },

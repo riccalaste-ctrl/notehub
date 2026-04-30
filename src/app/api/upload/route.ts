@@ -7,9 +7,12 @@ const uploadSchema = z.object({
   subjectId: z.string().uuid(),
   professorId: z.string().uuid().optional(),
   uploaderName: z.string().max(100).optional(),
-  fileName: z.string().min(1).max(255),
-  fileType: z.string(),
-  fileData: z.string(),
+  originalFilename: z.string().min(1).max(255),
+  driveFileId: z.string().min(1),
+  mimeType: z.string(),
+  sizeBytes: z.number().positive(),
+  downloadUrl: z.string().url().optional(),
+  viewUrl: z.string().url().optional(),
 });
 
 const ALLOWED_TYPES = [
@@ -19,8 +22,6 @@ const ALLOWED_TYPES = [
   'image/jpeg',
   'image/png',
 ];
-
-const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,26 +35,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { subjectId, professorId, uploaderName, fileName, fileType, fileData } = validation.data;
+    const {
+      subjectId,
+      professorId,
+      uploaderName,
+      originalFilename,
+      driveFileId,
+      mimeType,
+      sizeBytes,
+      downloadUrl,
+      viewUrl,
+    } = validation.data;
 
-    if (!ALLOWED_TYPES.includes(fileType)) {
+    if (!ALLOWED_TYPES.includes(mimeType)) {
       return NextResponse.json(
         { error: 'File type not allowed. Allowed: PDF, DOC, DOCX, JPG, PNG' },
         { status: 400 }
       );
     }
 
-    const decodedData = Buffer.from(fileData, 'base64');
-    if (decodedData.length > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        { error: 'File too large. Maximum size is 20MB' },
-        { status: 400 }
-      );
-    }
-
     const { data: subject, error: subjectError } = await supabaseAdmin
       .from('subjects')
-      .select('*')
+      .select('id, name, enabled')
       .eq('id', subjectId)
       .eq('enabled', true)
       .single();
@@ -65,55 +68,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!subject.gas_url || !subject.gas_secret) {
-      return NextResponse.json(
-        { error: 'Subject is not configured for uploads' },
-        { status: 500 }
-      );
-    }
-
-    const gasResponse = await fetch(subject.gas_url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        secret: subject.gas_secret,
-        action: 'upload',
-        filename: fileName,
-        mimeType: fileType,
-        dataBase64: fileData,
-      }),
-    });
-
-    if (!gasResponse.ok) {
-      const errorText = await gasResponse.text();
-      return NextResponse.json(
-        { error: 'Failed to upload to Drive', details: errorText },
-        { status: 502 }
-      );
-    }
-
-    const gasResult = await gasResponse.json();
-
-    if (!gasResult.success) {
-      return NextResponse.json(
-        { error: gasResult.error || 'Upload failed' },
-        { status: 502 }
-      );
-    }
-
     const { data: upload, error: insertError } = await supabaseAdmin
       .from('uploads')
       .insert({
         subject_id: subjectId,
         professor_id: professorId || null,
-        original_filename: fileName,
-        drive_file_id: gasResult.fileId,
-        download_url: gasResult.downloadUrl,
-        view_url: gasResult.viewUrl,
-        mime_type: fileType,
-        size_bytes: decodedData.length,
+        original_filename: originalFilename,
+        drive_file_id: driveFileId,
+        download_url: downloadUrl || `https://drive.google.com/uc?id=${driveFileId}&export=download`,
+        view_url: viewUrl || `https://drive.google.com/file/d/${driveFileId}/view`,
+        mime_type: mimeType,
+        size_bytes: sizeBytes,
         uploader_name: uploaderName || null,
       })
       .select()

@@ -8,7 +8,12 @@ import { GraduationCap, BookOpen, Users, FileText, LayoutDashboard, Plus, Trash2
 interface Subject {
   id: string;
   name: string;
+  slug: string;
   enabled: boolean;
+  google_client_id?: string;
+  google_client_secret?: string;
+  google_drive_folder_id?: string;
+  google_drive_refresh_token?: string;
 }
 
 interface Professor {
@@ -38,7 +43,15 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const { toast, showToast, hideToast } = useToast();
 
-  const [subjectForm, setSubjectForm] = useState({ name: '', enabled: true });
+  const [subjectForm, setSubjectForm] = useState({
+    name: '',
+    slug: '',
+    enabled: true,
+    google_client_id: '',
+    google_client_secret: '',
+    google_drive_folder_id: '',
+    google_drive_refresh_token: '',
+  });
   const [professorForm, setProfessorForm] = useState({ name: '' });
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -136,7 +149,15 @@ export default function AdminPage() {
           editingId ? 'Materia aggiornata' : 'Materia creata',
           'success'
         );
-        setSubjectForm({ name: '', enabled: true });
+        setSubjectForm({
+          name: '',
+          slug: '',
+          enabled: true,
+          google_client_id: '',
+          google_client_secret: '',
+          google_drive_folder_id: '',
+          google_drive_refresh_token: '',
+        });
         setEditingId(null);
         await fetchData();
       }
@@ -181,6 +202,19 @@ export default function AdminPage() {
     } catch {
       showToast('Errore', 'error');
     }
+  };
+
+  const editSubject = (subject: Subject) => {
+    setSubjectForm({
+      name: subject.name,
+      slug: subject.slug || '',
+      enabled: subject.enabled,
+      google_client_id: subject.google_client_id || '',
+      google_client_secret: subject.google_client_secret || '',
+      google_drive_folder_id: subject.google_drive_folder_id || '',
+      google_drive_refresh_token: subject.google_drive_refresh_token || '',
+    });
+    setEditingId(subject.id);
   };
 
   const deleteProfessor = async (id: string) => {
@@ -475,6 +509,85 @@ export default function AdminPage() {
                     />
                   </div>
 
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">
+                      Slug
+                    </label>
+                    <input
+                      type="text"
+                      value={subjectForm.slug}
+                      onChange={(e) => setSubjectForm({ ...subjectForm, slug: e.target.value })}
+                      className="w-full px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition"
+                      placeholder="Es: matematica"
+                      required
+                    />
+                  </div>
+
+                  <div className="pt-4 border-t border-stone-200/50">
+                    <p className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1">
+                      Credenziali Google Drive
+                      <span className="text-xs text-foreground-light font-normal">(opzionale)</span>
+                    </p>
+
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs font-medium text-foreground-light mb-1">
+                          Client ID
+                          <span className="ml-1 cursor-help" title="Google Cloud Console → OAuth 2.0 Client IDs → Crea → Web application">?</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={subjectForm.google_client_id}
+                          onChange={(e) => setSubjectForm({ ...subjectForm, google_client_id: e.target.value })}
+                          className="w-full px-4 py-2.5 text-sm neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition"
+                          placeholder="es. 123456789-abc.apps.googleusercontent.com"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-foreground-light mb-1">
+                          Client Secret
+                          <span className="ml-1 cursor-help" title="Visibile in Google Cloud Console dopo aver creato le credenziali OAuth">?</span>
+                        </label>
+                        <input
+                          type="password"
+                          value={subjectForm.google_client_secret}
+                          onChange={(e) => setSubjectForm({ ...subjectForm, google_client_secret: e.target.value })}
+                          className="w-full px-4 py-2.5 text-sm neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition"
+                          placeholder="es. GOCSPX-xxxxxxxx"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-foreground-light mb-1">
+                          Google Drive Folder ID
+                          <span className="ml-1 cursor-help" title="Crea una cartella su Drive, aprilà e copia l'ID dall'URL: drive.google.com/drive/folders/ID">?</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={subjectForm.google_drive_folder_id}
+                          onChange={(e) => setSubjectForm({ ...subjectForm, google_drive_folder_id: e.target.value })}
+                          className="w-full px-4 py-2.5 text-sm neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition"
+                          placeholder="es. 1i3gX2GnP0W-Z08guBy7n0FlV3bRtoPIj"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-foreground-light mb-1">
+                          Refresh Token
+                          <span className="ml-1 cursor-help" title="Usa lo script get-drive-refresh-token.js per ottenerlo. Necessario per rinnovare l'accesso automaticamente.">?</span>
+                        </label>
+                        <input
+                          type="password"
+                          value={subjectForm.google_drive_refresh_token}
+                          onChange={(e) => setSubjectForm({ ...subjectForm, google_drive_refresh_token: e.target.value })}
+                          className="w-full px-4 py-2.5 text-sm neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition"
+                          placeholder="es. 1//04iN7VHH5VMpNCgYIARAAGAQ..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   <button
                     type="submit"
                     disabled={loading}
@@ -488,7 +601,7 @@ export default function AdminPage() {
                       type="button"
                       onClick={() => {
                         setEditingId(null);
-                        setSubjectForm({ name: '', enabled: true });
+                        setSubjectForm({ name: '', slug: '', enabled: true, google_client_id: '', google_client_secret: '', google_drive_folder_id: '', google_drive_refresh_token: '' });
                       }}
                       className="w-full py-3 bg-[#FFB5A0] hover:bg-[#FF9D85] text-white font-semibold rounded-neu premium-transition"
                     >
@@ -522,17 +635,15 @@ export default function AdminPage() {
                             ) : (
                               <span className="text-[#EF4444] font-medium">Disattivato</span>
                             )}
+                            {subject.slug && <span className="ml-2 font-mono text-xs">{subject.slug}</span>}
+                            {subject.google_client_id && (
+                              <span className="ml-2 text-xs bg-[#6366F1]/10 text-[#6366F1] px-1.5 py-0.5 rounded">Drive</span>
+                            )}
                           </p>
                         </div>
                         <div className="flex gap-2">
                           <button
-                            onClick={() => {
-                              setSubjectForm({
-                                name: subject.name,
-                                enabled: subject.enabled,
-                              });
-                              setEditingId(subject.id);
-                            }}
+                            onClick={() => editSubject(subject)}
                             className="px-4 py-2 text-sm bg-[#6366F1]/10 hover:bg-[#6366F1]/20 text-[#6366F1] rounded-neu flex items-center gap-1.5 font-medium premium-transition"
                           >
                             <Edit className="size-3.5" />

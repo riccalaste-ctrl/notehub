@@ -9,6 +9,10 @@ const subjectSchema = z.object({
   slug: z.string().min(1).max(50).regex(/^[a-z0-9-]+$/),
   gas_url: z.string().url().optional().or(z.literal('')),
   gas_secret: z.string().max(100).optional().or(z.literal('')),
+  google_client_id: z.string().max(200).optional().or(z.literal('')),
+  google_client_secret: z.string().max(200).optional().or(z.literal('')),
+  google_drive_folder_id: z.string().max(200).optional().or(z.literal('')),
+  google_drive_refresh_token: z.string().max(500).optional().or(z.literal('')),
   enabled: z.boolean().default(true),
 });
 
@@ -49,7 +53,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, slug, gas_url, gas_secret, enabled } = validation.data;
+    const { name, slug, gas_url, gas_secret, google_client_id, google_client_secret, google_drive_folder_id, google_drive_refresh_token, enabled } = validation.data;
 
     const { data, error } = await supabaseAdmin
       .from('subjects')
@@ -58,6 +62,10 @@ export async function POST(request: NextRequest) {
         slug,
         gas_url: gas_url || null,
         gas_secret: gas_secret || null,
+        google_client_id: google_client_id || null,
+        google_client_secret: google_client_secret || null,
+        google_drive_folder_id: google_drive_folder_id || null,
+        google_drive_refresh_token: google_drive_refresh_token || null,
         enabled,
       })
       .select()
@@ -107,6 +115,10 @@ export async function PUT(request: NextRequest) {
         slug: validation.data.slug,
         gas_url: validation.data.gas_url || null,
         gas_secret: validation.data.gas_secret || null,
+        google_client_id: validation.data.google_client_id || null,
+        google_client_secret: validation.data.google_client_secret || null,
+        google_drive_folder_id: validation.data.google_drive_folder_id || null,
+        google_drive_refresh_token: validation.data.google_drive_refresh_token || null,
         enabled: validation.data.enabled,
       })
       .eq('id', id)

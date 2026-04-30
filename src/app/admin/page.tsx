@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Toast, { useToast } from '@/components/Toast';
 import Link from 'next/link';
+import { GraduationCap, BookOpen, Users, FileText, LayoutDashboard, Plus, Trash2, Edit, LogOut, Search, ChevronRight, Compass } from 'lucide-react';
 
 interface Subject {
   id: string;
@@ -226,26 +227,24 @@ export default function AdminPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-stone-50 px-4">
         <div className="max-w-md w-full">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 border border-slate-200 dark:border-slate-700">
+          <div className="glass-card p-8 shadow-glass-lg">
             <div className="text-center mb-8">
-              <div className="w-14 h-14 bg-gradient-to-br from-primary-600 to-primary-700 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
+              <div className="w-14 h-14 gradient-logo rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lavender">
+                <GraduationCap className="size-7 text-white" />
               </div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">
-                NoteHub Admin
+              <h1 className="text-3xl font-bold gradient-text">
+                SKAKK-UP Admin
               </h1>
-              <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
+              <p className="text-stone-500 mt-2 text-sm">
                 Pannello di amministrazione
               </p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-stone-600 mb-2">
                   Password
                 </label>
                 <input
@@ -256,7 +255,7 @@ export default function AdminPage() {
                     setLoginError('');
                   }}
                   placeholder="Inserisci la password admin"
-                  className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+                  className="w-full px-4 py-3 border border-stone-200 rounded-xl bg-white text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-lavender/50 focus:border-transparent transition"
                   required
                   disabled={loginLoading}
                   autoFocus
@@ -264,7 +263,7 @@ export default function AdminPage() {
               </div>
 
               {loginError && (
-                <div className="px-3 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
+                <div className="px-3 py-2 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
                   {loginError}
                 </div>
               )}
@@ -272,7 +271,7 @@ export default function AdminPage() {
               <button
                 type="submit"
                 disabled={loginLoading || !password}
-                className="w-full py-3 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                className="w-full py-3 gradient-primary hover:opacity-90 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lavender"
               >
                 {loginLoading ? (
                   <span className="flex items-center justify-center">
@@ -288,10 +287,10 @@ export default function AdminPage() {
               </button>
             </form>
 
-            <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
-              <p className="text-center text-sm text-slate-600 dark:text-slate-400">
+            <div className="mt-6 pt-6 border-t border-stone-200">
+              <p className="text-center text-sm text-stone-500">
                 Torna alla{' '}
-                <Link href="/" className="text-primary-600 hover:text-primary-700 font-medium transition">
+                <Link href="/" className="text-lavender hover:text-lavender-dark font-medium transition">
                   home
                 </Link>
               </p>
@@ -303,52 +302,52 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-stone-50">
       {/* Header */}
-      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-40">
+      <header className="glass-header sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-primary-700 rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
+            <div className="w-10 h-10 gradient-logo rounded-xl flex items-center justify-center shadow-lavender">
+              <GraduationCap className="size-6 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">NoteHub Admin</h1>
+            <h1 className="text-xl font-bold gradient-text">SKAKK-UP Admin</h1>
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center space-x-2 px-4 py-2 text-slate-600 dark:text-slate-300 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition"
+            className="flex items-center space-x-2 px-4 py-2 text-stone-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
+            <LogOut className="size-5" />
             <span>Esci</span>
           </button>
         </div>
       </header>
 
       {/* Navigation */}
-      <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+      <div className="glass-header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex space-x-8 overflow-x-auto">
+          <nav className="flex space-x-6 overflow-x-auto">
             {[
-              { id: 'dashboard' as const, label: '📊 Dashboard' },
-              { id: 'subjects' as const, label: '📚 Materie' },
-              { id: 'professors' as const, label: '👨‍🏫 Professori' },
-              { id: 'uploads' as const, label: '📁 File' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? 'border-primary-600 text-primary-600'
-                    : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+              { id: 'dashboard' as const, label: 'Dashboard', icon: LayoutDashboard },
+              { id: 'subjects' as const, label: 'Materie', icon: BookOpen },
+              { id: 'professors' as const, label: 'Professori', icon: Users },
+              { id: 'uploads' as const, label: 'File', icon: FileText },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition whitespace-nowrap ${
+                    activeTab === tab.id
+                      ? 'border-lavender text-lavender'
+                      : 'border-transparent text-stone-500 hover:text-stone-800'
+                  }`}
+                >
+                  <Icon className="size-4" />
+                  {tab.label}
+                </button>
+              );
+            })}
           </nav>
         </div>
       </div>
@@ -357,63 +356,63 @@ export default function AdminPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === 'dashboard' && (
           <div>
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-8">Panoramica</h2>
+            <h2 className="text-3xl font-bold text-stone-800 mb-8">Panoramica</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
+              <div className="glass-card p-6 bento-card">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm">Materie</p>
-                    <p className="text-3xl font-bold text-slate-900 dark:text-white">{subjects.length}</p>
+                    <p className="text-stone-500 text-sm">Materie</p>
+                    <p className="text-3xl font-bold text-stone-800">{subjects.length}</p>
                   </div>
-                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                    <span className="text-2xl">📚</span>
+                  <div className="w-12 h-12 gradient-sage rounded-xl flex items-center justify-center shadow-sage">
+                    <BookOpen className="size-6 text-white" />
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
+              <div className="glass-card p-6 bento-card">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm">Professori</p>
-                    <p className="text-3xl font-bold text-slate-900 dark:text-white">{professors.length}</p>
+                    <p className="text-stone-500 text-sm">Professori</p>
+                    <p className="text-3xl font-bold text-stone-800">{professors.length}</p>
                   </div>
-                  <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                    <span className="text-2xl">👨‍🏫</span>
+                  <div className="w-12 h-12 gradient-lavender rounded-xl flex items-center justify-center shadow-lavender">
+                    <Users className="size-6 text-white" />
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
+              <div className="glass-card p-6 bento-card">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm">File Caricati</p>
-                    <p className="text-3xl font-bold text-slate-900 dark:text-white">{uploads.length}</p>
+                    <p className="text-stone-500 text-sm">File Caricati</p>
+                    <p className="text-3xl font-bold text-stone-800">{uploads.length}</p>
                   </div>
-                  <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                    <span className="text-2xl">📁</span>
+                  <div className="w-12 h-12 gradient-peach rounded-xl flex items-center justify-center shadow-peach">
+                    <FileText className="size-6 text-white" />
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
+              <div className="glass-card p-6 bento-card">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm">Spazio Utilizzato</p>
-                    <p className="text-3xl font-bold text-slate-900 dark:text-white">
+                    <p className="text-stone-500 text-sm">Spazio Utilizzato</p>
+                    <p className="text-3xl font-bold text-stone-800">
                       {formatBytes(uploads.reduce((sum, u) => sum + u.size_bytes, 0))}
                     </p>
                   </div>
-                  <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
-                    <span className="text-2xl">💾</span>
+                  <div className="w-12 h-12 bg-stone-300 rounded-xl flex items-center justify-center">
+                    <LayoutDashboard className="size-6 text-white" />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-              <p className="text-sm text-blue-800 dark:text-blue-200">
-                ℹ️ Benvenuto nel pannello amministrativo di NoteHub. Qui puoi gestire materie, professori e file caricati.
+            <div className="glass-card p-4 border-l-4 border-lavender">
+              <p className="text-sm text-stone-600">
+                Benvenuto nel pannello amministrativo di SKAKK-UP. Qui puoi gestire materie, professori e file caricati.
               </p>
             </div>
           </div>
@@ -422,21 +421,21 @@ export default function AdminPage() {
         {activeTab === 'subjects' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1">
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-                  {editingId ? '✏️ Modifica Materia' : '➕ Aggiungi Materia'}
+              <div className="glass-card p-6">
+                <h3 className="text-lg font-semibold text-stone-800 mb-4">
+                  {editingId ? 'Modifica Materia' : 'Aggiungi Materia'}
                 </h3>
 
                 <form onSubmit={handleSubjectSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-stone-600 mb-2">
                       Nome Materia
                     </label>
                     <input
                       type="text"
                       value={subjectForm.name}
                       onChange={(e) => setSubjectForm({ ...subjectForm, name: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+                      className="w-full px-3 py-2 border border-stone-200 rounded-xl bg-white text-stone-800 focus:ring-2 focus:ring-lavender/50 focus:outline-none"
                       placeholder="Es: Matematica"
                       required
                     />
@@ -448,9 +447,9 @@ export default function AdminPage() {
                       id="enabled"
                       checked={subjectForm.enabled}
                       onChange={(e) => setSubjectForm({ ...subjectForm, enabled: e.target.checked })}
-                      className="w-4 h-4 text-primary-600"
+                      className="w-4 h-4 text-lavender rounded"
                     />
-                    <label htmlFor="enabled" className="ml-2 text-sm text-slate-600 dark:text-slate-400">
+                    <label htmlFor="enabled" className="ml-2 text-sm text-stone-600">
                       Attivo
                     </label>
                   </div>
@@ -458,7 +457,7 @@ export default function AdminPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition disabled:opacity-50"
+                    className="w-full py-2 gradient-primary text-white font-medium rounded-xl transition disabled:opacity-50 shadow-lavender"
                   >
                     {loading ? 'Elaborazione...' : (editingId ? 'Aggiorna' : 'Crea')}
                   </button>
@@ -470,7 +469,7 @@ export default function AdminPage() {
                         setEditingId(null);
                         setSubjectForm({ name: '', enabled: true });
                       }}
-                      className="w-full py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-900 dark:text-white rounded-lg transition"
+                      className="w-full py-2 bg-stone-200 hover:bg-stone-300 text-stone-800 rounded-xl transition"
                     >
                       Annulla
                     </button>
@@ -480,21 +479,21 @@ export default function AdminPage() {
             </div>
 
             <div className="lg:col-span-2">
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow overflow-hidden">
-                <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700">
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+              <div className="glass-card overflow-hidden">
+                <div className="px-6 py-4 border-b border-stone-200/50">
+                  <h3 className="text-lg font-semibold text-stone-800">
                     Materie ({subjects.length})
                   </h3>
                 </div>
 
-                <div className="divide-y divide-slate-200 dark:divide-slate-700">
+                <div className="divide-y divide-stone-100">
                   {subjects.length > 0 ? (
                     subjects.map((subject) => (
-                      <div key={subject.id} className="px-6 py-4 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+                      <div key={subject.id} className="px-6 py-4 flex justify-between items-center hover:bg-stone-50/50 transition">
                         <div className="flex-1">
-                          <p className="font-medium text-slate-900 dark:text-white">{subject.name}</p>
-                          <p className="text-sm text-slate-500 dark:text-slate-400">
-                            {subject.enabled ? '✅ Attivo' : '❌ Disattivo'}
+                          <p className="font-medium text-stone-800">{subject.name}</p>
+                          <p className="text-sm text-stone-500">
+                            {subject.enabled ? 'Attivo' : 'Disattivato'}
                           </p>
                         </div>
                         <div className="flex gap-2">
@@ -506,21 +505,23 @@ export default function AdminPage() {
                               });
                               setEditingId(subject.id);
                             }}
-                            className="px-3 py-1 text-sm bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded transition"
+                            className="px-3 py-1 text-sm bg-lavender/10 hover:bg-lavender/20 text-lavender-dark rounded-xl transition flex items-center gap-1"
                           >
+                            <Edit className="size-3.5" />
                             Modifica
                           </button>
                           <button
                             onClick={() => deleteSubject(subject.id)}
-                            className="px-3 py-1 text-sm bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 rounded transition"
+                            className="px-3 py-1 text-sm bg-red-50 hover:bg-red-100 text-red-600 rounded-xl transition flex items-center gap-1"
                           >
+                            <Trash2 className="size-3.5" />
                             Elimina
                           </button>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="px-6 py-8 text-center text-slate-500 dark:text-slate-400">
+                    <div className="px-6 py-8 text-center text-stone-500">
                       Nessuna materia creata. Inizia a crearne una!
                     </div>
                   )}
@@ -533,21 +534,21 @@ export default function AdminPage() {
         {activeTab === 'professors' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1">
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-                  ➕ Aggiungi Professore
+              <div className="glass-card p-6">
+                <h3 className="text-lg font-semibold text-stone-800 mb-4">
+                  Aggiungi Professore
                 </h3>
 
                 <form onSubmit={handleProfessorSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-stone-600 mb-2">
                       Nome Professore
                     </label>
                     <input
                       type="text"
                       value={professorForm.name}
                       onChange={(e) => setProfessorForm({ name: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+                      className="w-full px-3 py-2 border border-stone-200 rounded-xl bg-white text-stone-800 focus:ring-2 focus:ring-lavender/50 focus:outline-none"
                       placeholder="Es: Prof. Rossi"
                       required
                     />
@@ -556,7 +557,7 @@ export default function AdminPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition disabled:opacity-50"
+                    className="w-full py-2 gradient-primary text-white font-medium rounded-xl transition disabled:opacity-50 shadow-lavender"
                   >
                     {loading ? 'Elaborazione...' : 'Crea'}
                   </button>
@@ -565,28 +566,29 @@ export default function AdminPage() {
             </div>
 
             <div className="lg:col-span-2">
-              <div className="bg-white dark:bg-slate-800 rounded-lg shadow overflow-hidden">
-                <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700">
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+              <div className="glass-card overflow-hidden">
+                <div className="px-6 py-4 border-b border-stone-200/50">
+                  <h3 className="text-lg font-semibold text-stone-800">
                     Professori ({professors.length})
                   </h3>
                 </div>
 
-                <div className="divide-y divide-slate-200 dark:divide-slate-700">
+                <div className="divide-y divide-stone-100">
                   {professors.length > 0 ? (
                     professors.map((professor) => (
-                      <div key={professor.id} className="px-6 py-4 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
-                        <p className="font-medium text-slate-900 dark:text-white">{professor.name}</p>
+                      <div key={professor.id} className="px-6 py-4 flex justify-between items-center hover:bg-stone-50/50 transition">
+                        <p className="font-medium text-stone-800">{professor.name}</p>
                         <button
                           onClick={() => deleteProfessor(professor.id)}
-                          className="px-3 py-1 text-sm bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 rounded transition"
+                          className="px-3 py-1 text-sm bg-red-50 hover:bg-red-100 text-red-600 rounded-xl transition flex items-center gap-1"
                         >
+                          <Trash2 className="size-3.5" />
                           Elimina
                         </button>
                       </div>
                     ))
                   ) : (
-                    <div className="px-6 py-8 text-center text-slate-500 dark:text-slate-400">
+                    <div className="px-6 py-8 text-center text-stone-500">
                       Nessun professore creato. Inizia a crearne uno!
                     </div>
                   )}
@@ -598,41 +600,42 @@ export default function AdminPage() {
 
         {activeTab === 'uploads' && (
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
+            <h2 className="text-2xl font-bold text-stone-800 mb-6">
               File Caricati ({uploads.length})
             </h2>
 
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow overflow-hidden">
+            <div className="glass-card overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700">
+                  <thead className="bg-stone-50/50 border-b border-stone-200/50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 dark:text-white">Nome File</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 dark:text-white">Materia</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 dark:text-white">Dimensione</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 dark:text-white">Data</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900 dark:text-white">Azioni</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-stone-800">Nome File</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-stone-800">Materia</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-stone-800">Dimensione</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-stone-800">Data</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-stone-800">Azioni</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                  <tbody className="divide-y divide-stone-100">
                     {uploads.length > 0 ? (
                       uploads.map((upload) => (
-                        <tr key={upload.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
-                          <td className="px-6 py-4 text-sm text-slate-900 dark:text-white">{upload.original_filename}</td>
-                          <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+                        <tr key={upload.id} className="hover:bg-stone-50/50 transition">
+                          <td className="px-6 py-4 text-sm text-stone-800">{upload.original_filename}</td>
+                          <td className="px-6 py-4 text-sm text-stone-500">
                             {upload.subject?.name || '-'}
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+                          <td className="px-6 py-4 text-sm text-stone-500">
                             {formatBytes(upload.size_bytes)}
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+                          <td className="px-6 py-4 text-sm text-stone-500">
                             {formatDate(upload.created_at)}
                           </td>
                           <td className="px-6 py-4 text-sm">
                             <button
                               onClick={() => deleteUpload(upload.id)}
-                              className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition"
+                              className="text-red-600 hover:text-red-700 transition flex items-center gap-1"
                             >
+                              <Trash2 className="size-4" />
                               Elimina
                             </button>
                           </td>
@@ -640,7 +643,7 @@ export default function AdminPage() {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={5} className="px-6 py-8 text-center text-slate-500 dark:text-slate-400">
+                        <td colSpan={5} className="px-6 py-8 text-center text-stone-500">
                           Nessun file caricato
                         </td>
                       </tr>

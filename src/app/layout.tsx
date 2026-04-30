@@ -22,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="it" className={`${inter.variable} dark`}>
+    <html lang="it" className={inter.variable}>
       <body className="min-h-screen flex flex-col font-sans antialiased">
         {children}
       </body>

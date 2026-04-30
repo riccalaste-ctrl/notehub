@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Search, X } from 'lucide-react';
 
 interface CommandBarProps {
   isOpen: boolean;
@@ -41,7 +42,7 @@ export default function CommandBar({ isOpen, onClose, onSearch }: CommandBarProp
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-stone-800/30 backdrop-blur-sm z-50"
             onClick={onClose}
           />
           <motion.div
@@ -51,24 +52,22 @@ export default function CommandBar({ isOpen, onClose, onSearch }: CommandBarProp
             transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
             className="fixed top-[20%] left-1/2 -translate-x-1/2 w-full max-w-2xl z-50 px-4"
           >
-            <div className="glass rounded-3xl border border-white/20 overflow-hidden shadow-2xl">
-              <div className="flex items-center px-5 py-4 border-b border-white/10">
-                <svg className="w-5 h-5 text-silk-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+            <div className="glass-card overflow-hidden shadow-glass-lg">
+              <div className="flex items-center px-5 py-4 border-b border-stone-200/50">
+                <Search className="size-5 text-lavender mr-3" />
                 <input
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Cerca file, materie, professori..."
-                  className="flex-1 bg-transparent text-white placeholder-silk-500 outline-none text-sm"
+                  className="flex-1 bg-transparent text-stone-800 placeholder-stone-400 outline-none text-sm"
                   autoFocus
                 />
-                <kbd className="hidden sm:inline-flex items-center px-2 py-1 text-xs text-silk-500 bg-white/5 rounded-lg border border-white/10">
-                  ESC
-                </kbd>
+                <button onClick={onClose} className="ml-2 p-1 rounded-lg hover:bg-stone-100">
+                  <X className="size-4 text-stone-400" />
+                </button>
               </div>
-              <div className="px-3 py-2 text-xs text-silk-500">
+              <div className="px-3 py-2 text-xs text-stone-400">
                 Digita per cercare tra gli appunti disponibili
               </div>
             </div>

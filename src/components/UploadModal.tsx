@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { X, Check, Plus } from 'lucide-react';
 
 interface Subject {
   id: string;
@@ -142,7 +143,7 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-stone-800/30 backdrop-blur-sm z-50"
             onClick={onClose}
           />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -151,20 +152,18 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-              className="glass rounded-3xl w-full max-w-md p-6 border border-white/20 shadow-2xl"
+              className="glass-card w-full max-w-md p-6 shadow-glass-lg"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-white">
+                <h2 className="text-lg font-semibold text-stone-800">
                   Carica Appunti
                 </h2>
                 <button
                   onClick={onClose}
-                  className="p-2 text-silk-400 hover:text-white rounded-xl hover:bg-white/10 premium-transition"
+                  className="p-2 text-stone-500 hover:text-stone-800 rounded-xl hover:bg-white/50 premium-transition"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <X className="size-5" />
                 </button>
               </div>
 
@@ -174,17 +173,15 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                   animate={{ opacity: 1, scale: 1 }}
                   className="text-center py-8"
                 >
-                  <div className="w-16 h-16 rounded-3xl bg-green-500/20 flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
+                  <div className="w-16 h-16 rounded-3xl bg-sage/20 flex items-center justify-center mx-auto mb-4">
+                    <Check className="size-8 text-sage-dark" />
                   </div>
-                  <p className="text-green-400 font-medium">Upload completato!</p>
+                  <p className="text-sage-dark font-medium">Upload completato!</p>
                 </motion.div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-silk-300 mb-1">
+                    <label className="block text-sm font-medium text-stone-600 mb-1">
                       Il tuo nome (facoltativo)
                     </label>
                     <input
@@ -193,12 +190,12 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                       onChange={(e) => setUploaderName(e.target.value)}
                       placeholder="Anonimo"
                       maxLength={100}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-silk-500 outline-none focus:border-cobalt/50 focus:ring-1 focus:ring-cobalt/50 premium-transition"
+                      className="w-full px-4 py-3 glass-input rounded-2xl text-stone-800 placeholder-stone-400 outline-none focus:ring-2 focus:ring-lavender/30 premium-transition"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-silk-300 mb-1">
+                    <label className="block text-sm font-medium text-stone-600 mb-1">
                       Materia *
                     </label>
                     <select
@@ -208,7 +205,7 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                         setSelectedProfessor('');
                       }}
                       required
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white outline-none focus:border-cobalt/50 premium-transition [&>option]:bg-charcoal"
+                      className="w-full px-4 py-3 glass-input rounded-2xl text-stone-800 outline-none focus:ring-2 focus:ring-lavender/30 premium-transition [&>option]:bg-white"
                     >
                       <option value="">Seleziona materia</option>
                       {subjects.filter(s => s.enabled).map((subject) => (
@@ -221,13 +218,13 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
 
                   {selectedSubject && filteredProfessors.length > 0 && (
                     <div>
-                      <label className="block text-sm font-medium text-silk-300 mb-1">
+                      <label className="block text-sm font-medium text-stone-600 mb-1">
                         Professore
                       </label>
                       <select
                         value={selectedProfessor}
                         onChange={(e) => setSelectedProfessor(e.target.value)}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white outline-none focus:border-cobalt/50 premium-transition [&>option]:bg-charcoal"
+                        className="w-full px-4 py-3 glass-input rounded-2xl text-stone-800 outline-none focus:ring-2 focus:ring-lavender/30 premium-transition [&>option]:bg-white"
                       >
                         <option value="">Seleziona professore</option>
                         {filteredProfessors.map((professor) => (
@@ -240,7 +237,7 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                   )}
 
                   <div>
-                    <label className="block text-sm font-medium text-silk-300 mb-1">
+                    <label className="block text-sm font-medium text-stone-600 mb-1">
                       File *
                     </label>
                     <input
@@ -249,26 +246,26 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                       onChange={handleFileChange}
                       accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                       required
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white outline-none focus:border-cobalt/50 premium-transition file:mr-4 file:py-1 file:px-3 file:rounded-xl file:border-0 file:bg-cobalt/20 file:text-cobalt-light file:text-sm file:cursor-pointer"
+                      className="w-full px-4 py-3 glass-input rounded-2xl text-stone-800 outline-none focus:ring-2 focus:ring-lavender/30 premium-transition file:mr-4 file:py-1 file:px-3 file:rounded-xl file:border-0 file:bg-lavender/20 file:text-lavender-dark file:text-sm file:cursor-pointer"
                     />
-                    <p className="mt-1 text-xs text-silk-500">
+                    <p className="mt-1 text-xs text-stone-400">
                       Max 20MB. Permessi: PDF, DOC, DOCX, JPG, PNG
                     </p>
                   </div>
 
                   {file && (
-                    <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-                      <p className="text-sm font-medium text-white truncate">
+                    <div className="p-3 glass-input rounded-2xl">
+                      <p className="text-sm font-medium text-stone-800 truncate">
                         {file.name}
                       </p>
-                      <p className="text-xs text-silk-400">
+                      <p className="text-xs text-stone-500">
                         {(file.size / 1024 / 1024).toFixed(2)} MB
                       </p>
                     </div>
                   )}
 
                   {error && (
-                    <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-2xl">
+                    <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-2xl">
                       {error}
                     </div>
                   )}
@@ -277,14 +274,14 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                     <button
                       type="button"
                       onClick={onClose}
-                      className="px-5 py-2.5 text-sm font-medium text-silk-300 hover:text-white rounded-2xl hover:bg-white/10 premium-transition"
+                      className="px-5 py-2.5 text-sm font-medium text-stone-600 hover:text-stone-800 rounded-2xl hover:bg-white/50 premium-transition"
                     >
                       Annulla
                     </button>
                     <button
                       type="submit"
                       disabled={uploading || !file || !selectedSubject}
-                      className="px-5 py-2.5 text-sm font-medium text-white bg-cobalt hover:bg-cobalt-light rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center premium-transition shadow-lg shadow-cobalt/25"
+                      className="px-5 py-2.5 text-sm font-medium text-white gradient-primary rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center premium-transition shadow-lavender"
                     >
                       {uploading ? (
                         <>
@@ -295,7 +292,10 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                           Caricamento...
                         </>
                       ) : (
-                        'Carica'
+                        <>
+                          <Plus className="size-4 mr-1.5" />
+                          Carica
+                        </>
                       )}
                     </button>
                   </div>

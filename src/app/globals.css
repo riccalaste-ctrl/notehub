@@ -73,7 +73,6 @@ body {
   }
 
   .neu-card:hover {
-    box-shadow: var(--neu-shadow-hover-xl);
     transform: translateY(-4px);
   }
 
@@ -137,7 +136,6 @@ body {
   }
 
   .neu-bento-card:hover {
-    box-shadow: var(--neu-shadow-hover-xl);
     transform: translateY(-6px);
   }
 

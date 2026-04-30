@@ -231,8 +231,8 @@ export default function AdminPage() {
         <div className="max-w-md w-full">
           <div className="neu-modal p-8">
             <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-neu-xl bg-orange-400/20 flex items-center justify-center mx-auto mb-4 shadow-neu-lg">
-              <Shield className="size-8 text-orange-500" />
+            <div className="w-16 h-16 rounded-neu-xl bg-[#5B8DB8]/20 flex items-center justify-center mx-auto mb-4 shadow-neu-lg">
+              <Shield className="size-8 text-[#5B8DB8]" />
             </div>
               <h1 className="text-3xl font-semibold text-foreground">
                 SKAKK-UP Admin
@@ -271,7 +271,7 @@ export default function AdminPage() {
               <button
                 type="submit"
                 disabled={loginLoading || !password}
-                className="w-full py-3 gradient-primary text-white font-semibold rounded-neu premium-transition shadow-neu-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                className="w-full py-3 bg-[#5B8DB8] text-white font-semibold rounded-neu premium-transition shadow-neu disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
                 {loginLoading ? (
                   <>
@@ -475,23 +475,10 @@ export default function AdminPage() {
                     />
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      id="enabled"
-                      checked={subjectForm.enabled}
-                      onChange={(e) => setSubjectForm({ ...subjectForm, enabled: e.target.checked })}
-                      className="w-4 h-4 rounded-neu-sm"
-                    />
-                    <label htmlFor="enabled" className="text-sm font-medium text-foreground">
-                      Attivo
-                    </label>
-                  </div>
-
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3 gradient-primary text-white font-semibold rounded-neu premium-transition shadow-neu disabled:opacity-50"
+                    className="w-full py-3 bg-[#52B788] text-white font-semibold rounded-neu premium-transition shadow-neu disabled:opacity-50"
                   >
                     {loading ? 'Elaborazione...' : (editingId ? 'Aggiorna' : 'Crea')}
                   </button>
@@ -503,7 +490,7 @@ export default function AdminPage() {
                         setEditingId(null);
                         setSubjectForm({ name: '', enabled: true });
                       }}
-                      className="w-full py-3 bg-stone-200 hover:bg-stone-300 text-foreground font-semibold rounded-neu premium-transition"
+                      className="w-full py-3 bg-[#FFB5A0] hover:bg-[#FF9D85] text-white font-semibold rounded-neu premium-transition"
                     >
                       Annulla
                     </button>
@@ -604,7 +591,7 @@ export default function AdminPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3 gradient-primary text-white font-semibold rounded-neu premium-transition shadow-neu disabled:opacity-50"
+                    className="w-full py-3 bg-[#9B72B0] text-white font-semibold rounded-neu premium-transition shadow-neu disabled:opacity-50"
                   >
                     {loading ? 'Elaborazione...' : 'Crea'}
                   </button>

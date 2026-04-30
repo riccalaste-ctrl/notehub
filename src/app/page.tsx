@@ -138,9 +138,9 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10"
+            className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10"
           >
-            <div className="neu-card p-5 bg-[#5B8DB8]">
+            <div className="neu-card p-5 bg-[#7BAFDE]">
               <div className="flex items-center gap-3">
                 <div className="size-10 rounded-neu bg-blue-400/30 flex items-center justify-center">
                   <BookOpen className="size-5 text-white" />
@@ -151,7 +151,7 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-            <div className="neu-card p-5 bg-[#9B72B0]">
+            <div className="neu-card p-5 bg-[#B992C9]">
               <div className="flex items-center gap-3">
                 <div className="size-10 rounded-neu bg-yellow-400/30 flex items-center justify-center">
                   <FileText className="size-5 text-white" />
@@ -164,7 +164,7 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-            <Link href="/consigli" className="neu-card p-5 bento-card block bg-[#52B788]">
+            <Link href="/consigli" className="neu-card p-5 bento-card block bg-[#72C9A4]">
               <div className="flex items-center gap-3">
                 <div className="size-10 rounded-neu bg-mint/30 flex items-center justify-center">
                   <TrendingUp className="size-5 text-white" />
@@ -273,7 +273,7 @@ export default function DashboardPage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setUploadModalOpen(true)}
-            className="flex items-center px-5 font-semibold rounded-neu-lg text-white h-14 bg-gradient-to-br from-[#FF8C42] to-[#E87000] premium-transition shadow-lg"
+            className="flex items-center px-5 font-semibold rounded-neu-lg text-white h-14 bg-gradient-to-br from-[#FF8C42] to-[#E87000] premium-transition"
           >
             <Plus className="size-5 mr-2" />
             Carica

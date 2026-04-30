@@ -162,7 +162,6 @@ export default function MateriePage() {
   return (
     <div className="min-h-screen bg-neu-base">
       <Header
-        onOpenUpload={() => setUploadModalOpen(true)}
         breadcrumbs={getBreadcrumbs().map(crumb => ({
           label: crumb.label,
           href: crumb.href,
@@ -323,7 +322,7 @@ export default function MateriePage() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setUploadModalOpen(true)}
-                    className="inline-flex items-center px-5 py-2.5 gradient-primary text-white rounded-neu text-sm font-medium premium-transition"
+                    className="inline-flex items-center px-5 py-2.5 bg-gradient-to-br from-[#FF8C42] to-[#E87000] text-white rounded-neu text-sm font-medium premium-transition"
                   >
                     <Plus className="size-4 mr-1.5" />
                     Carica un file
@@ -343,7 +342,7 @@ export default function MateriePage() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setUploadModalOpen(true)}
-          className="flex items-center px-5 font-semibold rounded-neu-lg text-white h-14 gradient-primary premium-transition shadow-lg"
+            className="flex items-center px-5 font-semibold rounded-neu-lg text-white h-14 bg-gradient-to-br from-[#FF8C42] to-[#E87000] premium-transition"
         >
           <Plus className="size-5 mr-2" />
           Carica

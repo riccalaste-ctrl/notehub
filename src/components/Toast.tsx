@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Check, X, Info } from 'lucide-react';
 
 interface ToastProps {
   message: string;
@@ -15,28 +16,16 @@ export default function Toast({ message, type = 'info', onClose }: ToastProps) {
     return () => clearTimeout(timer);
   }, [onClose]);
 
-  const bgColor = {
-    success: 'bg-green-500/90',
-    error: 'bg-red-500/90',
-    info: 'bg-cobalt/90',
+  const bgClass = {
+    success: 'bg-sage/90',
+    error: 'bg-peach/90',
+    info: 'bg-lavender/90',
   }[type];
 
   const icon = {
-    success: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-      </svg>
-    ),
-    error: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    ),
-    info: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
+    success: <Check className="size-5" />,
+    error: <X className="size-5" />,
+    info: <Info className="size-5" />,
   }[type];
 
   return (
@@ -47,13 +36,11 @@ export default function Toast({ message, type = 'info', onClose }: ToastProps) {
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
       className="fixed bottom-4 right-4 z-50"
     >
-      <div className={`${bgColor} backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 border border-white/20`}>
+      <div className={`${bgClass} backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 border border-white/20`}>
         {icon}
         <span className="text-sm font-medium">{message}</span>
         <button onClick={onClose} className="ml-2 hover:opacity-80 premium-transition">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <X className="size-4" />
         </button>
       </div>
     </motion.div>

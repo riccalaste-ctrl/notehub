@@ -36,6 +36,8 @@
     ".next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "Add a new screen showing the Matematica subject",
+    "Completely redesign the screen by switching from"
   ]
 }

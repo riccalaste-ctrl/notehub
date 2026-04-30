@@ -1,6 +1,7 @@
 'use client';
 
-import TiltCard from './TiltCard';
+import { motion } from 'framer-motion';
+import { FileText, Download, Eye } from 'lucide-react';
 
 interface FileCardProps {
   file: {
@@ -18,43 +19,17 @@ interface FileCardProps {
   index?: number;
 }
 
-function getFileIcon(mimeType: string) {
-  if (mimeType.includes('pdf')) {
-    return (
-      <div className="w-10 h-10 rounded-2xl bg-red-500/10 flex items-center justify-center">
-        <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM6 20V4h7v5h5v11H6z" />
-          <path d="M8.5 15.5c0 .83-.67 1.5-1.5 1.5H5v-2h1.5c.28 0 .5-.22.5-.5v-1c0-.28-.22-.5-.5-.5H5v-2h2c.83 0 1.5.67 1.5 1.5v1zm3 1.5c0 .83-.67 1.5-1.5 1.5h-2v-2h2v1c0 .28.22.5.5.5h1v-2h-1c-.83 0-1.5.67-1.5 1.5v1zm2-3.5c0-.83.67-1.5 1.5-1.5h1v2h-1c-.28 0-.5.22-.5.5v1c0 .28.22.5.5.5h1.5v2h-1.5c-.83 0-1.5-.67-1.5-1.5v-3zm6.5 2.5h-2v-2h2v1c0 .28.22.5.5.5h1v-2h-1c-.83 0-1.5-.67-1.5-1.5v-1c0-.83.67-1.5 1.5-1.5h2v2h-2v-1c0-.28-.22-.5-.5-.5h-1v2h1c.83 0 1.5.67 1.5 1.5v1c0 .83-.67 1.5-1.5 1.5z" />
-        </svg>
-      </div>
-    );
-  }
-  if (mimeType.includes('word') || mimeType.includes('document')) {
-    return (
-      <div className="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center">
-        <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM6 20V4h7v5h5v11H6z" />
-          <path d="M8 12h8v1H8zm0 2h8v1H8zm0 2h5v1H8z" />
-        </svg>
-      </div>
-    );
-  }
-  if (mimeType.includes('image')) {
-    return (
-      <div className="w-10 h-10 rounded-2xl bg-green-500/10 flex items-center justify-center">
-        <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
-        </svg>
-      </div>
-    );
-  }
-  return (
-    <div className="w-10 h-10 rounded-2xl bg-silk-700/50 flex items-center justify-center">
-      <svg className="w-5 h-5 text-silk-400" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM6 20V4h7v5h5v11H6z" />
-      </svg>
-    </div>
-  );
+const gradientClasses = [
+  'gradient-sage shadow-sage',
+  'gradient-lavender shadow-lavender',
+  'gradient-peach shadow-peach',
+];
+
+function getFileGradient(mimeType: string) {
+  if (mimeType.includes('pdf')) return 'gradient-peach shadow-peach';
+  if (mimeType.includes('word') || mimeType.includes('document')) return 'gradient-lavender shadow-lavender';
+  if (mimeType.includes('image')) return 'gradient-sage shadow-sage';
+  return 'bg-stone-300 shadow-glass-sm';
 }
 
 function formatFileSize(bytes: number): string {
@@ -85,68 +60,63 @@ export default function FileCard({ file, index = 0 }: FileCardProps) {
   };
 
   return (
-    <TiltCard index={index}>
-      <div className="p-5 group">
-        <div className="flex items-start space-x-4">
-          <div className="flex-shrink-0">
-            {getFileIcon(file.mime_type)}
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.08, duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+      whileHover={{ y: -4 }}
+      className="relative transition-all duration-500 ease-out p-5 overflow-hidden glass-card bento-card"
+    >
+      <div className="h-1/2 pointer-events-none absolute inset-x-0 top-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%)' }} />
+
+      <div className="relative">
+        <div className="flex justify-between items-start">
+          <div className={`size-10 rounded-xl flex justify-center items-center text-white ${getFileGradient(file.mime_type)}`}>
+            <FileText className="size-5" />
           </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-medium text-white truncate mb-2" title={file.original_filename}>
-              {file.original_filename}
-            </h3>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-silk-400">
-              {file.subject_name && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-xl bg-cobalt/20 text-cobalt-light border border-cobalt/30">
-                  {file.subject_name}
-                </span>
-              )}
-              {file.professor_name && (
-                <span className="inline-flex items-center">
-                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  {file.professor_name}
-                </span>
-              )}
-            </div>
-            <div className="mt-2 flex items-center gap-3 text-xs text-silk-500">
-              <span className="inline-flex items-center">
-                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                {formatDate(file.created_at)}
-              </span>
-              <span>{formatFileSize(file.size_bytes)}</span>
-            </div>
-          </div>
-          <div className="flex-shrink-0 flex space-x-1 opacity-0 group-hover:opacity-100 premium-transition">
+          <div className="flex gap-1">
             {file.view_url && (
               <button
                 onClick={handleView}
-                className="p-2 text-silk-400 hover:text-white rounded-xl hover:bg-white/10 premium-transition"
+                className="size-8 rounded-full flex justify-center items-center bg-white/60 border border-white/90 hover:bg-white/80 premium-transition"
                 title="Visualizza"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
+                <Eye className="size-3.5 text-lavender" />
               </button>
             )}
             {file.download_url && (
               <button
                 onClick={handleDownload}
-                className="p-2 text-silk-400 hover:text-white rounded-xl hover:bg-white/10 premium-transition"
+                className="size-8 rounded-full flex justify-center items-center bg-white/60 border border-white/90 hover:bg-white/80 premium-transition"
                 title="Scarica"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
+                <Download className="size-3.5 text-sage-dark" />
               </button>
             )}
           </div>
         </div>
+
+        <div className="mt-4">
+          <h3 className="font-semibold text-base text-stone-800 truncate mb-1" title={file.original_filename}>
+            {file.original_filename}
+          </h3>
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            {file.subject_name && (
+              <span className={`font-bold rounded-full text-white text-[10px] px-2 py-0.5 ${gradientClasses[index % gradientClasses.length]}`}>
+                {file.subject_name}
+              </span>
+            )}
+            {file.professor_name && (
+              <span className="text-stone-500">{file.professor_name}</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2 mt-3 text-xs text-stone-500">
+            <span>{formatDate(file.created_at)}</span>
+            <span>·</span>
+            <span>{formatFileSize(file.size_bytes)}</span>
+          </div>
+        </div>
       </div>
-    </TiltCard>
+    </motion.div>
   );
 }

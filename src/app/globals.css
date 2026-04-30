@@ -3,19 +3,17 @@
 @tailwind utilities;
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #F8F9FA;
+  --foreground: #2D3748;
   --surface: #ffffff;
-  --primary: #2E5BFF;
-  --text-secondary: #64748b;
-}
-
-.dark {
-  --background: #121212;
-  --foreground: #ffffff;
-  --surface: #1e1e1e;
-  --primary: #2E5BFF;
-  --text-secondary: #a1a1aa;
+  --primary: #B8A4E3;
+  --text-secondary: #9CA3AF;
+  --text-muted: #6B7280;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.95);
+  --glass-blur: blur(20px) saturate(180%);
+  --shadow-glass: 0 12px 40px rgba(139,127,180,0.15), 0 4px 12px rgba(122,138,168,0.08);
+  --shadow-glass-sm: 0 4px 16px rgba(139,127,180,0.08);
 }
 
 html {
@@ -25,41 +23,105 @@ html {
 body {
   background-color: var(--background);
   color: var(--foreground);
+  font-family: 'Inter', 'Geist', 'SF Pro Display', system-ui, -apple-system, sans-serif;
   transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+* {
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
 @layer components {
   .glass {
-    background: rgba(30, 30, 30, 0.6);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-glass);
+    border-radius: 20px;
   }
 
-  .dark .glass {
-    background: rgba(30, 30, 30, 0.6);
-    border-color: rgba(255, 255, 255, 0.1);
+  .glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(139,127,180,0.15), 0 4px 12px rgba(122,138,168,0.08);
   }
 
-  .light .glass {
+  .glass-sidebar {
     background: rgba(255, 255, 255, 0.6);
-    border-color: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-right: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 4px 0 30px rgba(139,127,180,0.08);
+  }
+
+  .glass-header {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.9);
+  }
+
+  .glass-input {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 20px rgba(139,127,180,0.10);
+  }
+
+  .gradient-logo {
+    background: linear-gradient(135deg, #A8D5BA 0%, #B8A4E3 50%, #FFB5A0 100%);
+  }
+
+  .gradient-sage {
+    background: linear-gradient(135deg, #A8D5BA 0%, #7AB89A 100%);
+  }
+
+  .gradient-lavender {
+    background: linear-gradient(135deg, #B8A4E3 0%, #9580D4 100%);
+  }
+
+  .gradient-peach {
+    background: linear-gradient(135deg, #FFB5A0 0%, #FF9478 100%);
+  }
+
+  .gradient-primary {
+    background: linear-gradient(135deg, #B8A4E3 0%, #A8D5BA 100%);
+  }
+
+  .gradient-tri {
+    background: linear-gradient(135deg, #B8A4E3 0%, #A8D5BA 50%, #FFB5A0 100%);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #6B7B8C 0%, #B8A4E3 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .premium-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .bento-card {
-    border-radius: 24px;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 20px;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .bento-card:hover {
-    transform: scale(1.02) translateY(-4px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
-  }
-
-  .command-bar {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 50px rgba(139,127,180,0.2), 0 8px 20px rgba(122,138,168,0.1);
   }
 
   .stagger-item {
@@ -77,7 +139,7 @@ body {
     }
   }
 
-  .premium-transition {
+  .command-bar {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }

@@ -9,8 +9,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "NoteHub - The Digital Agora",
+  title: "SKAKK-UP - Digital Agora",
   description: "Piattaforma premium per professionisti della conoscenza",
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({

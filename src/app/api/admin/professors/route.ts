@@ -6,6 +6,10 @@ import { z } from 'zod';
 
 const professorSchema = z.object({
   name: z.string().min(1).max(100),
+  google_client_id: z.string().max(200).optional().or(z.literal('')),
+  google_client_secret: z.string().max(200).optional().or(z.literal('')),
+  google_drive_folder_id: z.string().max(200).optional().or(z.literal('')),
+  google_drive_refresh_token: z.string().max(500).optional().or(z.literal('')),
 });
 
 export async function GET() {
@@ -45,9 +49,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data, error } = await supabaseAdmin!
+    const { data, error } = await supabaseAdmin
       .from('professors')
-      .insert({ name: validation.data.name })
+      .insert({
+        name: validation.data.name,
+        google_client_id: validation.data.google_client_id || null,
+        google_client_secret: validation.data.google_client_secret || null,
+        google_drive_folder_id: validation.data.google_drive_folder_id || null,
+        google_drive_refresh_token: validation.data.google_drive_refresh_token || null,
+      })
       .select()
       .single();
 
@@ -78,9 +88,15 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const { data, error } = await supabaseAdmin!
+    const { data, error } = await supabaseAdmin
       .from('professors')
-      .update({ name })
+      .update({
+        name,
+        google_client_id: body.google_client_id || null,
+        google_client_secret: body.google_client_secret || null,
+        google_drive_folder_id: body.google_drive_folder_id || null,
+        google_drive_refresh_token: body.google_drive_refresh_token || null,
+      })
       .eq('id', id)
       .select()
       .single();

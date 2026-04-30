@@ -34,6 +34,13 @@ module.exports = {
           dark: '#FF9478',
           light: '#FFA288',
         },
+        orange: {
+          DEFAULT: '#FF8C42',
+          dark: '#E8700',
+          light: '#FFA564',
+          400: '#FF8C42',
+          500: '#E8700',
+        },
         stone: {
           50: '#F0F2F5',
           100: '#E0E5EC',

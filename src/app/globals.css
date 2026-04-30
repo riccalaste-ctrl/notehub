@@ -159,11 +159,11 @@ body {
   }
 
   .gradient-mint {
-    background: linear-gradient(135deg, #A8D5BA 0%, #7AB89A 100%);
+    background: linear-gradient(135deg, #FF8C42 0%, #E8700 100%);
   }
 
   .gradient-coral {
-    background: linear-gradient(135deg, #FFB5A0 0%, #FF9478 100%);
+    background: linear-gradient(135deg, #FF8C42 0%, #E8700 100%);
   }
 
   .gradient-primary {

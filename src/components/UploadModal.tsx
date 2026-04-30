@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Plus, Shield, Mail } from 'lucide-react';
+import GoogleDriveUploader from './GoogleDriveUploader';
 
 interface Subject {
   id: string;
@@ -30,15 +31,6 @@ interface UploadModalProps {
   subjectProfessors: SubjectProfessor[];
 }
 
-const ALLOWED_TYPES = [
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'image/jpeg',
-  'image/png',
-];
-
-const MAX_FILE_SIZE = 20 * 1024 * 1024;
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@notehub.local';
 
 export default function UploadModal({ isOpen, onClose, subjects, professors, subjectProfessors }: UploadModalProps) {
@@ -48,20 +40,14 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
   const [selectedProfessor, setSelectedProfessor] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('');
   const [uploaderName, setUploaderName] = useState('');
-  const [file, setFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!isOpen) {
       setSelectedProfessor('');
       setSelectedSubject('');
       setUploaderName('');
-      setFile(null);
       setError('');
       setSuccess(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
     }
   }, [isOpen]);
 
@@ -73,66 +59,14 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
     })
     .filter(Boolean) as Subject[];
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (!selectedFile) return;
-
-    if (!ALLOWED_TYPES.includes(selectedFile.type)) {
-      setError('Tipo file non consentito. Permessi: PDF, DOC, DOCX, JPG, PNG');
-      return;
-    }
-
-    if (selectedFile.size > MAX_FILE_SIZE) {
-      setError('File troppo grande. Dimensione massima: 20MB');
-      return;
-    }
-
-    setFile(selectedFile);
-    setError('');
+  const handleSuccess = () => {
+    setSuccess(true);
+    setTimeout(() => onClose(), 1500);
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!file || !selectedSubject || !selectedProfessor) {
-      setError('Seleziona un file, una materia e un professore');
-      return;
-    }
-
-    setUploading(true);
-    setError('');
-
-    try {
-      const arrayBuffer = await file.arrayBuffer();
-      const base64 = btoa(
-        new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
-      );
-
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          subjectId: selectedSubject,
-          professorId: selectedProfessor || undefined,
-          uploaderName: uploaderName || undefined,
-          fileName: file.name,
-          fileType: file.type,
-          fileData: base64,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Upload failed');
-      }
-
-      setSuccess(true);
-      setTimeout(() => onClose(), 1500);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Errore durante upload');
-    } finally {
-      setUploading(false);
-    }
+  const handleError = (err: string) => {
+    setError(err);
+    setUploading(false);
   };
 
   return (
@@ -201,7 +135,7 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                   <p className="text-mint-dark font-medium">Upload completato!</p>
                 </motion.div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-semibold text-foreground mb-1">
                       Il tuo nome <span className="text-foreground-muted font-normal">(facoltativo)</span>
@@ -261,32 +195,14 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                     </div>
                   )}
 
-                  <div>
-                    <label className="block text-sm font-semibold text-foreground mb-1">
-                      File <span className="text-coral-dark font-normal">*</span>
-                    </label>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      onChange={handleFileChange}
-                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                      required
-                       className="w-full px-4 py-3 neu-input rounded-neu text-foreground outline-none premium-transition file:mr-4 file:py-1 file:px-3 file:rounded-neu-sm file:border-0 file:bg-lavender/20 file:text-lavender-dark file:text-sm file:cursor-pointer"
+                  {selectedSubject && (
+                    <GoogleDriveUploader
+                      subjectId={selectedSubject}
+                      professorId={selectedProfessor}
+                      uploaderName={uploaderName}
+                      onSuccess={handleSuccess}
+                      onError={handleError}
                     />
-                    <p className="mt-1 text-xs text-foreground-light">
-                      Max 20MB. Permessi: PDF, DOC, DOCX, JPG, PNG
-                    </p>
-                  </div>
-
-                  {file && (
-                    <div className="p-3 neu-surface-pressed rounded-neu">
-                      <p className="text-sm font-semibold text-foreground truncate">
-                        {file.name}
-                      </p>
-                      <p className="text-xs text-foreground-light">
-                        {(file.size / 1024 / 1024).toFixed(2)} MB
-                      </p>
-                    </div>
                   )}
 
                   {error && (
@@ -303,28 +219,8 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                     >
                       Annulla
                     </button>
-                    <button
-                      type="submit"
-                      disabled={uploading || !file || !selectedSubject || !selectedProfessor}
-                       className="px-5 py-2.5 text-sm font-semibold text-white gradient-primary rounded-neu disabled:opacity-50 disabled:cursor-not-allowed flex items-center premium-transition"
-                    >
-                      {uploading ? (
-                        <>
-                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                          </svg>
-                          Caricamento...
-                        </>
-                      ) : (
-                        <>
-                          <Plus className="size-4 mr-1.5" />
-                          Carica
-                        </>
-                      )}
-                    </button>
                   </div>
-                </form>
+                </div>
               )}
             </motion.div>
           </div>

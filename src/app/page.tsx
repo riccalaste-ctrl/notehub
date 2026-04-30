@@ -53,7 +53,7 @@ export default function HomePage() {
   const [professors, setProfessors] = useState<Professor[]>([]);
   const [subjectProfessors, setSubjectProfessors] = useState<SubjectProfessor[]>([]);
   const [uploads, setUploads] = useState<Upload[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [commandBarOpen, setCommandBarOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -63,9 +63,13 @@ export default function HomePage() {
     professorId: '',
   });
   const { toast, showToast, hideToast } = useToast();
+  const hasFilters = filters.search !== '' || filters.subjectId !== '' || filters.professorId !== '';
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
+    if (!hasFilters) {
+      setInitialLoading(false);
+      return;
+    }
     try {
       const params = new URLSearchParams();
       if (filters.search) params.set('search', filters.search);
@@ -85,9 +89,9 @@ export default function HomePage() {
       console.error('Fetch error:', error);
       showToast('Errore di connessione', 'error');
     } finally {
-      setLoading(false);
+      setInitialLoading(false);
     }
-  }, [filters, showToast]);
+  }, [filters, showToast, hasFilters]);
 
   const fetchMetadata = useCallback(async () => {
     try {
@@ -182,7 +186,7 @@ export default function HomePage() {
                 onClick={() => setFilters({ search: '', subjectId: '', professorId: '' })}
                 className={`transition-all duration-300 ease-out font-medium rounded-full text-sm px-4 h-9 whitespace-nowrap ${
                   !filters.subjectId
-                    ? 'gradient-primary border border-white/60 shadow-lavender text-white'
+                    ? 'gradient-primary text-white'
                     : 'glass-input text-stone-600 hover:text-stone-800'
                 }`}
               >
@@ -194,7 +198,7 @@ export default function HomePage() {
                   onClick={() => setFilters((prev) => ({ ...prev, subjectId: prev.subjectId === subject.id ? '' : subject.id, professorId: '' }))}
                   className={`transition-all duration-300 ease-out font-medium rounded-full text-sm px-4 h-9 whitespace-nowrap ${
                     filters.subjectId === subject.id
-                      ? `${gradientClasses[i % gradientClasses.length]} border border-white/60 text-white shadow-lg`
+                      ? `${gradientClasses[i % gradientClasses.length]} text-white`
                       : 'glass-input text-stone-600 hover:text-stone-800'
                   }`}
                 >
@@ -248,7 +252,7 @@ export default function HomePage() {
 
           {/* Files Grid */}
           <div>
-            {loading ? (
+            {initialLoading ? (
               <FileListSkeleton />
             ) : uploads.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -267,17 +271,25 @@ export default function HomePage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold text-stone-800 mb-2">Nessun file trovato</h3>
-                <p className="text-sm text-stone-500 mb-8">Prova a modificare i filtri o carica il primo file!</p>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setUploadModalOpen(true)}
-                  className="inline-flex items-center px-6 py-3 gradient-primary text-white rounded-full font-medium premium-transition shadow-lavender"
-                >
-                  <Plus className="size-4 mr-2" />
-                  Carica il primo file
-                </motion.button>
+                <h3 className="text-lg font-semibold text-stone-800 mb-2">
+                  {hasFilters ? 'Nessun risultato' : 'Nessun file trovato'}
+                </h3>
+                <p className="text-sm text-stone-500 mb-8">
+                  {hasFilters
+                    ? 'Prova a modificare i filtri di ricerca.'
+                    : 'Carica il primo file per iniziare!'}
+                </p>
+                {!hasFilters && (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setUploadModalOpen(true)}
+                    className="inline-flex items-center px-6 py-3 gradient-primary text-white rounded-full font-medium premium-transition"
+                  >
+                    <Plus className="size-4 mr-2" />
+                    Carica il primo file
+                  </motion.button>
+                )}
               </motion.div>
             )}
           </div>

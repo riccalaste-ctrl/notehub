@@ -37,7 +37,7 @@ function AnimatedSphere({ position, color, speed }: SphereProps) {
 }
 
 export default function ThreeBackground() {
-  const spheres = [
+  const spheres: SphereProps[] = [
     { position: [-4, 2, -10], color: '#2E5BFF', speed: 0.3 },
     { position: [4, -2, -8], color: '#5B7DFF', speed: -0.2 },
     { position: [0, 3, -12], color: '#1A3FD9', speed: 0.4 },

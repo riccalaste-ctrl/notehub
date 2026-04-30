@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, ReactNode } from 'react';
+import { useState, useRef, useEffect, useCallback, ReactNode } from 'react';
 import { motion } from 'framer-motion';
 
 interface MagneticElementProps {
@@ -13,7 +13,7 @@ export default function MagneticElement({ children, strength = 0.3, className = 
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const ref = useRef<HTMLDivElement>(null);
 
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!ref.current) return;
 
     const rect = ref.current.getBoundingClientRect();
@@ -24,11 +24,11 @@ export default function MagneticElement({ children, strength = 0.3, className = 
     const deltaY = (e.clientY - centerY) * strength;
 
     setPosition({ x: deltaX, y: deltaY });
-  };
+  }, [strength]);
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     setPosition({ x: 0, y: 0 });
-  };
+  }, []);
 
   useEffect(() => {
     const element = ref.current;
@@ -41,7 +41,7 @@ export default function MagneticElement({ children, strength = 0.3, className = 
         element.removeEventListener('mouseleave', handleMouseLeave);
       };
     }
-  }, []);
+  }, [handleMouseMove, handleMouseLeave]);
 
   return (
     <motion.div

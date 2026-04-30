@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Lightbulb, BookOpen, Clock, Users, Target, MessageCircle, Plus, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Lightbulb, BookOpen, Clock, Users, Target, MessageCircle, Plus, ChevronRight, Send, X } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Toast, { useToast } from '@/components/Toast';
@@ -96,9 +96,27 @@ const categoriaLabels: Record<string, string> = {
 
 export default function ConsigliPage() {
   const [filter, setFilter] = useState('tutti');
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({ categoria: 'studio', titolo: '', contenuto: '', autore: '' });
   const { toast, showToast, hideToast } = useToast();
 
   const filtered = filter === 'tutti' ? consigliDemo : consigliDemo.filter(c => c.categoria === filter);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.titolo.trim() || !formData.contenuto.trim()) {
+      showToast('Compila titolo e contenuto', 'error');
+      return;
+    }
+    const subject = encodeURIComponent(`[NoteHub] Nuovo consiglio: ${formData.titolo}`);
+    const body = encodeURIComponent(
+      `Categoria: ${categoriaLabels[formData.categoria]}\n\nTitolo: ${formData.titolo}\n\nContenuto:\n${formData.contenuto}\n\nAutore: ${formData.autore || 'Anonimo'}`
+    );
+    window.location.href = `mailto:admin@notehub.local?subject=${subject}&body=${body}`;
+    showToast('Email pronta per l\'invio!', 'success');
+    setShowForm(false);
+    setFormData({ categoria: 'studio', titolo: '', contenuto: '', autore: '' });
+  };
 
   return (
     <div className="min-h-screen bg-stone-50">
@@ -175,27 +193,122 @@ export default function ConsigliPage() {
             ))}
           </div>
 
-          {/* Submit CTA */}
+          {/* Submit CTA / Form */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="mt-10 glass-card p-6 text-center"
+            className="mt-10 glass-card p-6"
           >
-            <Lightbulb className="size-8 text-stone-700 mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-stone-900 mb-2">
-              Hai un consiglio da condividere?
-            </h3>
-            <p className="text-sm text-stone-700 mb-4">
-              Contatta l&apos;amministrazione per contribuire con i tuoi suggerimenti
-            </p>
-            <a
-              href="mailto:admin@notehub.local"
-              className="inline-flex items-center px-5 py-2.5 gradient-primary text-white rounded-full text-sm font-semibold premium-transition"
-            >
-              <MessageCircle className="size-4 mr-1.5" />
-              Contattaci
-            </a>
+            <AnimatePresence mode="wait">
+              {!showForm ? (
+                <motion.div
+                  key="cta"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="text-center"
+                >
+                  <Lightbulb className="size-8 text-stone-700 mx-auto mb-3" />
+                  <h3 className="text-lg font-bold text-stone-900 mb-2">
+                    Hai un consiglio da condividere?
+                  </h3>
+                  <p className="text-sm text-stone-700 mb-4">
+                    Condividi i tuoi suggerimenti con la community di NoteHub
+                  </p>
+                  <button
+                    onClick={() => setShowForm(true)}
+                    className="inline-flex items-center px-5 py-2.5 gradient-primary text-white rounded-full text-sm font-semibold premium-transition"
+                  >
+                    <Plus className="size-4 mr-1.5" />
+                    Condividi un consiglio
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.form
+                  key="form"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  onSubmit={handleSubmit}
+                  className="space-y-4"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-bold text-stone-900 flex items-center gap-2">
+                      <Lightbulb className="size-5 text-stone-700" />
+                      Nuovo consiglio
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={() => setShowForm(false)}
+                      className="p-1.5 rounded-full hover:bg-stone-200 premium-transition"
+                    >
+                      <X className="size-4 text-stone-600" />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-stone-700 mb-1.5">Categoria</label>
+                      <select
+                        value={formData.categoria}
+                        onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
+                        className="w-full px-3 py-2 rounded-xl bg-white/70 border border-stone-300 text-sm text-stone-800 outline-none focus:ring-2 focus:ring-lavender/50 focus:border-lavender premium-transition"
+                      >
+                        <option value="studio">Studio</option>
+                        <option value="professori">Professori</option>
+                        <option value="organizzazione">Organizzazione</option>
+                        <option value="vita">Vita Scolastica</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-stone-700 mb-1.5">Il tuo nome (opzionale)</label>
+                      <input
+                        type="text"
+                        value={formData.autore}
+                        onChange={(e) => setFormData({ ...formData, autore: e.target.value })}
+                        placeholder="Es. Marco B."
+                        className="w-full px-3 py-2 rounded-xl bg-white/70 border border-stone-300 text-sm text-stone-800 placeholder-stone-400 outline-none focus:ring-2 focus:ring-lavender/50 focus:border-lavender premium-transition"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-700 mb-1.5">Titolo</label>
+                    <input
+                      type="text"
+                      value={formData.titolo}
+                      onChange={(e) => setFormData({ ...formData, titolo: e.target.value })}
+                      placeholder="Un titolo breve e chiaro..."
+                      className="w-full px-3 py-2 rounded-xl bg-white/70 border border-stone-300 text-sm text-stone-800 placeholder-stone-400 outline-none focus:ring-2 focus:ring-lavender/50 focus:border-lavender premium-transition"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-700 mb-1.5">Contenuto</label>
+                    <textarea
+                      value={formData.contenuto}
+                      onChange={(e) => setFormData({ ...formData, contenuto: e.target.value })}
+                      placeholder="Descrivi il tuo consiglio in dettaglio..."
+                      rows={4}
+                      className="w-full px-3 py-2 rounded-xl bg-white/70 border border-stone-300 text-sm text-stone-800 placeholder-stone-400 outline-none focus:ring-2 focus:ring-lavender/50 focus:border-lavender premium-transition resize-none"
+                      required
+                    />
+                  </div>
+
+                  <div className="flex justify-end pt-2">
+                    <button
+                      type="submit"
+                      className="inline-flex items-center px-5 py-2.5 gradient-primary text-white rounded-full text-sm font-semibold premium-transition"
+                    >
+                      <Send className="size-4 mr-1.5" />
+                      Invia consiglio
+                    </button>
+                  </div>
+                </motion.form>
+              )}
+            </AnimatePresence>
           </motion.div>
         </div>
 

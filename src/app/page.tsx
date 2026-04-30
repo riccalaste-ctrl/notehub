@@ -138,8 +138,8 @@ export default function DashboardPage() {
           >
             <div className="neu-card p-5">
               <div className="flex items-center gap-3">
-                <div className="size-10 rounded-neu gradient-mint flex items-center justify-center">
-                  <BookOpen className="size-5 text-white" />
+                <div className="size-10 rounded-neu bg-mint/20 flex items-center justify-center">
+                  <BookOpen className="size-5 text-mint-dark" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground">{subjects.length}</p>
@@ -149,8 +149,8 @@ export default function DashboardPage() {
             </div>
             <div className="neu-card p-5">
               <div className="flex items-center gap-3">
-                <div className="size-10 rounded-neu gradient-lavender flex items-center justify-center">
-                  <FileText className="size-5 text-white" />
+                <div className="size-10 rounded-neu bg-lavender/20 flex items-center justify-center">
+                  <FileText className="size-5 text-lavender-dark" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground">
@@ -162,8 +162,8 @@ export default function DashboardPage() {
             </div>
             <div className="neu-card p-5">
               <div className="flex items-center gap-3">
-                <div className="size-10 rounded-neu gradient-coral flex items-center justify-center">
-                  <Clock className="size-5 text-white" />
+                <div className="size-10 rounded-neu bg-coral/20 flex items-center justify-center">
+                  <Clock className="size-5 text-coral-dark" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground">{recentUploads.length}</p>
@@ -173,8 +173,8 @@ export default function DashboardPage() {
             </div>
             <Link href="/consigli" className="neu-card p-5 bento-card block">
               <div className="flex items-center gap-3">
-                <div className="size-10 rounded-neu bg-stone-300 flex items-center justify-center">
-                  <TrendingUp className="size-5 text-foreground" />
+                <div className="size-10 rounded-neu bg-orange-400/20 flex items-center justify-center">
+                  <TrendingUp className="size-5 text-orange-500" />
                 </div>
                 <div>
                   <p className="text-sm font-bold text-foreground">Consigli</p>

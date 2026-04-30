@@ -231,9 +231,9 @@ export default function AdminPage() {
         <div className="max-w-md w-full">
           <div className="neu-modal p-8">
             <div className="text-center mb-8">
-              <div className="w-16 h-16 rounded-neu-xl gradient-lavender flex items-center justify-center mx-auto mb-4 shadow-neu-lg">
-                <Shield className="size-8 text-white" />
-              </div>
+            <div className="w-16 h-16 rounded-neu-xl bg-orange-400/20 flex items-center justify-center mx-auto mb-4 shadow-neu-lg">
+              <Shield className="size-8 text-orange-500" />
+            </div>
               <h1 className="text-3xl font-semibold text-foreground">
                 SKAKK-UP Admin
               </h1>
@@ -307,8 +307,8 @@ export default function AdminPage() {
       <header className="neu-header sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-neu gradient-lavender flex items-center justify-center shadow-neu">
-              <GraduationCap className="size-6 text-white" />
+            <div className="w-10 h-10 rounded-neu flex items-center justify-center p-1">
+              <img src="/logo.svg" alt="SKAKK-UP" className="w-full h-full" />
             </div>
             <h1 className="text-xl font-semibold text-foreground">SKAKK-UP Admin</h1>
           </div>
@@ -370,9 +370,9 @@ export default function AdminPage() {
                     <p className="text-foreground-light text-sm font-medium">Materie</p>
                     <p className="text-3xl font-semibold text-foreground mt-1">{subjects.length}</p>
                   </div>
-                  <div className="w-12 h-12 rounded-neu gradient-mint flex items-center justify-center shadow-neu">
-                    <BookOpen className="size-6 text-white" />
-                  </div>
+            <div className="w-12 h-12 rounded-neu bg-mint/20 flex items-center justify-center shadow-neu">
+              <BookOpen className="size-6 text-mint-dark" />
+            </div>
                 </div>
               </div>
 
@@ -382,9 +382,9 @@ export default function AdminPage() {
                     <p className="text-foreground-light text-sm font-medium">Professori</p>
                     <p className="text-3xl font-semibold text-foreground mt-1">{professors.length}</p>
                   </div>
-                  <div className="w-12 h-12 rounded-neu gradient-lavender flex items-center justify-center shadow-neu">
-                    <Users className="size-6 text-white" />
-                  </div>
+            <div className="w-12 h-12 rounded-neu bg-lavender/20 flex items-center justify-center shadow-neu">
+              <Users className="size-6 text-lavender-dark" />
+            </div>
                 </div>
               </div>
 
@@ -394,9 +394,9 @@ export default function AdminPage() {
                     <p className="text-foreground-light text-sm font-medium">File Caricati</p>
                     <p className="text-3xl font-semibold text-foreground mt-1">{uploads.length}</p>
                   </div>
-                  <div className="w-12 h-12 rounded-neu gradient-coral flex items-center justify-center shadow-neu">
-                    <FileText className="size-6 text-white" />
-                  </div>
+            <div className="w-12 h-12 rounded-neu bg-coral/20 flex items-center justify-center shadow-neu">
+              <FileText className="size-6 text-coral-dark" />
+            </div>
                 </div>
               </div>
 
@@ -408,9 +408,9 @@ export default function AdminPage() {
                       {formatBytes(uploads.reduce((sum, u) => sum + u.size_bytes, 0))}
                     </p>
                   </div>
-                  <div className="w-12 h-12 rounded-neu bg-stone-300 flex items-center justify-center">
-                    <HardDrive className="size-6 text-foreground" />
-                  </div>
+            <div className="w-12 h-12 rounded-neu bg-orange-400/20 flex items-center justify-center">
+              <HardDrive className="size-6 text-orange-500" />
+            </div>
                 </div>
               </div>
             </div>

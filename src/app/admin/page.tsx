@@ -172,14 +172,26 @@ export default function AdminPage() {
 
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/professors', {
-        method: 'POST',
+      const method = editingId ? 'PUT' : 'POST';
+      const url = '/api/admin/professors';
+
+      const body = editingId
+        ? { id: editingId, ...professorForm }
+        : professorForm;
+
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(professorForm),
+        body: JSON.stringify(body),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        showToast('Professore creato', 'success');
+        showToast(
+          editingId ? 'Professore aggiornato' : 'Professore creato',
+          'success'
+        );
         setProfessorForm({
           name: '',
           google_client_id: '',
@@ -187,10 +199,13 @@ export default function AdminPage() {
           google_drive_folder_id: '',
           google_drive_refresh_token: '',
         });
+        setEditingId(null);
         await fetchData();
+      } else {
+        showToast(data.error || 'Errore nella creazione', 'error');
       }
     } catch (error) {
-      showToast('Errore', 'error');
+      showToast('Errore di connessione', 'error');
     } finally {
       setLoading(false);
     }
@@ -742,13 +757,22 @@ export default function AdminPage() {
                           </div>
                           <p className="font-semibold text-foreground">{professor.name}</p>
                         </div>
-                        <button
-                          onClick={() => deleteProfessor(professor.id)}
-                          className="px-4 py-2 text-sm bg-[#EF4444]/10 hover:bg-[#EF4444]/20 text-[#EF4444] rounded-neu flex items-center gap-1.5 font-medium premium-transition"
-                        >
-                          <Trash2 className="size-3.5" />
-                          Elimina
-                        </button>
+                         <div className="flex gap-2">
+                           <button
+                             onClick={() => editProfessor(professor)}
+                             className="px-4 py-2 text-sm bg-[#6366F1]/10 hover:bg-[#6366F1]/20 text-[#6366F1] rounded-neu flex items-center gap-1.5 font-medium premium-transition"
+                           >
+                             <Edit className="size-3.5" />
+                             Modifica
+                           </button>
+                           <button
+                             onClick={() => deleteProfessor(professor.id)}
+                             className="px-4 py-2 text-sm bg-[#EF4444]/10 hover:bg-[#EF4444]/20 text-[#EF4444] rounded-neu flex items-center gap-1.5 font-medium premium-transition"
+                           >
+                             <Trash2 className="size-3.5" />
+                             Elimina
+                           </button>
+                         </div>
                       </div>
                     ))
                   ) : (

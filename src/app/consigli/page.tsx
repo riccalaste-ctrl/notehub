@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Lightbulb, Mail, Send, Sparkles, BookOpen, Brain, Target, ArrowRight } from 'lucide-react';
+import { Lightbulb, Plus, Sparkles, BookOpen, Brain, Target } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -94,33 +94,30 @@ export default function ConsigliPage() {
             </p>
           </motion.div>
 
-          {/* Contact Info */}
+          {/* Special Upload Button for Consigli */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="mt-8 neu-card p-6"
+            className="mt-8 neu-card p-8 text-center"
           >
-            <div className="flex items-start gap-4">
-              <div className="size-10 rounded-neu neu-surface-pressed flex items-center justify-center flex-shrink-0">
-                <Mail className="size-5 text-foreground-light" />
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-foreground mb-1">
-                  Vuoi contribuire?
-                </h3>
-                <p className="text-sm text-foreground-light leading-relaxed">
-                  Se hai un consiglio da condividere, invialo alla email dell&apos;amministrazione.
-                  Dopo una verifica, verrà pubblicato qui.
-                </p>
-                <div className="mt-3 p-3 rounded-neu neu-surface inline-block">
-                  <p className="text-sm font-semibold text-foreground-light flex items-center gap-2">
-                    <Send className="size-4 text-lavender-dark" />
-                    <span className="text-foreground-muted">Email: admin@skakk-up.it</span>
-                  </p>
-                </div>
-              </div>
+            <div className="w-16 h-16 rounded-neu-xl bg-gradient-to-br from-[#52B788] to-[#40916C] flex items-center justify-center mx-auto mb-4 shadow-neu-lg">
+              <Plus className="size-8 text-white" />
             </div>
+            <h2 className="text-xl font-semibold text-foreground mb-2">
+              Hai un consiglio da condividere?
+            </h2>
+            <p className="text-sm text-foreground-light max-w-md mx-auto leading-relaxed mb-6">
+              Carica qui il tuo contributo per aiutare gli altri studenti a migliorare il loro metodo di studio.
+            </p>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => window.dispatchEvent(new Event('open-upload'))}
+              className="px-8 py-3 bg-gradient-to-r from-[#FF8C42] to-[#E87000] text-white font-semibold rounded-neu-lg premium-transition shadow-lg"
+            >
+              Carica Consiglio
+            </motion.button>
           </motion.div>
         </div>
 

@@ -107,6 +107,10 @@ export default function DashboardPage() {
       }
     };
     fetchData();
+
+    const handleOpenUpload = () => setUploadModalOpen(true);
+    window.addEventListener('open-upload', handleOpenUpload);
+    return () => window.removeEventListener('open-upload', handleOpenUpload);
   }, []);
 
   return (
@@ -263,20 +267,6 @@ export default function DashboardPage() {
         </div>
 
         <Footer />
-      </main>
-
-      {/* Floating Upload Button */}
-      <div className="fixed right-6 bottom-6 z-30">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setUploadModalOpen(true)}
-          className="flex items-center px-5 font-semibold rounded-neu-lg text-white h-14 gradient-primary premium-transition shadow-lg"
-        >
-          <Plus className="size-5 mr-2" />
-          Carica
-        </motion.button>
-      </div>
 
       <UploadModal
         isOpen={uploadModalOpen}

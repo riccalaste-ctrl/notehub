@@ -3,11 +3,11 @@
 @tailwind utilities;
 
 :root {
-  --neu-base: #d4edda;
-  --neu-surface: #d4edda;
+  --neu-base: #FFE4CC;
+  --neu-surface: #FFE4CC;
   --neu-light: #ffffff;
-  --neu-dark: rgba(72, 180, 104, 0.6);
-  --neu-dark-strong: rgba(72, 180, 104, 0.8);
+  --neu-dark: rgba(255, 165, 0, 0.6);
+  --neu-dark-strong: rgba(255, 165, 0, 0.8);
   --foreground: #000000;
   --foreground-light: #111111;
   --foreground-muted: #222222;

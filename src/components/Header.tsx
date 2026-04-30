@@ -25,7 +25,7 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 z-40 flex-col items-center gap-8 w-56 h-full p-6 neu-sidebar">
+      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 z-40 flex-col items-center gap-8 w-56 h-full p-6 neu-sidebar border-r border-stone-200/50">
         <Link href="/" className="flex items-center gap-2 w-full">
           <div className="size-9 rounded-neu neu-surface flex justify-center items-center p-1">
             <img src="/logo.svg" alt="SKAKK-UP" className="w-full h-full" />
@@ -117,7 +117,7 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
               animate={{ x: 0 }}
               exit={{ x: -300 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed left-0 top-0 bottom-0 z-50 w-64 neu-sidebar p-6 lg:hidden"
+              className="fixed left-0 top-0 bottom-0 z-50 w-64 neu-sidebar border-r border-stone-200/50 p-6 lg:hidden"
             >
               <div className="flex justify-between items-center mb-8">
                 <div className="flex items-center gap-2">

@@ -1,15 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Search, Clock, Users } from 'lucide-react';
+import { BookOpen, FileText, Users, Clock, ChevronRight, Plus, TrendingUp } from 'lucide-react';
+import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import FileCard from '@/components/FileCard';
-import { FileListSkeleton } from '@/components/Skeleton';
-import UploadModal from '@/components/UploadModal';
 import Toast, { useToast } from '@/components/Toast';
-import CommandBar from '@/components/CommandBar';
 
 interface Subject {
   id: string;
@@ -23,24 +20,28 @@ interface Professor {
   name: string;
 }
 
-interface SubjectProfessor {
-  subject_id: string;
-  professor_id: string;
-  professor?: Professor;
-}
-
 interface Upload {
   id: string;
   original_filename: string;
   subject_name?: string;
   subject_slug?: string;
-  professor_name?: string;
   created_at: string;
-  mime_type: string;
-  size_bytes: number;
-  download_url?: string;
-  view_url?: string;
 }
+
+const subjectIcons: Record<string, string> = {
+  matematica: '∑',
+  fisica: '⚛',
+  chimica: '⬡',
+  biologia: '🧬',
+  italiano: '📖',
+  latino: '🏛',
+  storia: '📜',
+  filosofia: '🧠',
+  inglese: '🌍',
+  informatica: '💻',
+  arte: '🎨',
+  scienze: '🔬',
+};
 
 const gradientClasses = [
   'gradient-sage',
@@ -48,251 +49,207 @@ const gradientClasses = [
   'gradient-peach',
 ];
 
-export default function HomePage() {
+export default function DashboardPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [professors, setProfessors] = useState<Professor[]>([]);
-  const [subjectProfessors, setSubjectProfessors] = useState<SubjectProfessor[]>([]);
-  const [uploads, setUploads] = useState<Upload[]>([]);
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [recentUploads, setRecentUploads] = useState<Upload[]>([]);
+  const [uploadCounts, setUploadCounts] = useState<Record<string, number>>({});
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
-  const [commandBarOpen, setCommandBarOpen] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [filters, setFilters] = useState({
-    search: '',
-    subjectId: '',
-    professorId: '',
-  });
   const { toast, showToast, hideToast } = useToast();
-  const hasFilters = filters.search !== '' || filters.subjectId !== '' || filters.professorId !== '';
-
-  const fetchData = useCallback(async () => {
-    if (!hasFilters) {
-      setInitialLoading(false);
-      return;
-    }
-    try {
-      const params = new URLSearchParams();
-      if (filters.search) params.set('search', filters.search);
-      if (filters.subjectId) params.set('subject_id', filters.subjectId);
-      if (filters.professorId) params.set('professor_id', filters.professorId);
-      params.set('limit', '50');
-
-      const res = await fetch(`/api/files?${params}`);
-      const data = await res.json();
-
-      if (res.ok) {
-        setUploads(data.uploads || []);
-      } else {
-        showToast(data.error || 'Errore nel caricamento file', 'error');
-      }
-    } catch (error) {
-      console.error('Fetch error:', error);
-      showToast('Errore di connessione', 'error');
-    } finally {
-      setInitialLoading(false);
-    }
-  }, [filters, showToast, hasFilters]);
-
-  const fetchMetadata = useCallback(async () => {
-    try {
-      const [subjectsRes, professorsRes, subjectProfessorsRes] = await Promise.all([
-        fetch('/api/admin/subjects'),
-        fetch('/api/admin/professors'),
-        fetch('/api/admin/subject-professors'),
-      ]);
-
-      if (subjectsRes.ok) setSubjects(await subjectsRes.json());
-      if (professorsRes.ok) setProfessors(await professorsRes.json());
-      if (subjectProfessorsRes.ok) setSubjectProfessors(await subjectProfessorsRes.json());
-    } catch (error) {
-      console.error('Metadata fetch error:', error);
-    }
-  }, []);
 
   useEffect(() => {
-    fetchMetadata();
-  }, [fetchMetadata]);
+    const fetchData = async () => {
+      try {
+        const [subjectsRes, uploadsRes] = await Promise.all([
+          fetch('/api/admin/subjects'),
+          fetch('/api/files?limit=10'),
+        ]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchData();
-    }, 300);
+        if (subjectsRes.ok) {
+          const data = await subjectsRes.json();
+          setSubjects(data.filter((s: Subject) => s.enabled));
+        }
 
-    return () => clearTimeout(timer);
-  }, [filters, fetchData, refreshKey]);
+        if (uploadsRes.ok) {
+          const data = await uploadsRes.json();
+          setRecentUploads(data.uploads || []);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setCommandBarOpen(true);
+          const counts: Record<string, number> = {};
+          (data.uploads || []).forEach((u: Upload) => {
+            if (u.subject_slug) {
+              counts[u.subject_slug] = (counts[u.subject_slug] || 0) + 1;
+            }
+          });
+          setUploadCounts(counts);
+        }
+      } catch (error) {
+        console.error('Fetch error:', error);
       }
     };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    fetchData();
   }, []);
-
-  const filteredProfessors = useMemo(() => {
-    if (!filters.subjectId) return professors;
-    const prof_ids = subjectProfessors
-      .filter((sp) => sp.subject_id === filters.subjectId)
-      .map((sp) => sp.professor_id);
-    return professors.filter((p) => prof_ids.includes(p.id));
-  }, [filters.subjectId, professors, subjectProfessors]);
-
-  const handleCommandSearch = (query: string) => {
-    setFilters((prev) => ({ ...prev, search: query }));
-    setCommandBarOpen(false);
-  };
 
   return (
     <div className="min-h-screen bg-stone-50">
-      <Header onOpenUpload={() => setUploadModalOpen(true)} breadcrumbs={[{ label: 'Materie', href: '/' }, { label: 'Dashboard' }]} />
+      <Header breadcrumbs={[{ label: 'Dashboard' }]} />
 
       <main className="lg:pl-56 pt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Hero Section */}
+          {/* Header */}
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
-            className="mb-12 mt-6"
+            className="mb-10 mt-6"
           >
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8">
-              <div>
-                <h1 className="leading-tight font-extrabold text-4xl tracking-tight text-stone-800">
-                  Esplora gli Appunti
-                </h1>
-                <p className="text-base text-stone-500 mt-2">
-                  Seleziona una disciplina per accedere ai documenti
-                </p>
-              </div>
-              <div className="flex items-center gap-2 mt-4 sm:mt-0">
-                <div className="font-medium rounded-full text-xs px-3 h-8 flex items-center gap-1.5 glass-input text-stone-600">
-                  <Clock className="size-3.5 text-sage-dark" />
-                  {uploads.length} documenti
-                </div>
-                <div className="font-medium rounded-full text-xs px-3 h-8 flex items-center gap-1.5 glass-input text-stone-600">
-                  <Users className="size-3.5 text-lavender" />
-                  {subjects.filter(s => s.enabled).length} materie
-                </div>
-              </div>
-            </div>
-
-            {/* Subject Filter Pills */}
-            <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2">
-              <button
-                onClick={() => setFilters({ search: '', subjectId: '', professorId: '' })}
-                className={`transition-all duration-300 ease-out font-medium rounded-full text-sm px-4 h-9 whitespace-nowrap ${
-                  !filters.subjectId
-                    ? 'gradient-primary text-white'
-                    : 'glass-input text-stone-600 hover:text-stone-800'
-                }`}
-              >
-                Tutti
-              </button>
-              {subjects.filter(s => s.enabled).map((subject, i) => (
-                <button
-                  key={subject.id}
-                  onClick={() => setFilters((prev) => ({ ...prev, subjectId: prev.subjectId === subject.id ? '' : subject.id, professorId: '' }))}
-                  className={`transition-all duration-300 ease-out font-medium rounded-full text-sm px-4 h-9 whitespace-nowrap ${
-                    filters.subjectId === subject.id
-                      ? `${gradientClasses[i % gradientClasses.length]} text-white`
-                      : 'glass-input text-stone-600 hover:text-stone-800'
-                  }`}
-                >
-                  {subject.name}
-                </button>
-              ))}
-            </div>
-
-            {/* Search Bar */}
-            <div className="relative mb-8">
-              <Search className="top-1/2 -translate-y-1/2 size-5 absolute left-4 text-lavender" />
-              <input
-                type="text"
-                value={filters.search}
-                onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
-                placeholder="Cerca argomento, autore, file..."
-                className="w-full text-sm pl-12 pr-4 py-3 rounded-2xl glass-input text-stone-800 placeholder-stone-400 outline-none focus:ring-2 focus:ring-lavender/30 premium-transition"
-              />
-            </div>
-
-            {/* Professor Filter */}
-            {filters.subjectId && filteredProfessors.length > 0 && (
-              <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
-                <span className="text-sm text-stone-500 mr-2">Professore:</span>
-                <button
-                  onClick={() => setFilters((prev) => ({ ...prev, professorId: '' }))}
-                  className={`transition-all duration-300 rounded-full text-xs px-3 h-7 whitespace-nowrap ${
-                    !filters.professorId
-                      ? 'bg-stone-800 text-white'
-                      : 'glass-input text-stone-600'
-                  }`}
-                >
-                  Tutti
-                </button>
-                {filteredProfessors.map((prof) => (
-                  <button
-                    key={prof.id}
-                    onClick={() => setFilters((prev) => ({ ...prev, professorId: prof.id }))}
-                    className={`transition-all duration-300 rounded-full text-xs px-3 h-7 whitespace-nowrap ${
-                      filters.professorId === prof.id
-                        ? 'bg-lavender text-white'
-                        : 'glass-input text-stone-600'
-                    }`}
-                  >
-                    {prof.name}
-                  </button>
-                ))}
-              </div>
-            )}
+            <h1 className="text-3xl font-extrabold text-stone-900 tracking-tight">
+              Benvenuto su SKAKK-UP
+            </h1>
+            <p className="text-base text-stone-700 mt-2">
+              Il tuo archivio condiviso per appunti e risorse scolastiche
+            </p>
           </motion.div>
 
-          {/* Files Grid */}
-          <div>
-            {initialLoading ? (
-              <FileListSkeleton />
-            ) : uploads.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {uploads.map((upload, index) => (
-                  <FileCard key={upload.id} file={upload} index={index} />
+          {/* Stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10"
+          >
+            <div className="glass-card p-5">
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-xl gradient-sage flex items-center justify-center">
+                  <BookOpen className="size-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-stone-900">{subjects.length}</p>
+                  <p className="text-xs text-stone-600">Materie</p>
+                </div>
+              </div>
+            </div>
+            <div className="glass-card p-5">
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-xl gradient-lavender flex items-center justify-center">
+                  <FileText className="size-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-stone-900">
+                    {Object.values(uploadCounts).reduce((a, b) => a + b, 0)}
+                  </p>
+                  <p className="text-xs text-stone-600">File totali</p>
+                </div>
+              </div>
+            </div>
+            <div className="glass-card p-5">
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-xl gradient-peach flex items-center justify-center">
+                  <Clock className="size-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-stone-900">{recentUploads.length}</p>
+                  <p className="text-xs text-stone-600">Recenti</p>
+                </div>
+              </div>
+            </div>
+            <Link href="/consigli" className="glass-card p-5 bento-card block">
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-xl bg-stone-700 flex items-center justify-center">
+                  <TrendingUp className="size-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-stone-900">Consigli</p>
+                  <p className="text-xs text-stone-600">Scopri di più →</p>
+                </div>
+              </div>
+            </Link>
+          </motion.div>
+
+          {/* Subjects Grid */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-stone-900">Materie</h2>
+              <Link
+                href="/materie"
+                className="flex items-center gap-1 text-sm font-medium text-stone-700 hover:text-stone-900 premium-transition"
+              >
+                Vedi tutte <ChevronRight className="size-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {subjects.map((subject, i) => {
+                const icon = subjectIcons[subject.slug.toLowerCase()] || '📚';
+                const count = uploadCounts[subject.slug] || 0;
+                return (
+                  <Link
+                    key={subject.id}
+                    href={`/materie/${subject.slug}`}
+                    className="glass-card bento-card p-5 block group"
+                  >
+                    <div className={`size-12 rounded-xl ${gradientClasses[i % gradientClasses.length]} flex items-center justify-center text-white text-xl font-bold mb-3 shadow-lg group-hover:scale-110 premium-transition`}>
+                      {icon}
+                    </div>
+                    <h3 className="font-semibold text-stone-900 text-sm mb-1">
+                      {subject.name}
+                    </h3>
+                    <p className="text-xs text-stone-600">
+                      {count > 0 ? `${count} file` : 'Nessun file'}
+                    </p>
+                  </Link>
+                );
+              })}
+            </div>
+          </motion.div>
+
+          {/* Recent Files */}
+          {recentUploads.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="mt-10"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-stone-900">Ultimi caricamenti</h2>
+                <Link
+                  href="/materie"
+                  className="flex items-center gap-1 text-sm font-medium text-stone-700 hover:text-stone-900 premium-transition"
+                >
+                  Esplora <ChevronRight className="size-4" />
+                </Link>
+              </div>
+
+              <div className="space-y-3">
+                {recentUploads.slice(0, 5).map((upload) => (
+                  <Link
+                    key={upload.id}
+                    href={upload.subject_slug ? `/materie/${upload.subject_slug}` : '/materie'}
+                    className="glass-card p-4 flex items-center justify-between bento-card block"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="size-8 rounded-lg bg-stone-100 flex items-center justify-center flex-shrink-0">
+                        <FileText className="size-4 text-stone-600" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-stone-900 truncate">
+                          {upload.original_filename}
+                        </p>
+                        {upload.subject_name && (
+                          <p className="text-xs text-stone-600">{upload.subject_name}</p>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-xs text-stone-500 flex-shrink-0 ml-4">
+                      {new Date(upload.created_at).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}
+                    </span>
+                  </Link>
                 ))}
               </div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-center py-16"
-              >
-                <div className="w-20 h-20 rounded-3xl bg-white/50 flex items-center justify-center mx-auto mb-6 shadow-glass-sm">
-                  <svg className="w-10 h-10 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-semibold text-stone-800 mb-2">
-                  {hasFilters ? 'Nessun risultato' : 'Nessun file trovato'}
-                </h3>
-                <p className="text-sm text-stone-500 mb-8">
-                  {hasFilters
-                    ? 'Prova a modificare i filtri di ricerca.'
-                    : 'Carica il primo file per iniziare!'}
-                </p>
-                {!hasFilters && (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setUploadModalOpen(true)}
-                    className="inline-flex items-center px-6 py-3 gradient-primary text-white rounded-full font-medium premium-transition"
-                  >
-                    <Plus className="size-4 mr-2" />
-                    Carica il primo file
-                  </motion.button>
-                )}
-              </motion.div>
-            )}
-          </div>
+            </motion.div>
+          )}
         </div>
 
         <Footer />
@@ -304,29 +261,12 @@ export default function HomePage() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setUploadModalOpen(true)}
-          className="flex items-center px-5 font-semibold rounded-full text-white h-14 gradient-tri border border-white/60 shadow-glass-lg premium-transition"
+          className="flex items-center px-5 font-semibold rounded-full text-white h-14 gradient-tri premium-transition"
         >
           <Plus className="size-5 mr-2" />
-          Carica Appunti
+          Carica
         </motion.button>
       </div>
-
-      <UploadModal
-        isOpen={uploadModalOpen}
-        onClose={() => {
-          setUploadModalOpen(false);
-          setRefreshKey((k) => k + 1);
-        }}
-        subjects={subjects.filter((s) => s.enabled)}
-        professors={professors}
-        subjectProfessors={subjectProfessors}
-      />
-
-      <CommandBar
-        isOpen={commandBarOpen}
-        onClose={() => setCommandBarOpen(false)}
-        onSearch={handleCommandSearch}
-      />
 
       {toast && <Toast {...toast} onClose={hideToast} />}
     </div>

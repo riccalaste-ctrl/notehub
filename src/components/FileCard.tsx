@@ -97,7 +97,7 @@ export default function FileCard({ file, index = 0 }: FileCardProps) {
         </div>
 
         <div className="mt-4">
-          <h3 className="font-semibold text-base text-stone-800 truncate mb-1" title={file.original_filename}>
+          <h3 className="font-bold text-base text-stone-900 truncate mb-1" title={file.original_filename}>
             {file.original_filename}
           </h3>
           <div className="flex flex-wrap items-center gap-2 text-xs">
@@ -107,10 +107,10 @@ export default function FileCard({ file, index = 0 }: FileCardProps) {
               </span>
             )}
             {file.professor_name && (
-              <span className="text-stone-500">{file.professor_name}</span>
+              <span className="text-stone-700 font-medium">{file.professor_name}</span>
             )}
           </div>
-          <div className="flex items-center gap-2 mt-3 text-xs text-stone-500">
+          <div className="flex items-center gap-2 mt-3 text-xs text-stone-700 font-medium">
             <span>{formatDate(file.created_at)}</span>
             <span>·</span>
             <span>{formatFileSize(file.size_bytes)}</span>

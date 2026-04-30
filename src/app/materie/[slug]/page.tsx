@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { BookOpen, FileText, Plus, ChevronRight, Search } from 'lucide-react';
+import { BookOpen, FileText, Plus, ChevronRight, Search, Filter, ArrowLeft, Files, GraduationCap } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import FileCard from '@/components/FileCard';
@@ -107,10 +107,13 @@ export default function SubjectPage() {
 
   if (!subject) {
     return (
-      <div className="min-h-screen bg-stone-50 flex items-center justify-center">
+      <div className="min-h-screen bg-neu-base flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-stone-900 mb-2">Materia non trovata</h1>
-          <button onClick={() => router.push('/materie')} className="text-lavender hover:underline">
+          <div className="w-16 h-16 rounded-neu-xl neu-surface flex items-center justify-center mx-auto mb-4">
+            <BookOpen className="size-8 text-foreground-muted" />
+          </div>
+          <h1 className="text-2xl font-semibold text-foreground mb-2">Materia non trovata</h1>
+          <button onClick={() => router.push('/materie')} className="text-lavender-dark hover:underline font-medium">
             Torna alle materie
           </button>
         </div>
@@ -123,66 +126,96 @@ export default function SubjectPage() {
     .map((sp) => sp.professor)
     .filter(Boolean) as Professor[];
 
+  const getBreadcrumbs = () => {
+    if (professorFilter) {
+      const prof = professors.find(p => p.id === professorFilter);
+      return [
+        { label: 'Materie', href: '/materie' },
+        { label: subject.name, href: `/materie/${subject.slug}` },
+        { label: prof?.name || 'Professore' },
+      ];
+    }
+    return [
+      { label: 'Materie', href: '/materie' },
+      { label: subject.name },
+    ];
+  };
+
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-neu-base">
       <Header
         onOpenUpload={() => setUploadModalOpen(true)}
-        breadcrumbs={[
-          { label: 'Materie', href: '/materie' },
-          { label: subject.name },
-        ]}
+        breadcrumbs={getBreadcrumbs()}
       />
 
       <main className="lg:pl-56 pt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Subject Header */}
           <div className="flex items-center gap-4 mb-8 mt-6">
-            <div className="size-16 rounded-xl gradient-sage flex items-center justify-center">
-              <BookOpen className="size-8 text-white" />
+            <button
+              onClick={() => { setUploadModalOpen(false); router.push('/materie'); }}
+              className="p-2 rounded-neu neu-button premium-transition"
+            >
+              <ArrowLeft className="size-5 text-foreground-light" />
+            </button>
+            <div className="size-14 rounded-neu gradient-lavender flex items-center justify-center shadow-neu">
+              <BookOpen className="size-7 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-extrabold text-stone-900">{subject.name}</h1>
-              <p className="text-stone-700">{uploads.length} {uploads.length === 1 ? 'file' : 'file'} disponibili</p>
+              <h1 className="text-3xl font-semibold text-foreground">
+                {subject.name}
+              </h1>
+              <p className="text-sm text-foreground-light flex items-center gap-2">
+                <Files className="size-4" />
+                {uploads.length} {uploads.length === 1 ? 'file' : 'file'} disponibili
+              </p>
             </div>
           </div>
 
-          {/* Search */}
-          <div className="relative mb-6">
-            <Search className="top-1/2 -translate-y-1/2 size-5 absolute left-4 text-stone-400" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={`Cerca in ${subject.name}...`}
-              className="w-full text-sm pl-12 pr-4 py-3 rounded-2xl glass-input text-stone-900 placeholder-stone-400 outline-none focus:ring-2 focus:ring-lavender/30 premium-transition"
-            />
-          </div>
+          {/* Search and Filters */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-8">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-foreground-muted" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={`Cerca in ${subject.name}...`}
+                className="w-full text-sm pl-12 pr-4 py-3 rounded-neu neu-input text-foreground placeholder-foreground-muted outline-none premium-transition"
+              />
+            </div>
 
-          {/* Professor Filter */}
-          {filteredProfs.length > 0 && (
-            <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2">
-              <span className="text-sm text-stone-700 mr-2 font-medium">Professore:</span>
-              <button
-                onClick={() => setProfessorFilter('')}
-                className={`rounded-full text-xs px-3 h-7 whitespace-nowrap font-medium premium-transition ${
-                  !professorFilter ? 'bg-stone-800 text-white' : 'bg-stone-200 text-stone-700 hover:bg-stone-300'
-                }`}
-              >
-                Tutti
-              </button>
-              {filteredProfs.map((prof) => (
+            {filteredProfs.length > 0 && (
+              <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                <Filter className="size-4 text-foreground-light flex-shrink-0" />
+                <span className="text-sm text-foreground-light font-medium flex-shrink-0">Professore:</span>
                 <button
-                  key={prof.id}
-                  onClick={() => setProfessorFilter(prof.id)}
-                  className={`rounded-full text-xs px-3 h-7 whitespace-nowrap font-medium premium-transition ${
-                    professorFilter === prof.id ? 'bg-lavender text-white' : 'bg-stone-200 text-stone-700 hover:bg-stone-300'
+                  onClick={() => setProfessorFilter('')}
+                  className={`rounded-neu text-xs px-4 h-10 whitespace-nowrap font-medium premium-transition ${
+                    !professorFilter
+                      ? 'shadow-neu-pressed text-lavender-dark bg-neu-surface'
+                      : 'neu-button text-foreground-light hover:text-foreground'
                   }`}
                 >
-                  {prof.name}
+                  Tutti
                 </button>
-              ))}
-            </div>
-          )}
+                {filteredProfs.map((prof) => (
+                  <button
+                    key={prof.id}
+                    onClick={() => setProfessorFilter(prof.id)}
+                    className={`rounded-neu text-xs px-4 h-10 whitespace-nowrap font-medium premium-transition flex items-center gap-1.5 ${
+                      professorFilter === prof.id
+                        ? 'shadow-neu-pressed text-lavender-dark bg-neu-surface'
+                        : 'neu-button text-foreground-light hover:text-foreground'
+                    }`}
+                  >
+                    <GraduationCap className="size-3" />
+                    {prof.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Files */}
           {loading ? (
@@ -195,16 +228,18 @@ export default function SubjectPage() {
             </div>
           ) : (
             <div className="text-center py-16">
-              <div className="w-16 h-16 rounded-2xl bg-stone-200 flex items-center justify-center mx-auto mb-4">
-                <FileText className="size-8 text-stone-400" />
+              <div className="w-20 h-20 rounded-neu-xl neu-surface flex items-center justify-center mx-auto mb-6">
+                <FileText className="size-10 text-foreground-muted" />
               </div>
-              <h3 className="text-lg font-semibold text-stone-900 mb-2">Nessun file</h3>
-              <p className="text-sm text-stone-700 mb-6">Non ci sono file per questa materia</p>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Nessun file</h3>
+              <p className="text-sm text-foreground-light mb-6">
+                Non ci sono file per questa materia{professorFilter ? ' con questo professore' : ''}
+              </p>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setUploadModalOpen(true)}
-                className="inline-flex items-center px-5 py-2.5 gradient-primary text-white rounded-full text-sm font-medium premium-transition"
+                className="inline-flex items-center px-5 py-2.5 gradient-primary text-white rounded-neu text-sm font-medium premium-transition"
               >
                 <Plus className="size-4 mr-1.5" />
                 Carica un file
@@ -216,12 +251,13 @@ export default function SubjectPage() {
         <Footer />
       </main>
 
+      {/* Floating Upload Button */}
       <div className="fixed right-6 bottom-6 z-30">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setUploadModalOpen(true)}
-          className="flex items-center px-5 font-semibold rounded-full text-white h-14 gradient-tri premium-transition"
+          className="flex items-center px-5 font-semibold rounded-neu-lg text-white h-14 gradient-primary premium-transition shadow-lg"
         >
           <Plus className="size-5 mr-2" />
           Carica
@@ -230,7 +266,10 @@ export default function SubjectPage() {
 
       <UploadModal
         isOpen={uploadModalOpen}
-        onClose={() => setUploadModalOpen(false)}
+        onClose={() => {
+          setUploadModalOpen(false);
+          fetchUploads();
+        }}
         subjects={allSubjects.filter((s) => s.enabled)}
         professors={professors}
         subjectProfessors={subjectProfessors}

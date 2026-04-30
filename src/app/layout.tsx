@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   title: "SKAKK-UP - Digital Agora",
   description: "Piattaforma premium per professionisti della conoscenza",
   icons: {
-    icon: '/favicon.svg',
+    icon: '/favicon.png',
   },
 };
 

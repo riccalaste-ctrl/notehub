@@ -167,7 +167,7 @@ body {
   }
 
   .gradient-primary {
-    background: linear-gradient(135deg, #FF8C42 0%, #E8700 100%);
+    background: #FF8C42;
   }
 
   .gradient-text {

@@ -94,6 +94,18 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
 
           {/* Right side */}
           <div className="flex items-center gap-3">
+            {onOpenUpload && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={onOpenUpload}
+                  className="hidden sm:inline-flex items-center px-5 py-2 font-semibold rounded-neu text-white text-sm bg-gradient-to-br from-[#FF8C42] to-[#E87000] premium-transition"
+                >
+                <Plus className="size-4 mr-1.5" />
+                <span className="relative z-10">Carica</span>
+              </motion.button>
+            )}
+
             <Link href="/admin" className="px-3 py-2 text-sm font-semibold text-foreground hover:shadow-neu-badge rounded-neu premium-transition">
               Admin
             </Link>

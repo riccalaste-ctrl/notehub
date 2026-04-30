@@ -266,6 +266,19 @@ export default function DashboardPage() {
           )}
         </div>
         <Footer />
+
+        {/* Floating Upload Button */}
+        <div className="fixed right-6 bottom-6 z-30">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setUploadModalOpen(true)}
+            className="flex items-center px-5 font-semibold rounded-neu-lg text-white h-14 bg-gradient-to-br from-[#FF8C42] to-[#E87000] premium-transition shadow-lg"
+          >
+            <Plus className="size-5 mr-2" />
+            Carica
+          </motion.button>
+        </div>
       </main>
 
       <UploadModal

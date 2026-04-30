@@ -231,8 +231,8 @@ export default function AdminPage() {
         <div className="max-w-md w-full">
           <div className="neu-modal p-8">
             <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-neu-xl bg-[#5B8DB8]/20 flex items-center justify-center mx-auto mb-4 shadow-neu-lg">
-              <Shield className="size-8 text-[#5B8DB8]" />
+            <div className="w-16 h-16 rounded-neu-xl bg-[#FF8C42]/20 flex items-center justify-center mx-auto mb-4">
+              <Shield className="size-8 text-[#FF8C42]" />
             </div>
               <h1 className="text-3xl font-semibold text-foreground">
                 SKAKK-UP Admin
@@ -271,7 +271,7 @@ export default function AdminPage() {
               <button
                 type="submit"
                 disabled={loginLoading || !password}
-                className="w-full py-3 bg-[#5B8DB8] text-white font-semibold rounded-neu premium-transition shadow-neu disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                className="w-full py-3 bg-gradient-to-br from-[#FF8C42] to-[#E87000] text-white font-semibold rounded-neu premium-transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
                 {loginLoading ? (
                   <>

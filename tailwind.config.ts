@@ -25,9 +25,9 @@ module.exports = {
           light: '#BFE3CC',
         },
         lavender: {
-          DEFAULT: '#B8A4E3',
-          dark: '#9580D4',
-          light: '#C8B4F0',
+          DEFAULT: '#7C9CB0',
+          dark: '#5A8B96',
+          light: '#9BC4D0',
         },
         coral: {
           DEFAULT: '#FFB5A0',

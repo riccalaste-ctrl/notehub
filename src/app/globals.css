@@ -66,7 +66,7 @@ body {
   }
 
   .neu-card {
-    background: #FFFFFF;
+    background: #F5F7FA;
     border-radius: var(--neu-radius-lg);
     border: 1px solid rgba(163, 177, 198, 0.3);
     transition: all 0.3s ease-in-out;
@@ -77,14 +77,13 @@ body {
   }
 
   .neu-sidebar {
-    background: var(--neu-surface);
-    border-right: none;
-    box-shadow: none;
+    background: #D5DCE4;
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
   }
 
   .neu-header {
     background: var(--neu-surface);
-    box-shadow: none;
+    border-bottom: 1px solid rgba(163, 177, 198, 0.2);
   }
 
   .neu-input {

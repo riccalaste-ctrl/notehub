@@ -1,8 +1,15 @@
+declare global {
+  interface Window {
+    gapi: any;
+    google: any;
+  }
+}
+
 const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
 const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
 let gapiInited = false;
-let tokenClient: google.accounts.oauth2.TokenClient | null = null;
+let tokenClient: any = null;
 
 interface DriveFile {
   fileId: string;
@@ -21,6 +28,9 @@ export function initGoogleApi(clientId: string): Promise<void> {
       resolve();
       return;
     }
+
+    const gapi = (window as any).gapi;
+    const google = (window as any).google;
 
     const script1 = document.createElement('script');
     script1.src = 'https://apis.google.com/js/api.js';
@@ -56,15 +66,15 @@ export function initGoogleApi(clientId: string): Promise<void> {
 export function signInWithGoogle(clientId: string): Promise<string> {
   return new Promise((resolve, reject) => {
     if (!tokenClient) {
-      tokenClient = google.accounts.oauth2.initTokenClient({
+      tokenClient = (window as any).google.accounts.oauth2.initTokenClient({
         client_id: clientId,
         scope: SCOPES,
-        callback: (resp: google.accounts.oauth2.TokenResponse) => {
+        callback: (resp: { error?: string; access_token?: string }) => {
           if (resp.error) {
             reject(new Error(resp.error));
             return;
           }
-          resolve(resp.access_token);
+          resolve(resp.access_token || '');
         },
       });
     }
@@ -74,13 +84,15 @@ export function signInWithGoogle(clientId: string): Promise<string> {
 }
 
 export function getAccessToken(): string | null {
+  const gapi = (window as any).gapi;
   return gapi.client.getToken()?.access_token || null;
 }
 
 export function signOutGoogle(): void {
+  const gapi = (window as any).gapi;
   const token = gapi.client.getToken();
   if (token) {
-    google.accounts.oauth2.revoke(token.access_token, () => {
+    (window as any).google.accounts.oauth2.revoke(token.access_token, () => {
       gapi.client.setToken(null);
     });
   }
@@ -91,6 +103,7 @@ export async function uploadFile(
   folderId: string,
   onProgress?: (percent: number) => void
 ): Promise<DriveFile> {
+  const gapi = (window as any).gapi;
   const accessToken = getAccessToken();
   if (!accessToken) throw new Error('Not authenticated with Google Drive');
 
@@ -143,6 +156,7 @@ export function getPreviewUrl(fileId: string): string {
 }
 
 export async function deleteFile(fileId: string): Promise<void> {
+  const gapi = (window as any).gapi;
   const accessToken = getAccessToken();
   if (!accessToken) throw new Error('Not authenticated with Google Drive');
 

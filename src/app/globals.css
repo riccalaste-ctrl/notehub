@@ -8,9 +8,9 @@
   --neu-light: #FFFFFF;
   --neu-dark: rgba(163, 177, 198, 0.6);
   --neu-dark-strong: rgba(163, 177, 198, 0.8);
-  --foreground: #0A0A0A;
-  --foreground-light: #1A1A1A;
-  --foreground-muted: #2A2A2A;
+  --foreground: #000000;
+  --foreground-light: #111111;
+  --foreground-muted: #222222;
   --accent-lavender: #FF8C42;
   --accent-mint: #A8D5BA;
   --accent-coral: #FFB5A0;
@@ -51,7 +51,8 @@ body {
   .neu-surface {
     background: var(--neu-surface);
     border-radius: var(--neu-radius);
-    border: 1px solid rgba(163, 177, 198, 0.3);
+    box-shadow: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
+    border: 1px solid transparent;
     transition: all 0.3s ease-in-out;
   }
 
@@ -66,9 +67,10 @@ body {
   }
 
   .neu-card {
-    background: #F5F7FA;
+    background: var(--neu-surface);
     border-radius: var(--neu-radius-lg);
-    border: 1px solid rgba(163, 177, 198, 0.3);
+    box-shadow: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
+    border: 1px solid transparent;
     transition: all 0.3s ease-in-out;
   }
 
@@ -77,19 +79,19 @@ body {
   }
 
   .neu-sidebar {
-    background: #D5DCE4;
-    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    background: var(--neu-surface);
+    border-right: 1px solid rgba(0, 0, 0, 0.12);
   }
 
   .neu-header {
     background: var(--neu-surface);
-    border-bottom: 1px solid rgba(163, 177, 198, 0.2);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
   }
 
   .neu-input {
     background: var(--neu-surface);
-    border: 1px solid rgba(163, 177, 198, 0.3);
-    box-shadow: none;
+    border: 1px solid transparent;
+    box-shadow: inset 3px 3px 6px var(--neu-dark), inset -3px -3px 6px var(--neu-light);
     transition: all 0.3s ease-in-out;
   }
 
@@ -99,8 +101,8 @@ body {
 
   .neu-button {
     background: var(--neu-surface);
-    border: 1px solid rgba(163, 177, 198, 0.3);
-    box-shadow: none;
+    border: 1px solid transparent;
+    box-shadow: 4px 4px 8px var(--neu-dark), -4px -4px 8px var(--neu-light);
     transition: all 0.3s ease-in-out;
     cursor: pointer;
   }
@@ -118,19 +120,22 @@ body {
   .neu-modal {
     background: var(--neu-surface);
     border-radius: var(--neu-radius-xl);
-    border: 1px solid rgba(163, 177, 198, 0.3);
+    box-shadow: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
+    border: 1px solid transparent;
   }
 
   .neu-toast {
     background: var(--neu-surface);
     border-radius: var(--neu-radius-lg);
-    border: 1px solid rgba(163, 177, 198, 0.3);
+    box-shadow: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
+    border: 1px solid transparent;
   }
 
   .neu-bento-card {
     background: var(--neu-surface);
     border-radius: var(--neu-radius-xl);
-    border: 1px solid rgba(163, 177, 198, 0.3);
+    box-shadow: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
+    border: 1px solid transparent;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
@@ -141,7 +146,8 @@ body {
   .neu-badge {
     background: var(--neu-surface);
     border-radius: var(--neu-radius-sm);
-    border: 1px solid rgba(163, 177, 198, 0.3);
+    box-shadow: 4px 4px 8px var(--neu-dark), -4px -4px 8px var(--neu-light);
+    border: 1px solid transparent;
   }
 
   .glass-badge {

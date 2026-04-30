@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { supabaseAdmin } from '@/lib/supabase';
-import { requireAuth } from '@/lib/auth';
+import { requireAdmin, isAdminAuthenticated } from '@/lib/auth';
 import { z } from 'zod';
 
 const professorSchema = z.object({
@@ -13,7 +13,7 @@ const professorSchema = z.object({
 });
 
 export async function GET() {
-  const authError = await requireAuth();
+  const authError = await requireAdmin();
   if (authError) return authError;
 
   try {
@@ -35,7 +35,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const authError = await requireAuth();
+  const authError = await requireAdmin();
   if (authError) return authError;
 
   try {
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const authError = await requireAuth();
+  const authError = await requireAdmin();
   if (authError) return authError;
 
   try {
@@ -114,7 +114,7 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const authError = await requireAuth();
+  const authError = await requireAdmin();
   if (authError) return authError;
 
   try {

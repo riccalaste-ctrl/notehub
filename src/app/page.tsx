@@ -138,7 +138,7 @@ export default function DashboardPage() {
           >
             <div className="neu-card p-5">
               <div className="flex items-center gap-3">
-                <div className="size-10 rounded-neu bg-mint/30 flex items-center justify-center">
+                <div className="size-10 rounded-neu bg-blue-400/30 flex items-center justify-center">
                   <BookOpen className="size-5 text-white" />
                 </div>
                 <div>
@@ -149,7 +149,7 @@ export default function DashboardPage() {
             </div>
             <div className="neu-card p-5">
               <div className="flex items-center gap-3">
-                <div className="size-10 rounded-neu bg-lavender/30 flex items-center justify-center">
+                <div className="size-10 rounded-neu bg-yellow-400/30 flex items-center justify-center">
                   <FileText className="size-5 text-white" />
                 </div>
                 <div>
@@ -160,20 +160,9 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-            <div className="neu-card p-5">
-              <div className="flex items-center gap-3">
-                <div className="size-10 rounded-neu bg-coral/30 flex items-center justify-center">
-                  <Clock className="size-5 text-white" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">{recentUploads.length}</p>
-                  <p className="text-xs text-foreground-light">Recenti</p>
-                </div>
-              </div>
-            </div>
             <Link href="/consigli" className="neu-card p-5 bento-card block">
               <div className="flex items-center gap-3">
-                <div className="size-10 rounded-neu bg-purple-400/30 flex items-center justify-center">
+                <div className="size-10 rounded-neu bg-mint/30 flex items-center justify-center">
                   <TrendingUp className="size-5 text-white" />
                 </div>
                 <div>

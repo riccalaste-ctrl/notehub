@@ -31,17 +31,17 @@ export default function GoogleDriveUploader({
   useEffect(() => {
     const init = async () => {
       try {
-        const res = await fetch('/api/admin/subjects');
+        const res = await fetch('/api/admin/professors');
         if (res.ok) {
-          const subjects = await res.json();
-          const subject = subjects.find((s: { id: string }) => s.id === subjectId);
-          if (subject?.google_client_id) {
-            setGoogleClientId(subject.google_client_id);
+          const professors = await res.json();
+          const professor = professors.find((p: { id: string }) => p.id === professorId);
+          if (professor?.google_client_id) {
+            setGoogleClientId(professor.google_client_id);
           } else {
             setGoogleClientId(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '');
           }
-          if (subject?.google_drive_folder_id) {
-            setFolderId(subject.google_drive_folder_id);
+          if (professor?.google_drive_folder_id) {
+            setFolderId(professor.google_drive_folder_id);
           }
         }
       } catch {
@@ -60,8 +60,8 @@ export default function GoogleDriveUploader({
         }
       }
     };
-    if (subjectId) init();
-  }, [subjectId, isInitialized, googleClientId]);
+    if (professorId) init();
+  }, [professorId, isInitialized, googleClientId]);
 
   const handleSignIn = async () => {
     try {

@@ -16,19 +16,30 @@ export default function ConsigliPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-10 mt-6"
+            className="mb-10 mt-6 flex items-center justify-between"
           >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-neu gradient-lavender flex items-center justify-center shadow-neu">
-                <Lightbulb className="size-6 text-white" />
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-neu gradient-lavender flex items-center justify-center">
+                  <Lightbulb className="size-6 text-white" />
+                </div>
+                <h1 className="text-3xl font-semibold text-foreground tracking-tight">
+                  Consigli & Suggerimenti
+                </h1>
               </div>
-              <h1 className="text-3xl font-semibold text-foreground tracking-tight">
-                Consigli & Suggerimenti
-              </h1>
+              <p className="text-base text-foreground-light">
+                Trucchi per lo studio, info sui professori e consigli per organizzarsi al meglio
+              </p>
             </div>
-            <p className="text-base text-foreground-light">
-              Trucchi per lo studio, info sui professori e consigli per organizzarsi al meglio
-            </p>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => window.dispatchEvent(new Event('open-upload'))}
+              className="hidden sm:inline-flex items-center px-5 py-3 font-semibold rounded-neu-lg text-white bg-gradient-to-br from-[#FF8C42] to-[#E87000] premium-transition shadow-lg"
+            >
+              <Plus className="size-5 mr-1.5" />
+              Consiglio
+            </motion.button>
           </motion.div>
 
           {/* Tips Grid */}
@@ -94,31 +105,6 @@ export default function ConsigliPage() {
             </p>
           </motion.div>
 
-          {/* Special Upload Button for Consigli */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="mt-8 neu-card p-8 text-center"
-          >
-            <div className="w-16 h-16 rounded-neu-xl bg-gradient-to-br from-[#52B788] to-[#40916C] flex items-center justify-center mx-auto mb-4 shadow-neu-lg">
-              <Plus className="size-8 text-white" />
-            </div>
-            <h2 className="text-xl font-semibold text-foreground mb-2">
-              Hai un consiglio da condividere?
-            </h2>
-            <p className="text-sm text-foreground-light max-w-md mx-auto leading-relaxed mb-6">
-              Carica qui il tuo contributo per aiutare gli altri studenti a migliorare il loro metodo di studio.
-            </p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => window.dispatchEvent(new Event('open-upload'))}
-              className="px-8 py-3 bg-gradient-to-r from-[#FF8C42] to-[#E87000] text-white font-semibold rounded-neu-lg premium-transition shadow-lg"
-            >
-              Carica Consiglio
-            </motion.button>
-          </motion.div>
         </div>
 
         <Footer />

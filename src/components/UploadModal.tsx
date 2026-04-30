@@ -90,8 +90,8 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!file || !selectedSubject) {
-      setError('Seleziona un file e una materia');
+    if (!file || !selectedSubject || !selectedProfessor) {
+      setError('Seleziona un file, una materia e un professore');
       return;
     }
 
@@ -140,7 +140,7 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-stone-800/30 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50"
             onClick={onClose}
           />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -149,30 +149,30 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-              className="glass-card w-full max-w-lg p-6 shadow-glass-lg max-h-[90vh] overflow-y-auto"
+              className="neu-modal w-full max-w-lg p-6 shadow-neu-xl max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-bold text-stone-900">
+                <h2 className="text-lg font-semibold text-foreground">
                   Carica Appunti
                 </h2>
                 <button
                   onClick={onClose}
-                  className="p-2 text-stone-600 hover:text-stone-900 rounded-xl hover:bg-stone-100 premium-transition"
+                  className="p-2 text-foreground-light rounded-neu neu-button premium-transition"
                 >
                   <X className="size-5" />
                 </button>
               </div>
 
               {/* Admin deletion notice */}
-              <div className="mb-5 p-3 rounded-xl bg-stone-100 border border-stone-200">
+                <div className="mb-5 p-3 rounded-neu neu-surface-pressed">
                 <div className="flex items-start gap-2">
-                  <Shield className="size-4 text-stone-700 mt-0.5 flex-shrink-0" />
+                  <Shield className="size-4 text-foreground-light mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-semibold text-stone-900">
+                    <p className="text-sm font-semibold text-foreground">
                       I file non possono essere eliminati dopo il caricamento
                     </p>
-                    <p className="text-xs text-stone-700 mt-1">
+                    <p className="text-xs text-foreground-light mt-1">
                       Per richiedere la rimozione di un file, contatta l&apos;amministratore:
                     </p>
                     <a
@@ -192,16 +192,16 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                   animate={{ opacity: 1, scale: 1 }}
                   className="text-center py-8"
                 >
-                  <div className="w-16 h-16 rounded-3xl bg-sage/20 flex items-center justify-center mx-auto mb-4">
-                    <Check className="size-8 text-sage-dark" />
+                    <div className="w-16 h-16 rounded-neu-xl bg-mint/20 flex items-center justify-center mx-auto mb-4">
+                    <Check className="size-8 text-mint-dark" />
                   </div>
-                  <p className="text-sage-dark font-medium">Upload completato!</p>
+                  <p className="text-mint-dark font-medium">Upload completato!</p>
                 </motion.div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold text-stone-800 mb-1">
-                      Il tuo nome <span className="text-stone-500 font-normal">(facoltativo)</span>
+                    <label className="block text-sm font-semibold text-foreground mb-1">
+                      Il tuo nome <span className="text-foreground-muted font-normal">(facoltativo)</span>
                     </label>
                     <input
                       type="text"
@@ -209,13 +209,13 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                       onChange={(e) => setUploaderName(e.target.value)}
                       placeholder="Anonimo"
                       maxLength={100}
-                      className="w-full px-4 py-3 glass-input rounded-2xl text-stone-900 placeholder-stone-400 outline-none focus:ring-2 focus:ring-lavender/30 premium-transition"
+                       className="w-full px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-stone-800 mb-1">
-                      Materia <span className="text-red-500">*</span>
+                    <label className="block text-sm font-semibold text-foreground mb-1">
+                      Materia <span className="text-coral-dark font-normal">*</span>
                     </label>
                     <select
                       value={selectedSubject}
@@ -224,9 +224,9 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                         setSelectedProfessor('');
                       }}
                       required
-                      className="w-full px-4 py-3 glass-input rounded-2xl text-stone-900 outline-none focus:ring-2 focus:ring-lavender/30 premium-transition [&>option]:bg-white"
-                    >
-                      <option value="">Seleziona materia</option>
+                       className="w-full px-4 py-3 neu-input rounded-neu text-foreground outline-none premium-transition [&>option]:bg-neu-surface"
+                     >
+                       <option value="">Seleziona materia</option>
                       {subjects.filter(s => s.enabled).map((subject) => (
                         <option key={subject.id} value={subject.id}>
                           {subject.name}
@@ -235,29 +235,32 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                     </select>
                   </div>
 
-                  {selectedSubject && filteredProfessors.length > 0 && (
+                  {selectedSubject && (
                     <div>
-                      <label className="block text-sm font-semibold text-stone-800 mb-1">
-                        Professore <span className="text-stone-500 font-normal">(facoltativo)</span>
+                      <label className="block text-sm font-semibold text-foreground mb-1">
+                        Professore <span className="text-coral-dark font-normal">*</span>
                       </label>
                       <select
                         value={selectedProfessor}
                         onChange={(e) => setSelectedProfessor(e.target.value)}
-                        className="w-full px-4 py-3 glass-input rounded-2xl text-stone-900 outline-none focus:ring-2 focus:ring-lavender/30 premium-transition [&>option]:bg-white"
-                      >
-                        <option value="">Seleziona professore</option>
-                        {filteredProfessors.map((professor) => (
+                        required
+                       className="w-full px-4 py-3 neu-input rounded-neu text-foreground outline-none premium-transition [&>option]:bg-neu-surface"
+                       >
+                         <option value="">Seleziona professore</option>
+                        {filteredProfessors.length > 0 ? filteredProfessors.map((professor) => (
                           <option key={professor.id} value={professor.id}>
                             {professor.name}
                           </option>
-                        ))}
+                        )) : (
+                          <option disabled>Nessun professore disponibile</option>
+                        )}
                       </select>
                     </div>
                   )}
 
                   <div>
-                    <label className="block text-sm font-semibold text-stone-800 mb-1">
-                      File <span className="text-red-500">*</span>
+                    <label className="block text-sm font-semibold text-foreground mb-1">
+                      File <span className="text-coral-dark font-normal">*</span>
                     </label>
                     <input
                       ref={fileInputRef}
@@ -265,26 +268,26 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                       onChange={handleFileChange}
                       accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                       required
-                      className="w-full px-4 py-3 glass-input rounded-2xl text-stone-900 outline-none focus:ring-2 focus:ring-lavender/30 premium-transition file:mr-4 file:py-1 file:px-3 file:rounded-xl file:border-0 file:bg-lavender/20 file:text-lavender-dark file:text-sm file:cursor-pointer"
+                       className="w-full px-4 py-3 neu-input rounded-neu text-foreground outline-none premium-transition file:mr-4 file:py-1 file:px-3 file:rounded-neu-sm file:border-0 file:bg-lavender/20 file:text-lavender-dark file:text-sm file:cursor-pointer"
                     />
-                    <p className="mt-1 text-xs text-stone-600">
+                    <p className="mt-1 text-xs text-foreground-light">
                       Max 20MB. Permessi: PDF, DOC, DOCX, JPG, PNG
                     </p>
                   </div>
 
                   {file && (
-                    <div className="p-3 glass-input rounded-2xl">
-                      <p className="text-sm font-semibold text-stone-900 truncate">
+                    <div className="p-3 neu-surface-pressed rounded-neu">
+                      <p className="text-sm font-semibold text-foreground truncate">
                         {file.name}
                       </p>
-                      <p className="text-xs text-stone-700">
+                      <p className="text-xs text-foreground-light">
                         {(file.size / 1024 / 1024).toFixed(2)} MB
                       </p>
                     </div>
                   )}
 
                   {error && (
-                    <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-2xl">
+                      <div className="p-3 bg-coral/10 border border-coral/20 text-coral-dark text-sm rounded-neu">
                       {error}
                     </div>
                   )}
@@ -293,14 +296,14 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                     <button
                       type="button"
                       onClick={onClose}
-                      className="px-5 py-2.5 text-sm font-semibold text-stone-800 rounded-2xl hover:bg-stone-100 premium-transition"
+                       className="px-5 py-2.5 text-sm font-semibold text-foreground neu-button rounded-neu premium-transition"
                     >
                       Annulla
                     </button>
                     <button
                       type="submit"
-                      disabled={uploading || !file || !selectedSubject}
-                      className="px-5 py-2.5 text-sm font-semibold text-white gradient-primary rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center premium-transition"
+                      disabled={uploading || !file || !selectedSubject || !selectedProfessor}
+                       className="px-5 py-2.5 text-sm font-semibold text-white gradient-primary rounded-neu disabled:opacity-50 disabled:cursor-not-allowed flex items-center premium-transition"
                     >
                       {uploading ? (
                         <>

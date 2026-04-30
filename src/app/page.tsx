@@ -138,8 +138,8 @@ export default function DashboardPage() {
           >
             <div className="neu-card p-5">
               <div className="flex items-center gap-3">
-                <div className="size-10 rounded-neu bg-orange-400/20 flex items-center justify-center">
-                  <BookOpen className="size-5 text-orange-500" />
+                <div className="size-10 rounded-neu gradient-mint flex items-center justify-center">
+                  <BookOpen className="size-5 text-white" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground">{subjects.length}</p>
@@ -149,8 +149,8 @@ export default function DashboardPage() {
             </div>
             <div className="neu-card p-5">
               <div className="flex items-center gap-3">
-                <div className="size-10 rounded-neu bg-orange-400/20 flex items-center justify-center">
-                  <FileText className="size-5 text-orange-500" />
+                <div className="size-10 rounded-neu gradient-lavender flex items-center justify-center">
+                  <FileText className="size-5 text-white" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground">
@@ -162,8 +162,8 @@ export default function DashboardPage() {
             </div>
             <div className="neu-card p-5">
               <div className="flex items-center gap-3">
-                <div className="size-10 rounded-neu bg-orange-400/20 flex items-center justify-center">
-                  <Clock className="size-5 text-orange-500" />
+                <div className="size-10 rounded-neu gradient-coral flex items-center justify-center">
+                  <Clock className="size-5 text-white" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground">{recentUploads.length}</p>
@@ -210,7 +210,7 @@ export default function DashboardPage() {
                     href={`/materie/${subject.slug}`}
                     className="neu-card p-5 block group"
                   >
-                    <div className={`size-12 rounded-neu-lg bg-orange-400/20 flex items-center justify-center text-orange-500 text-xl font-bold mb-3 shadow-lg group-hover:scale-110 premium-transition`}>
+                    <div className={`size-12 rounded-neu-lg gradient-lavender flex items-center justify-center text-white text-xl font-bold mb-3 shadow-lg group-hover:scale-110 premium-transition`}>
                       {icon}
                     </div>
                     <h3 className="font-semibold text-foreground text-sm mb-1">

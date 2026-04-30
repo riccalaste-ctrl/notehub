@@ -51,8 +51,7 @@ body {
   .neu-surface {
     background: var(--neu-surface);
     border-radius: var(--neu-radius);
-    box-shadow: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
-    border: 1px solid transparent;
+    border: 1px solid rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease-in-out;
   }
 
@@ -69,8 +68,7 @@ body {
   .neu-card {
     background: var(--neu-surface);
     border-radius: var(--neu-radius-lg);
-    box-shadow: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
-    border: 1px solid transparent;
+    border: 1px solid rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease-in-out;
   }
 
@@ -90,52 +88,46 @@ body {
 
   .neu-input {
     background: var(--neu-surface);
-    border: 1px solid transparent;
-    box-shadow: inset 3px 3px 6px var(--neu-dark), inset -3px -3px 6px var(--neu-light);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease-in-out;
   }
 
   .neu-input:focus {
-    box-shadow: var(--neu-shadow-pressed-lg);
+    border-color: rgba(0, 0, 0, 0.15);
   }
 
   .neu-button {
     background: var(--neu-surface);
-    border: 1px solid transparent;
-    box-shadow: 4px 4px 8px var(--neu-dark), -4px -4px 8px var(--neu-light);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease-in-out;
     cursor: pointer;
   }
 
   .neu-button:hover {
-    box-shadow: var(--neu-shadow-hover);
+    border-color: rgba(0, 0, 0, 0.15);
     transform: translateY(-2px);
   }
 
   .neu-button:active {
-    box-shadow: var(--neu-shadow-pressed);
     transform: translateY(0);
   }
 
   .neu-modal {
     background: var(--neu-surface);
     border-radius: var(--neu-radius-xl);
-    box-shadow: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
-    border: 1px solid transparent;
+    border: 1px solid rgba(0, 0, 0, 0.08);
   }
 
   .neu-toast {
     background: var(--neu-surface);
     border-radius: var(--neu-radius-lg);
-    box-shadow: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
-    border: 1px solid transparent;
+    border: 1px solid rgba(0, 0, 0, 0.08);
   }
 
   .neu-bento-card {
     background: var(--neu-surface);
     border-radius: var(--neu-radius-xl);
-    box-shadow: 6px 6px 12px var(--neu-dark), -6px -6px 12px var(--neu-light);
-    border: 1px solid transparent;
+    border: 1px solid rgba(0, 0, 0, 0.08);
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
@@ -146,8 +138,7 @@ body {
   .neu-badge {
     background: var(--neu-surface);
     border-radius: var(--neu-radius-sm);
-    box-shadow: 4px 4px 8px var(--neu-dark), -4px -4px 8px var(--neu-light);
-    border: 1px solid transparent;
+    border: 1px solid rgba(0, 0, 0, 0.08);
   }
 
   .glass-badge {

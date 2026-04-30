@@ -17,9 +17,9 @@ export default function Toast({ message, type = 'info', onClose }: ToastProps) {
   }, [onClose]);
 
   const bgClass = {
-    success: 'bg-sage/90',
-    error: 'bg-peach/90',
-    info: 'bg-lavender/90',
+    success: 'bg-mint/20 border-mint/30 text-mint-dark',
+    error: 'bg-coral/20 border-coral/30 text-coral-dark',
+    info: 'bg-lavender/20 border-lavender/30 text-lavender-dark',
   }[type];
 
   const icon = {
@@ -36,7 +36,7 @@ export default function Toast({ message, type = 'info', onClose }: ToastProps) {
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
       className="fixed bottom-4 right-4 z-50"
     >
-      <div className={`${bgClass} backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 border border-white/20`}>
+       <div className={`${bgClass} backdrop-blur-md px-5 py-3 rounded-neu-lg shadow-neu-lg flex items-center space-x-3 border`}>
         {icon}
         <span className="text-sm font-medium">{message}</span>
         <button onClick={onClose} className="ml-2 hover:opacity-80 premium-transition">

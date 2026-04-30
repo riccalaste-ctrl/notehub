@@ -20,16 +20,16 @@ interface FileCardProps {
 }
 
 const gradientClasses = [
-  'gradient-sage shadow-sage',
-  'gradient-lavender shadow-lavender',
-  'gradient-peach shadow-peach',
+  'gradient-mint',
+  'gradient-lavender',
+  'gradient-coral',
 ];
 
 function getFileGradient(mimeType: string) {
-  if (mimeType.includes('pdf')) return 'gradient-peach shadow-peach';
-  if (mimeType.includes('word') || mimeType.includes('document')) return 'gradient-lavender shadow-lavender';
-  if (mimeType.includes('image')) return 'gradient-sage shadow-sage';
-  return 'bg-stone-300 shadow-glass-sm';
+  if (mimeType.includes('pdf')) return 'gradient-coral';
+  if (mimeType.includes('word') || mimeType.includes('document')) return 'gradient-lavender';
+  if (mimeType.includes('image')) return 'gradient-mint';
+  return 'bg-stone-300';
 }
 
 function formatFileSize(bytes: number): string {
@@ -64,21 +64,18 @@ export default function FileCard({ file, index = 0 }: FileCardProps) {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.08, duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-      whileHover={{ y: -4 }}
-      className="relative transition-all duration-500 ease-out p-5 overflow-hidden glass-card bento-card"
+      className="neu-bento-card p-5 relative overflow-hidden"
     >
-      <div className="h-1/2 pointer-events-none absolute inset-x-0 top-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%)' }} />
-
       <div className="relative">
         <div className="flex justify-between items-start">
-          <div className={`size-10 rounded-xl flex justify-center items-center text-white ${getFileGradient(file.mime_type)}`}>
+          <div className={`size-10 rounded-neu flex justify-center items-center text-white ${getFileGradient(file.mime_type)}`}>
             <FileText className="size-5" />
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-1.5">
             {file.view_url && (
               <button
                 onClick={handleView}
-                className="size-8 rounded-full flex justify-center items-center bg-white/60 border border-white/90 hover:bg-white/80 premium-transition"
+                className="size-8 rounded-neu-sm neu-button flex justify-center items-center premium-transition"
                 title="Visualizza"
               >
                 <Eye className="size-3.5 text-lavender" />
@@ -87,17 +84,17 @@ export default function FileCard({ file, index = 0 }: FileCardProps) {
             {file.download_url && (
               <button
                 onClick={handleDownload}
-                className="size-8 rounded-full flex justify-center items-center bg-white/60 border border-white/90 hover:bg-white/80 premium-transition"
+                className="size-8 rounded-neu-sm neu-button flex justify-center items-center premium-transition"
                 title="Scarica"
               >
-                <Download className="size-3.5 text-sage-dark" />
+                <Download className="size-3.5 text-mint-dark" />
               </button>
             )}
           </div>
         </div>
 
         <div className="mt-4">
-          <h3 className="font-bold text-base text-stone-900 truncate mb-1" title={file.original_filename}>
+            <h3 className="font-semibold text-base text-foreground truncate mb-1" title={file.original_filename}>
             {file.original_filename}
           </h3>
           <div className="flex flex-wrap items-center gap-2 text-xs">
@@ -107,10 +104,10 @@ export default function FileCard({ file, index = 0 }: FileCardProps) {
               </span>
             )}
             {file.professor_name && (
-              <span className="text-stone-700 font-medium">{file.professor_name}</span>
+              <span className="text-foreground-light font-medium">{file.professor_name}</span>
             )}
           </div>
-          <div className="flex items-center gap-2 mt-3 text-xs text-stone-700 font-medium">
+          <div className="flex items-center gap-2 mt-3 text-xs text-foreground-light font-medium">
             <span>{formatDate(file.created_at)}</span>
             <span>·</span>
             <span>{formatFileSize(file.size_bytes)}</span>

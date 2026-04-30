@@ -25,12 +25,12 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 z-40 flex-col items-center gap-8 w-56 h-full p-6 glass-sidebar">
-        <Link href="/" className="flex items-center gap-2 w-full">
-          <div className="size-9 transition-all duration-300 rounded-xl flex justify-center items-center gradient-logo">
-            <GraduationCap className="size-5 text-white" />
-          </div>
-          <span className="font-extrabold text-lg leading-7 tracking-tight gradient-text">
+      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 z-40 flex-col items-center gap-8 w-56 h-full p-6 neu-sidebar">
+          <Link href="/" className="flex items-center gap-2 w-full">
+            <div className="size-9 rounded-neu neu-surface flex justify-center items-center">
+              <GraduationCap className="size-5 text-lavender" />
+            </div>
+          <span className="font-semibold text-lg leading-7 tracking-tight text-foreground">
             SKAKK-UP
           </span>
         </Link>
@@ -42,10 +42,10 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
               <Link
                 key={label}
                 href={href}
-                className={`flex items-center gap-2 w-full px-3 py-2.5 rounded-xl transition-all duration-300 ease-out text-sm font-semibold ${
+                className={`flex items-center gap-2 w-full px-3 py-2.5 rounded-neu transition-all duration-300 ease-out text-sm font-semibold ${
                   isActive
-                    ? 'bg-stone-800 text-white'
-                    : 'text-stone-700 hover:text-stone-900 hover:bg-stone-100'
+                    ? 'shadow-neu-pressed text-lavender-dark'
+                    : 'text-foreground-light hover:text-foreground hover:shadow-neu-badge'
                 }`}
               >
                 <Icon className="size-4" />
@@ -57,37 +57,37 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
       </aside>
 
       {/* Top Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 glass-header lg:left-56">
+      <header className="fixed top-0 left-0 right-0 z-50 neu-header lg:left-56">
         <div className="flex justify-between items-center h-16 px-4 lg:px-8">
           {/* Mobile hamburger */}
           <div className="flex lg:hidden items-center gap-2">
-            <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-xl hover:bg-stone-100 premium-transition">
-              <Menu className="size-5 text-stone-800" />
+            <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-neu neu-button">
+              <Menu className="size-5 text-foreground" />
             </button>
-            <Link href="/" className="size-8 rounded-xl flex justify-center items-center gradient-logo">
-              <GraduationCap className="size-4 text-white" />
+            <Link href="/" className="size-8 rounded-neu neu-surface flex justify-center items-center">
+              <GraduationCap className="size-4 text-lavender" />
             </Link>
-            <span className="font-extrabold text-base tracking-tight gradient-text">
-              SKAKK-UP
-            </span>
+              <span className="font-semibold text-base tracking-tight text-foreground">
+                SKAKK-UP
+              </span>
           </div>
 
           {/* Breadcrumbs */}
           <div className="hidden lg:flex items-center gap-2">
-            <Compass className="size-5 text-stone-500" />
+            <Compass className="size-5 text-foreground-muted" />
             {breadcrumbs ? breadcrumbs.map((crumb, i) => (
               <span key={i} className="flex items-center gap-2">
-                <ChevronRight className="size-4 text-stone-400" />
+                <ChevronRight className="size-4 text-foreground-light" />
                 {crumb.href ? (
-                  <Link href={crumb.href} className="font-medium text-sm text-stone-700 hover:text-stone-900 transition">{crumb.label}</Link>
+                  <Link href={crumb.href} className="font-medium text-sm text-foreground-light hover:text-foreground transition">{crumb.label}</Link>
                 ) : (
-                  <span className="font-bold text-sm text-stone-900">{crumb.label}</span>
+                  <span className="font-bold text-sm text-foreground">{crumb.label}</span>
                 )}
               </span>
             )) : currentSection && (
               <>
-                <ChevronRight className="size-4 text-stone-400" />
-                <span className="font-bold text-sm text-stone-900">{currentSection}</span>
+                <ChevronRight className="size-4 text-foreground-light" />
+                <span className="font-bold text-sm text-foreground">{currentSection}</span>
               </>
             )}
           </div>
@@ -95,18 +95,18 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
           {/* Right side */}
           <div className="flex items-center gap-3">
             {onOpenUpload && (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={onOpenUpload}
-                className="hidden sm:inline-flex items-center px-5 py-2 font-semibold rounded-full text-white text-sm gradient-primary premium-transition"
-              >
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={onOpenUpload}
+                  className="hidden sm:inline-flex items-center px-5 py-2 font-semibold rounded-neu text-white text-sm gradient-primary premium-transition"
+                >
                 <Plus className="size-4 mr-1.5" />
                 <span className="relative z-10">Carica</span>
               </motion.button>
             )}
 
-            <Link href="/admin" className="px-3 py-2 text-sm font-semibold text-stone-800 hover:bg-stone-100 rounded-xl premium-transition">
+            <Link href="/admin" className="px-3 py-2 text-sm font-semibold text-foreground hover:shadow-neu-badge rounded-neu premium-transition">
               Admin
             </Link>
           </div>
@@ -129,17 +129,17 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
               animate={{ x: 0 }}
               exit={{ x: -300 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed left-0 top-0 bottom-0 z-50 w-64 glass-sidebar p-6 lg:hidden"
+              className="fixed left-0 top-0 bottom-0 z-50 w-64 neu-sidebar p-6 lg:hidden"
             >
               <div className="flex justify-between items-center mb-8">
                 <div className="flex items-center gap-2">
-                  <div className="size-9 rounded-xl flex justify-center items-center gradient-logo">
-                    <GraduationCap className="size-5 text-white" />
+                  <div className="size-9 rounded-neu neu-surface flex justify-center items-center">
+                    <GraduationCap className="size-5 text-lavender" />
                   </div>
-                  <span className="font-extrabold text-lg gradient-text">SKAKK-UP</span>
+                  <span className="font-semibold text-lg text-foreground">SKAKK-UP</span>
                 </div>
-                <button onClick={() => setSidebarOpen(false)} className="p-2 rounded-xl hover:bg-stone-100">
-                  <X className="size-5 text-stone-800" />
+                <button onClick={() => setSidebarOpen(false)} className="p-2 rounded-neu neu-button">
+                  <X className="size-5 text-foreground" />
                 </button>
               </div>
 
@@ -151,10 +151,10 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
                       key={label}
                       href={href}
                       onClick={() => setSidebarOpen(false)}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold premium-transition ${
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-neu text-sm font-semibold premium-transition ${
                         isActive
-                          ? 'bg-stone-800 text-white'
-                          : 'text-stone-700 hover:text-stone-900 hover:bg-stone-100'
+                          ? 'shadow-neu-pressed text-lavender-dark'
+                          : 'text-foreground-light hover:text-foreground hover:shadow-neu-badge'
                       }`}
                     >
                       <Icon className="size-4" />

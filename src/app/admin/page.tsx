@@ -263,7 +263,7 @@ export default function AdminPage() {
               </div>
 
               {loginError && (
-                <div className="px-4 py-3 bg-coral/10 border border-coral/20 text-coral-dark text-sm rounded-neu">
+                <div className="px-4 py-3 bg-[#EF4444]/10 border border-[#EF4444]/20 text-[#EF4444] text-sm rounded-neu">
                   {loginError}
                 </div>
               )}
@@ -290,7 +290,7 @@ export default function AdminPage() {
             <div className="mt-6 pt-6 border-t border-stone-200">
               <p className="text-center text-sm text-foreground-light">
                 Torna alla{' '}
-                <Link href="/" className="text-lavender-dark hover:underline font-medium">
+                <Link href="/" className="text-[#6366F1] hover:underline font-medium">
                   home
                 </Link>
               </p>
@@ -314,7 +314,7 @@ export default function AdminPage() {
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center space-x-2 px-4 py-2 text-foreground-light hover:text-coral-dark rounded-neu neu-button premium-transition"
+            className="flex items-center space-x-2 px-4 py-2 text-foreground-light hover:text-[#EF4444] rounded-neu neu-button premium-transition"
           >
             <LogOut className="size-5" />
             <span className="text-sm font-semibold">Esci</span>
@@ -339,7 +339,7 @@ export default function AdminPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition whitespace-nowrap ${
                     activeTab === tab.id
-                      ? 'border-lavender text-lavender-dark'
+                      ? 'border-[#6366F1] text-[#6366F1]'
                       : 'border-transparent text-foreground-light hover:text-foreground'
                   }`}
                 >
@@ -370,8 +370,8 @@ export default function AdminPage() {
                     <p className="text-foreground-light text-sm font-medium">Materie</p>
                     <p className="text-3xl font-semibold text-foreground mt-1">{subjects.length}</p>
                   </div>
-            <div className="w-12 h-12 rounded-neu bg-mint/20 flex items-center justify-center shadow-neu">
-              <BookOpen className="size-6 text-mint-dark" />
+            <div className="w-12 h-12 rounded-neu bg-[#52B788] flex items-center justify-center">
+              <BookOpen className="size-6 text-white" />
             </div>
                 </div>
               </div>
@@ -382,8 +382,8 @@ export default function AdminPage() {
                     <p className="text-foreground-light text-sm font-medium">Professori</p>
                     <p className="text-3xl font-semibold text-foreground mt-1">{professors.length}</p>
                   </div>
-            <div className="w-12 h-12 rounded-neu bg-lavender/20 flex items-center justify-center shadow-neu">
-              <Users className="size-6 text-lavender-dark" />
+            <div className="w-12 h-12 rounded-neu bg-[#6366F1] flex items-center justify-center">
+              <Users className="size-6 text-white" />
             </div>
                 </div>
               </div>
@@ -394,8 +394,8 @@ export default function AdminPage() {
                     <p className="text-foreground-light text-sm font-medium">File Caricati</p>
                     <p className="text-3xl font-semibold text-foreground mt-1">{uploads.length}</p>
                   </div>
-            <div className="w-12 h-12 rounded-neu bg-coral/20 flex items-center justify-center shadow-neu">
-              <FileText className="size-6 text-coral-dark" />
+            <div className="w-12 h-12 rounded-neu bg-[#F59E0B] flex items-center justify-center">
+              <FileText className="size-6 text-white" />
             </div>
                 </div>
               </div>
@@ -408,8 +408,8 @@ export default function AdminPage() {
                       {formatBytes(uploads.reduce((sum, u) => sum + u.size_bytes, 0))}
                     </p>
                   </div>
-            <div className="w-12 h-12 rounded-neu bg-orange-400/20 flex items-center justify-center">
-              <HardDrive className="size-6 text-orange-500" />
+            <div className="w-12 h-12 rounded-neu bg-[#EF4444] flex items-center justify-center">
+              <HardDrive className="size-6 text-white" />
             </div>
                 </div>
               </div>
@@ -417,27 +417,27 @@ export default function AdminPage() {
 
             <div className="neu-card p-6">
               <div className="flex items-center gap-3 mb-4">
-                <BarChart3 className="size-5 text-lavender-dark" />
+                <BarChart3 className="size-5 text-[#6366F1]" />
                 <h3 className="text-lg font-semibold text-foreground">Statistiche Rapide</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="p-4 rounded-neu neu-surface">
                   <div className="flex items-center gap-2 mb-2">
-                    <School className="size-4 text-mint-dark" />
+                    <School className="size-4 text-[#52B788]" />
                     <p className="text-sm font-semibold text-foreground">Materie Attive</p>
                   </div>
                   <p className="text-2xl font-bold text-foreground">{subjects.filter(s => s.enabled).length}</p>
                 </div>
                 <div className="p-4 rounded-neu neu-surface">
                   <div className="flex items-center gap-2 mb-2">
-                    <UserCheck className="size-4 text-lavender-dark" />
+                    <UserCheck className="size-4 text-[#6366F1]" />
                     <p className="text-sm font-semibold text-foreground">Professori Totali</p>
                   </div>
                   <p className="text-2xl font-bold text-foreground">{professors.length}</p>
                 </div>
                 <div className="p-4 rounded-neu neu-surface">
                   <div className="flex items-center gap-2 mb-2">
-                    <FileCheck className="size-4 text-coral-dark" />
+                    <FileCheck className="size-4 text-[#F59E0B]" />
                     <p className="text-sm font-semibold text-foreground">File Totali</p>
                   </div>
                   <p className="text-2xl font-bold text-foreground">{uploads.length}</p>
@@ -503,7 +503,7 @@ export default function AdminPage() {
               <div className="neu-card overflow-hidden">
                 <div className="px-6 py-4 border-b border-stone-200/50 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <BookOpen className="size-5 text-lavender-dark" />
+                    <BookOpen className="size-5 text-[#6366F1]" />
                     <h3 className="text-lg font-semibold text-foreground">
                       Materie ({subjects.length})
                     </h3>
@@ -518,9 +518,9 @@ export default function AdminPage() {
                           <p className="font-semibold text-foreground">{subject.name}</p>
                           <p className="text-sm text-foreground-light">
                             {subject.enabled ? (
-                              <span className="text-mint-dark font-medium">Attivo</span>
+                              <span className="text-[#52B788] font-medium">Attivo</span>
                             ) : (
-                              <span className="text-coral-dark font-medium">Disattivato</span>
+                              <span className="text-[#EF4444] font-medium">Disattivato</span>
                             )}
                           </p>
                         </div>
@@ -533,14 +533,14 @@ export default function AdminPage() {
                               });
                               setEditingId(subject.id);
                             }}
-                            className="px-4 py-2 text-sm bg-lavender/10 hover:bg-lavender/20 text-lavender-dark rounded-neu flex items-center gap-1.5 font-medium premium-transition"
+                            className="px-4 py-2 text-sm bg-[#6366F1]/10 hover:bg-[#6366F1]/20 text-[#6366F1] rounded-neu flex items-center gap-1.5 font-medium premium-transition"
                           >
                             <Edit className="size-3.5" />
                             Modifica
                           </button>
                           <button
                             onClick={() => deleteSubject(subject.id)}
-                            className="px-4 py-2 text-sm bg-coral/10 hover:bg-coral/20 text-coral-dark rounded-neu flex items-center gap-1.5 font-medium premium-transition"
+                            className="px-4 py-2 text-sm bg-[#EF4444]/10 hover:bg-[#EF4444]/20 text-[#EF4444] rounded-neu flex items-center gap-1.5 font-medium premium-transition"
                           >
                             <Trash2 className="size-3.5" />
                             Elimina
@@ -603,7 +603,7 @@ export default function AdminPage() {
               <div className="neu-card overflow-hidden">
                 <div className="px-6 py-4 border-b border-stone-200/50 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Users className="size-5 text-lavender-dark" />
+                    <Users className="size-5 text-[#6366F1]" />
                     <h3 className="text-lg font-semibold text-foreground">
                       Professori ({professors.length})
                     </h3>
@@ -622,7 +622,7 @@ export default function AdminPage() {
                         </div>
                         <button
                           onClick={() => deleteProfessor(professor.id)}
-                          className="px-4 py-2 text-sm bg-coral/10 hover:bg-coral/20 text-coral-dark rounded-neu flex items-center gap-1.5 font-medium premium-transition"
+                          className="px-4 py-2 text-sm bg-[#EF4444]/10 hover:bg-[#EF4444]/20 text-[#EF4444] rounded-neu flex items-center gap-1.5 font-medium premium-transition"
                         >
                           <Trash2 className="size-3.5" />
                           Elimina
@@ -681,7 +681,7 @@ export default function AdminPage() {
                           <td className="px-6 py-4 text-sm">
                             <button
                               onClick={() => deleteUpload(upload.id)}
-                              className="px-4 py-2 text-sm bg-coral/10 hover:bg-coral/20 text-coral-dark rounded-neu flex items-center gap-1.5 font-medium premium-transition"
+                            className="px-4 py-2 text-sm bg-[#EF4444]/10 hover:bg-[#EF4444]/20 text-[#EF4444] rounded-neu flex items-center gap-1.5 font-medium premium-transition"
                             >
                               <Trash2 className="size-4" />
                               Elimina

@@ -265,8 +265,8 @@ export default function DashboardPage() {
             </motion.div>
           )}
         </div>
-
         <Footer />
+      </main>
 
       <UploadModal
         isOpen={uploadModalOpen}

@@ -60,20 +60,19 @@ export default function SubjectPage() {
 
   const fetchMetadata = useCallback(async () => {
     try {
-      const [subjectsRes, professorsRes, subjectProfessorsRes] = await Promise.all([
-        fetch('/api/admin/subjects'),
-        fetch('/api/admin/professors'),
-        fetch('/api/admin/subject-professors'),
-      ]);
+      const response = await fetch('/api/public/catalog');
+      if (!response.ok) return;
 
-      if (subjectsRes.ok) {
-        const data = await subjectsRes.json();
-        setAllSubjects(data);
-        const found = data.find((s: Subject) => s.slug === slug);
+      const data = await response.json();
+      const subjectsData = data.subjects || [];
+      setAllSubjects(subjectsData);
+      setProfessors(data.professors || []);
+      setSubjectProfessors(data.subjectProfessors || []);
+
+      if (subjectsData.length > 0) {
+        const found = subjectsData.find((s: Subject) => s.slug === slug);
         if (found) setSubject(found);
       }
-      if (professorsRes.ok) setProfessors(await professorsRes.json());
-      if (subjectProfessorsRes.ok) setSubjectProfessors(await subjectProfessorsRes.json());
     } catch (error) {
       console.error('Metadata fetch error:', error);
     }

@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { initGoogleApi, signInWithGoogle, uploadFile, getAccessToken, signOutGoogle } from '@/lib/google-drive';
+import { useRef, useState } from 'react';
+import { UploadCloud } from 'lucide-react';
 
 interface GoogleDriveUploaderProps {
   subjectId: string;
@@ -12,6 +11,59 @@ interface GoogleDriveUploaderProps {
   onError: (error: string) => void;
 }
 
+interface UploadSessionResponse {
+  sessionId: string;
+  uploadUrl: string;
+}
+
+interface GoogleUploadResponse {
+  id?: string;
+}
+
+const allowedTypes = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'image/jpeg',
+  'image/png',
+];
+
+function uploadFileToGoogle(
+  uploadUrl: string,
+  file: File,
+  onProgress: (percent: number) => void
+): Promise<GoogleUploadResponse> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+
+    xhr.upload.addEventListener('progress', (event) => {
+      if (event.lengthComputable) {
+        onProgress(Math.round((event.loaded / event.total) * 90) + 5);
+      }
+    });
+
+    xhr.addEventListener('load', () => {
+      if (xhr.status === 200 || xhr.status === 201) {
+        try {
+          resolve(xhr.responseText ? JSON.parse(xhr.responseText) : {});
+        } catch {
+          reject(new Error('Risposta Google Drive non valida'));
+        }
+        return;
+      }
+
+      reject(new Error(`Upload Google Drive non riuscito (${xhr.status})`));
+    });
+
+    xhr.addEventListener('error', () => reject(new Error('Upload Google Drive non riuscito')));
+    xhr.addEventListener('abort', () => reject(new Error('Upload annullato')));
+
+    xhr.open('PUT', uploadUrl);
+    xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+    xhr.send(file);
+  });
+}
+
 export default function GoogleDriveUploader({
   subjectId,
   professorId,
@@ -19,68 +71,15 @@ export default function GoogleDriveUploader({
   onSuccess,
   onError,
 }: GoogleDriveUploaderProps) {
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [googleClientId, setGoogleClientId] = useState<string>('');
-  const [folderId, setFolderId] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const res = await fetch('/api/admin/professors');
-        if (res.ok) {
-          const professors = await res.json();
-          const professor = professors.find((p: { id: string }) => p.id === professorId);
-          if (professor?.google_client_id) {
-            setGoogleClientId(professor.google_client_id);
-          } else {
-            setGoogleClientId(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '');
-          }
-          if (professor?.google_drive_folder_id) {
-            setFolderId(professor.google_drive_folder_id);
-          }
-        }
-      } catch {
-        setGoogleClientId(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '');
-      }
-
-      if (!isInitialized) {
-        try {
-          await initGoogleApi(googleClientId || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '');
-          setIsInitialized(true);
-          if (getAccessToken()) {
-            setIsAuthenticated(true);
-          }
-        } catch (err) {
-          console.error('Failed to initialize Google API:', err);
-        }
-      }
-    };
-    if (professorId) init();
-  }, [professorId, isInitialized, googleClientId]);
-
-  const handleSignIn = async () => {
-    try {
-      const clientId = googleClientId || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
-      await initGoogleApi(clientId);
-      const token = await signInWithGoogle(clientId);
-      if (token) {
-        setIsAuthenticated(true);
-      }
-    } catch (err) {
-      onError(err instanceof Error ? err.message : 'Errore autenticazione Google');
-    }
-  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png'];
     if (!allowedTypes.includes(file.type)) {
       onError('Tipo file non consentito. Permessi: PDF, DOC, DOCX, JPG, PNG');
       return;
@@ -90,60 +89,64 @@ export default function GoogleDriveUploader({
   };
 
   const handleUpload = async () => {
-    if (!selectedFile || !folderId) {
-      onError('Seleziona un file e assicurati che la cartella Drive sia configurata');
+    if (!selectedFile) {
+      onError('Seleziona un file da caricare');
       return;
     }
 
     setIsUploading(true);
-    setUploadProgress(0);
+    setUploadProgress(1);
 
     try {
-      const driveFile = await uploadFile(selectedFile, folderId, (percent) => {
-        setUploadProgress(percent);
-      });
-
-      const response = await fetch('/api/upload', {
+      const sessionResponse = await fetch('/api/upload/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           subjectId,
-          professorId: professorId || undefined,
+          professorId,
           uploaderName: uploaderName || undefined,
           originalFilename: selectedFile.name,
-          driveFileId: driveFile.fileId,
           mimeType: selectedFile.type,
           sizeBytes: selectedFile.size,
-          downloadUrl: driveFile.webContentLink,
-          viewUrl: driveFile.webViewLink,
         }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to save metadata');
+      const sessionData = await sessionResponse.json();
+      if (!sessionResponse.ok) {
+        throw new Error(sessionData.error || 'Impossibile preparare upload Drive');
       }
 
-      onSuccess(data.upload);
+      const { sessionId, uploadUrl } = sessionData as UploadSessionResponse;
+      const googleResult = await uploadFileToGoogle(uploadUrl, selectedFile, setUploadProgress);
+
+      if (!googleResult.id) {
+        throw new Error('Google Drive non ha restituito l\'ID del file');
+      }
+
+      setUploadProgress(96);
+
+      const completeResponse = await fetch('/api/upload/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          driveFileId: googleResult.id,
+        }),
+      });
+
+      const completeData = await completeResponse.json();
+      if (!completeResponse.ok) {
+        throw new Error(completeData.error || 'Impossibile salvare il file');
+      }
+
+      setUploadProgress(100);
+      onSuccess(completeData.upload);
     } catch (err) {
       onError(err instanceof Error ? err.message : 'Errore durante upload');
     } finally {
       setIsUploading(false);
     }
   };
-
-  if (!isAuthenticated) {
-    return (
-      <button
-        type="button"
-        onClick={handleSignIn}
-        className="w-full py-3 px-4 rounded-neu font-semibold text-white gradient-primary premium-transition"
-      >
-        Connetti Google Drive
-      </button>
-    );
-  }
 
   return (
     <div className="space-y-4">
@@ -161,6 +164,7 @@ export default function GoogleDriveUploader({
             htmlFor="drive-file-input"
             className="cursor-pointer text-sm text-foreground-light hover:text-foreground premium-transition"
           >
+            <UploadCloud className="size-8 mx-auto mb-2 text-lavender" />
             Clicca per selezionare un file<br />
             <span className="text-xs">PDF, DOC, DOCX, JPG, PNG</span>
           </label>

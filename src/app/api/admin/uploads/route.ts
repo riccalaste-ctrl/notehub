@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { supabaseAdmin } from '@/lib/supabase';
-import { requireAuth } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
-  const authError = await requireAuth();
+  const authError = await requireAdmin();
   if (authError) return authError;
 
   try {
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const authError = await requireAuth();
+  const authError = await requireAdmin();
   if (authError) return authError;
 
   try {

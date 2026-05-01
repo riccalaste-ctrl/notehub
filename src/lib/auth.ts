@@ -64,7 +64,7 @@ export async function requireAdmin(): Promise<NextResponse | undefined> {
 }
 
 export async function requireAuth(): Promise<NextResponse | undefined> {
-  const isAuth = await isUserAuthenticated();
+  const isAuth = (await isUserAuthenticated()) || (await isAdminAuthenticated());
   if (!isAuth) {
     return NextResponse.json(
       { error: 'Unauthorized' },
@@ -72,4 +72,3 @@ export async function requireAuth(): Promise<NextResponse | undefined> {
     );
   }
 }
-

@@ -14,7 +14,6 @@ export async function POST(request: NextRequest) {
     }
 
     const adminPassword = process.env.ADMIN_PASSWORD || 'NoteHub2026!';
-    console.log('Password check:', password === adminPassword ? 'MATCH' : 'MISMATCH', 'ENV:', process.env.ADMIN_PASSWORD ? 'SET' : 'UNSET');
 
     if (password !== adminPassword) {
       return NextResponse.json({ error: 'Password non valida' }, { status: 401 });
@@ -24,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     const cookie = serialize(ADMIN_JWT_COOKIE, jwt, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24,
       path: '/',

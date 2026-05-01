@@ -91,15 +91,13 @@ export default function MateriePage() {
 
   const fetchMetadata = useCallback(async () => {
     try {
-      const [subjectsRes, professorsRes, subjectProfessorsRes] = await Promise.all([
-        fetch('/api/admin/subjects'),
-        fetch('/api/admin/professors'),
-        fetch('/api/admin/subject-professors'),
-      ]);
+      const response = await fetch('/api/public/catalog');
+      if (!response.ok) return;
 
-      if (subjectsRes.ok) setSubjects(await subjectsRes.json());
-      if (professorsRes.ok) setProfessors(await professorsRes.json());
-      if (subjectProfessorsRes.ok) setSubjectProfessors(await subjectProfessorsRes.json());
+      const data = await response.json();
+      setSubjects(data.subjects || []);
+      setProfessors(data.professors || []);
+      setSubjectProfessors(data.subjectProfessors || []);
     } catch (error) {
       console.error('Metadata fetch error:', error);
     }

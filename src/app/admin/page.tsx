@@ -268,6 +268,10 @@ export default function AdminPage() {
       showToast(editingProfessorId ? 'Professore aggiornato' : 'Professore creato', 'success');
       resetProfessorForm();
       await fetchData();
+
+      if (!editingProfessorId && data.professor?.id) {
+        window.location.href = `/api/admin/google-drive/connect?professorId=${encodeURIComponent(data.professor.id)}`;
+      }
     } catch (error) {
       showToast(error instanceof Error ? error.message : 'Errore', 'error');
     } finally {

@@ -68,16 +68,16 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [subjectsRes, uploadsRes, professorsRes, subjectProfessorsRes] = await Promise.all([
-          fetch('/api/admin/subjects'),
+        const [catalogRes, uploadsRes] = await Promise.all([
+          fetch('/api/public/catalog'),
           fetch('/api/files?limit=10'),
-          fetch('/api/admin/professors'),
-          fetch('/api/admin/subject-professors'),
         ]);
 
-        if (subjectsRes.ok) {
-          const data = await subjectsRes.json();
-          setSubjects(data.filter((s: Subject) => s.enabled));
+        if (catalogRes.ok) {
+          const data = await catalogRes.json();
+          setSubjects(data.subjects || []);
+          setProfessors(data.professors || []);
+          setSubjectProfessors(data.subjectProfessors || []);
         }
 
         if (uploadsRes.ok) {
@@ -91,16 +91,6 @@ export default function DashboardPage() {
             }
           });
           setUploadCounts(counts);
-        }
-
-        if (professorsRes.ok) {
-          const data = await professorsRes.json();
-          setProfessors(data);
-        }
-
-        if (subjectProfessorsRes.ok) {
-          const data = await subjectProfessorsRes.json();
-          setSubjectProfessors(data);
         }
       } catch (error) {
         console.error('Fetch error:', error);

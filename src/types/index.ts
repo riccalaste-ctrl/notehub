@@ -2,8 +2,6 @@ export interface Subject {
   id: string;
   name: string;
   slug: string;
-  gas_url: string | null;
-  gas_secret: string | null;
   enabled: boolean;
   created_at: string;
 }
@@ -12,6 +10,17 @@ export interface Professor {
   id: string;
   name: string;
   created_at: string;
+  drive_connection?: ProfessorDriveConnection | null;
+}
+
+export interface ProfessorDriveConnection {
+  id: string;
+  google_email: string;
+  status: 'connected' | 'disconnected' | 'error';
+  root_folder_id: string | null;
+  connected_at: string | null;
+  disconnected_at: string | null;
+  last_error: string | null;
 }
 
 export interface SubjectProfessor {
@@ -26,6 +35,8 @@ export interface Upload {
   professor_id: string | null;
   original_filename: string;
   drive_file_id: string;
+  drive_folder_id?: string | null;
+  drive_connection_id?: string | null;
   download_url: string;
   view_url: string;
   mime_type: string;

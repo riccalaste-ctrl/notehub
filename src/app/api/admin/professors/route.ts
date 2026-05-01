@@ -1,16 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { supabaseAdmin } from '@/lib/supabase';
-import { requireAdmin, isAdminAuthenticated } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 import { z } from 'zod';
 
 const professorSchema = z.object({
   name: z.string().min(1).max(100),
-  google_client_id: z.string().max(200).optional().or(z.literal('')),
-  google_client_secret: z.string().max(200).optional().or(z.literal('')),
-  google_drive_folder_id: z.string().max(200).optional().or(z.literal('')),
-  google_drive_refresh_token: z.string().max(500).optional().or(z.literal('')),
 });
+
+function sanitizeProfessor(professor: any) {
+  const connection = Array.isArray(professor.drive_connection)
+    ? professor.drive_connection[0]
+    : professor.drive_connection;
+
+  return {
+    id: professor.id,
+    name: professor.name,
+    created_at: professor.created_at,
+    drive_connection: connection
+      ? {
+          id: connection.id,
+          google_email: connection.google_email,
+          status: connection.status,
+          root_folder_id: connection.root_folder_id,
+          connected_at: connection.connected_at,
+          disconnected_at: connection.disconnected_at,
+          last_error: connection.last_error,
+        }
+      : null,
+  };
+}
 
 export async function GET() {
   const authError = await requireAdmin();
@@ -19,12 +38,25 @@ export async function GET() {
   try {
     const { data, error } = await supabaseAdmin!
       .from('professors')
-      .select('*')
+      .select(`
+        id,
+        name,
+        created_at,
+        drive_connection:professor_drive_connections(
+          id,
+          google_email,
+          status,
+          root_folder_id,
+          connected_at,
+          disconnected_at,
+          last_error
+        )
+      `)
       .order('name');
 
     if (error) throw error;
 
-    return NextResponse.json({ professors: data || [] });
+    return NextResponse.json({ professors: (data || []).map(sanitizeProfessor) });
   } catch (error) {
     console.error('Error fetching professors:', error);
     return NextResponse.json(
@@ -53,10 +85,6 @@ export async function POST(request: NextRequest) {
       .from('professors')
       .insert({
         name: validation.data.name,
-        google_client_id: validation.data.google_client_id || null,
-        google_client_secret: validation.data.google_client_secret || null,
-        google_drive_folder_id: validation.data.google_drive_folder_id || null,
-        google_drive_refresh_token: validation.data.google_drive_refresh_token || null,
       })
       .select()
       .single();
@@ -92,10 +120,6 @@ export async function PUT(request: NextRequest) {
       .from('professors')
       .update({
         name,
-        google_client_id: body.google_client_id || null,
-        google_client_secret: body.google_client_secret || null,
-        google_drive_folder_id: body.google_drive_folder_id || null,
-        google_drive_refresh_token: body.google_drive_refresh_token || null,
       })
       .eq('id', id)
       .select()

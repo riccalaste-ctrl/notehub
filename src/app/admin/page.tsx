@@ -13,6 +13,7 @@ import {
   FileText,
   HardDrive,
   LayoutDashboard,
+  Lightbulb,
   LogOut,
   Plus,
   School,
@@ -52,7 +53,17 @@ interface Upload {
   size_bytes: number;
 }
 
-type Tab = 'dashboard' | 'subjects' | 'professors' | 'uploads';
+interface Consiglio {
+  id: string;
+  title: string;
+  content: string;
+  professor_id: string;
+  published: boolean;
+  created_at: string;
+  professor?: { id: string; name: string };
+}
+
+type Tab = 'dashboard' | 'subjects' | 'professors' | 'uploads' | 'consigli';
 
 function formatBytes(bytes: number) {
   if (!bytes) return '0 B';
@@ -103,19 +114,23 @@ export default function AdminPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [professors, setProfessors] = useState<Professor[]>([]);
   const [uploads, setUploads] = useState<Upload[]>([]);
+  const [consigli, setConsigli] = useState<Consiglio[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingSubjectId, setEditingSubjectId] = useState<string | null>(null);
   const [editingProfessorId, setEditingProfessorId] = useState<string | null>(null);
+  const [editingConsiglioId, setEditingConsiglioId] = useState<string | null>(null);
   const [subjectForm, setSubjectForm] = useState({ name: '', slug: '', enabled: true });
   const [professorForm, setProfessorForm] = useState({ name: '' });
+  const [consiglioForm, setConsiglioForm] = useState({ title: '', content: '', professor_id: '', published: true });
   const { toast, showToast, hideToast } = useToast();
 
   const fetchData = useCallback(async () => {
     try {
-      const [subjectsRes, professorsRes, uploadsRes] = await Promise.all([
+      const [subjectsRes, professorsRes, uploadsRes, consigliRes] = await Promise.all([
         fetch('/api/admin/subjects'),
         fetch('/api/admin/professors'),
         fetch('/api/admin/uploads?limit=100'),
+        fetch('/api/admin/consigli'),
       ]);
 
       if (subjectsRes.ok) {
@@ -131,6 +146,11 @@ export default function AdminPage() {
       if (uploadsRes.ok) {
         const data = await uploadsRes.json();
         setUploads(data.uploads || []);
+      }
+
+      if (consigliRes.ok) {
+        const data = await consigliRes.json();
+        setConsigli(data.consigli || []);
       }
     } catch (error) {
       console.error('Fetch error:', error);
@@ -269,6 +289,45 @@ export default function AdminPage() {
     await fetchData();
   };
 
+  const resetConsiglioForm = () => {
+    setEditingConsiglioId(null);
+    setConsiglioForm({ title: '', content: '', professor_id: '', published: true });
+  };
+
+  const handleConsiglioSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!consiglioForm.title.trim() || !consiglioForm.content.trim() || !consiglioForm.professor_id) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch('/api/admin/consigli', {
+        method: editingConsiglioId ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
+          editingConsiglioId ? { id: editingConsiglioId, ...consiglioForm } : consiglioForm
+        ),
+      });
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.error || 'Errore salvataggio consiglio');
+
+      showToast(editingConsiglioId ? 'Consiglio aggiornato' : 'Consiglio creato', 'success');
+      resetConsiglioForm();
+      await fetchData();
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Errore', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteConsiglio = async (id: string) => {
+    if (!confirm('Eliminare questo consiglio?')) return;
+    await fetch(`/api/admin/consigli?id=${id}`, { method: 'DELETE' });
+    showToast('Consiglio eliminato', 'success');
+    await fetchData();
+  };
+
   const deleteUpload = async (id: string) => {
     if (!confirm('Eliminare questo file?')) return;
     await fetch(`/api/admin/uploads?id=${id}`, { method: 'DELETE' });
@@ -386,6 +445,7 @@ export default function AdminPage() {
               { id: 'subjects' as const, label: 'Materie', icon: BookOpen },
               { id: 'professors' as const, label: 'Professori', icon: Users },
               { id: 'uploads' as const, label: 'File', icon: FileText },
+              { id: 'consigli' as const, label: 'Consigli', icon: Lightbulb },
             ].map((tab) => {
               const Icon = tab.icon;
               return (
@@ -732,6 +792,147 @@ export default function AdminPage() {
                   <p className="text-lg font-semibold">Nessun file caricato</p>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'consigli' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-1">
+              <div className="neu-card p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 rounded-neu gradient-lavender flex items-center justify-center">
+                    <Lightbulb className="size-4 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground">
+                    {editingConsiglioId ? 'Modifica Consiglio' : 'Aggiungi Consiglio'}
+                  </h3>
+                </div>
+
+                <form onSubmit={handleConsiglioSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">Titolo</label>
+                    <input
+                      type="text"
+                      value={consiglioForm.title}
+                      onChange={(e) => setConsiglioForm({ ...consiglioForm, title: e.target.value })}
+                      className="w-full px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition"
+                      placeholder="Es: Come studiare meglio"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">Contenuto</label>
+                    <textarea
+                      value={consiglioForm.content}
+                      onChange={(e) => setConsiglioForm({ ...consiglioForm, content: e.target.value })}
+                      className="w-full px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition resize-none"
+                      rows={5}
+                      placeholder="Scrivi il consiglio..."
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">Professore</label>
+                    <select
+                      value={consiglioForm.professor_id}
+                      onChange={(e) => setConsiglioForm({ ...consiglioForm, professor_id: e.target.value })}
+                      className="w-full px-4 py-3 neu-input rounded-neu text-foreground outline-none premium-transition [&>option]:bg-neu-surface"
+                      required
+                    >
+                      <option value="">Seleziona professore</option>
+                      {professors.map((prof) => (
+                        <option key={prof.id} value={prof.id}>{prof.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="consiglio-published"
+                      checked={consiglioForm.published}
+                      onChange={(e) => setConsiglioForm({ ...consiglioForm, published: e.target.checked })}
+                      className="rounded border-stone-300 text-[#6366F1] focus:ring-[#6366F1]"
+                    />
+                    <label htmlFor="consiglio-published" className="text-sm font-medium text-foreground">Pubblicato</label>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3 bg-[#9B72B0] text-white font-semibold rounded-neu premium-transition shadow-neu disabled:opacity-50"
+                  >
+                    {loading ? 'Elaborazione...' : editingConsiglioId ? 'Aggiorna' : 'Pubblica'}
+                  </button>
+                  {editingConsiglioId && (
+                    <button
+                      type="button"
+                      onClick={resetConsiglioForm}
+                      className="w-full py-3 bg-[#FFB5A0] text-white font-semibold rounded-neu premium-transition"
+                    >
+                      Annulla
+                    </button>
+                  )}
+                </form>
+              </div>
+            </div>
+
+            <div className="lg:col-span-2">
+              <div className="neu-card overflow-hidden">
+                <div className="px-6 py-4 border-b border-stone-200/50 flex items-center gap-3">
+                  <Lightbulb className="size-5 text-[#6366F1]" />
+                  <h3 className="text-lg font-semibold text-foreground">Consigli ({consigli.length})</h3>
+                </div>
+                <div className="divide-y divide-stone-200/50">
+                  {consigli.map((consiglio) => (
+                    <div key={consiglio.id} className="px-6 py-4 hover:bg-neu-base/50 transition">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <p className="font-semibold text-foreground">{consiglio.title}</p>
+                          <p className="text-xs text-foreground-light mt-1 line-clamp-2">{consiglio.content}</p>
+                        </div>
+                        <div className="flex gap-2 ml-4 flex-shrink-0">
+                          <button
+                            onClick={() => {
+                              setConsiglioForm({
+                                title: consiglio.title,
+                                content: consiglio.content,
+                                professor_id: consiglio.professor_id,
+                                published: consiglio.published,
+                              });
+                              setEditingConsiglioId(consiglio.id);
+                            }}
+                            className="px-3 py-1.5 text-xs bg-[#6366F1]/10 hover:bg-[#6366F1]/20 text-[#6366F1] rounded-neu flex items-center gap-1 font-medium premium-transition"
+                          >
+                            <Edit className="size-3" />
+                            Modifica
+                          </button>
+                          <button
+                            onClick={() => deleteConsiglio(consiglio.id)}
+                            className="px-3 py-1.5 text-xs bg-[#EF4444]/10 hover:bg-[#EF4444]/20 text-[#EF4444] rounded-neu flex items-center gap-1 font-medium premium-transition"
+                          >
+                            <Trash2 className="size-3" />
+                            Elimina
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-foreground-muted">
+                        <span className="flex items-center gap-1">
+                          <Users className="size-3" />
+                          {consiglio.professor?.name || '-'}
+                        </span>
+                        <span>{consiglio.published ? 'Pubblicato' : 'Bozza'}</span>
+                        <span>{new Date(consiglio.created_at).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                      </div>
+                    </div>
+                  ))}
+                  {consigli.length === 0 && (
+                    <div className="px-6 py-12 text-center text-foreground-light">
+                      <Lightbulb className="size-12 text-stone-300 mx-auto mb-3" />
+                      <p className="text-sm">Nessun consiglio pubblicato</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         )}

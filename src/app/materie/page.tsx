@@ -144,7 +144,7 @@ export default function MateriePage() {
     if (selectedSubject && selectedProfessor) {
       return [
         { label: 'Materie', href: '/materie' },
-        { label: selectedProfessor.name, href: '#', onClick: handleBackToSubjects },
+        { label: selectedProfessor.name, href: '/materie' },
         { label: selectedSubject.name },
       ];
     }

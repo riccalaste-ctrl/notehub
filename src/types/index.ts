@@ -83,3 +83,16 @@ export interface UploadResponse {
   upload?: Upload;
   error?: string;
 }
+
+export interface Consiglio {
+  id: string;
+  title: string;
+  content: string;
+  professor_id: string;
+  published: boolean;
+  created_at: string;
+  professor?: {
+    id: string;
+    name: string;
+  };
+}

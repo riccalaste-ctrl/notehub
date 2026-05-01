@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { supabaseAdmin } from '@/lib/supabase';
 import { requireAdmin } from '@/lib/auth';
+import { deleteFileFromDrive } from '@/lib/google-drive';
 
 export async function GET(request: NextRequest) {
   const authError = await requireAdmin();
@@ -64,6 +65,22 @@ export async function DELETE(request: NextRequest) {
         { error: 'Missing upload ID' },
         { status: 400 }
       );
+    }
+
+    const { data: upload, error: fetchError } = await supabaseAdmin
+      .from('uploads')
+      .select('drive_file_id, professor_id')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    if (upload?.drive_file_id && upload?.professor_id) {
+      try {
+        await deleteFileFromDrive(upload.professor_id, upload.drive_file_id);
+      } catch (driveError) {
+        console.warn('Drive deletion failed, proceeding with DB removal:', driveError);
+      }
     }
 
     const { error } = await supabaseAdmin

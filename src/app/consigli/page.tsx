@@ -1,114 +1,168 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Lightbulb, Plus, Sparkles, BookOpen, Brain, Target } from 'lucide-react';
+import { Lightbulb, Plus, Brain, BookOpen, Target, User } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import Toast, { useToast } from '@/components/Toast';
+
+interface Consiglio {
+  id: string;
+  title: string;
+  content: string;
+  professor_id: string;
+  published: boolean;
+  created_at: string;
+  professor?: {
+    id: string;
+    name: string;
+  };
+}
+
+const categoryIcons: Record<string, React.ReactNode> = {
+  metodo: <Brain className="size-5 text-mint-dark" />,
+  risorse: <BookOpen className="size-5 text-lavender-dark" />,
+  organizzazione: <Target className="size-5 text-coral-dark" />,
+};
+
+const categoryColors: Record<string, string> = {
+  metodo: 'bg-mint/20',
+  risorse: 'bg-lavender/20',
+  organizzazione: 'bg-coral/20',
+};
+
+function getCategoryFromContent(content: string): string {
+  const lower = content.toLowerCase();
+  if (lower.includes('studio') || lower.includes('metodo') || lower.includes('tecnica')) return 'metodo';
+  if (lower.includes('libro') || lower.includes('risorsa') || lower.includes('materiale')) return 'risorse';
+  if (lower.includes('organizz') || lower.includes('pianif') || lower.includes('scadenz')) return 'organizzazione';
+  return 'metodo';
+}
 
 export default function ConsigliPage() {
+  const [consigli, setConsigli] = useState<Consiglio[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast, showToast, hideToast } = useToast();
+
+  useEffect(() => {
+    fetch('/api/consigli')
+      .then((res) => {
+        if (!res.ok) throw new Error('Errore nel caricamento');
+        return res.json();
+      })
+      .then((data) => {
+        setConsigli(data.consigli || []);
+      })
+      .catch((err) => {
+        console.error('Consigli fetch error:', err);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="min-h-screen bg-neu-base">
       <Header breadcrumbs={[{ label: 'Consigli' }]} />
 
       <main className="lg:pl-56 pt-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-10 mt-6 flex items-center justify-between"
+            className="mb-10 mt-6"
           >
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-neu gradient-lavender flex items-center justify-center">
-                  <Lightbulb className="size-6 text-white" />
-                </div>
-                <h1 className="text-3xl font-semibold text-foreground tracking-tight">
-                  Consigli & Suggerimenti
-                </h1>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-neu gradient-lavender flex items-center justify-center">
+                <Lightbulb className="size-6 text-white" />
               </div>
-              <p className="text-base text-foreground-light">
-                Trucchi per lo studio, info sui professori e consigli per organizzarsi al meglio
-              </p>
+              <h1 className="text-3xl font-semibold text-foreground tracking-tight">
+                Consigli & Suggerimenti
+              </h1>
             </div>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => window.dispatchEvent(new Event('open-upload'))}
-              className="hidden sm:inline-flex items-center px-5 py-3 font-semibold rounded-neu-lg text-white bg-gradient-to-br from-[#FF8C42] to-[#E87000] premium-transition shadow-lg"
-            >
-              <Plus className="size-5 mr-1.5" />
-              Consiglio
-            </motion.button>
-          </motion.div>
-
-          {/* Tips Grid */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
-          >
-            <div className="neu-card p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-neu bg-mint/20 flex items-center justify-center">
-                  <Brain className="size-5 text-mint-dark" />
-                </div>
-                <h3 className="font-semibold text-foreground text-sm">Metodo di Studio</h3>
-              </div>
-              <p className="text-xs text-foreground-light">
-                Scopri tecniche efficaci per ottimizzare il tuo tempo di studio
-              </p>
-            </div>
-
-            <div className="neu-card p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-neu bg-lavender/20 flex items-center justify-center">
-                  <BookOpen className="size-5 text-lavender-dark" />
-                </div>
-                <h3 className="font-semibold text-foreground text-sm">Risorse</h3>
-              </div>
-              <p className="text-xs text-foreground-light">
-                Libri consigliati e materiali integrativi per ogni materia
-              </p>
-            </div>
-
-            <div className="neu-card p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-neu bg-coral/20 flex items-center justify-center">
-                  <Target className="size-5 text-coral-dark" />
-                </div>
-                <h3 className="font-semibold text-foreground text-sm">Organizzazione</h3>
-              </div>
-              <p className="text-xs text-foreground-light">
-                Strategie per gestire scadenze e pianificare il lavoro
-              </p>
-            </div>
-          </motion.div>
-
-          {/* Empty State */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="neu-card p-10 text-center"
-          >
-            <div className="w-16 h-16 rounded-neu-xl gradient-lavender flex items-center justify-center mx-auto mb-4 shadow-neu-lg">
-              <Sparkles className="size-8 text-white" />
-            </div>
-            <h2 className="text-xl font-semibold text-foreground mb-2">
-              Nessun consiglio disponibile
-            </h2>
-            <p className="text-sm text-foreground-light max-w-md mx-auto leading-relaxed">
-              I consigli verranno aggiunti gradualmente dall&apos;amministrazione.
-              Torna a visitare questa pagina per scoprire nuovi suggerimenti!
+            <p className="text-base text-foreground-light">
+              Trucchi per lo studio, info sui professori e consigli per organizzarsi al meglio
             </p>
           </motion.div>
 
+          {loading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="neu-card p-6 animate-pulse">
+                  <div className="h-4 bg-neu-base rounded w-1/3 mb-3" />
+                  <div className="h-3 bg-neu-base rounded w-2/3 mb-2" />
+                  <div className="h-3 bg-neu-base rounded w-full" />
+                </div>
+              ))}
+            </div>
+          ) : consigli.length > 0 ? (
+            <div className="space-y-4">
+              {consigli.map((consiglio, index) => {
+                const category = getCategoryFromContent(consiglio.content);
+                return (
+                  <motion.div
+                    key={consiglio.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="neu-card p-6"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className={`w-10 h-10 rounded-neu flex items-center justify-center flex-shrink-0 ${categoryColors[category] || categoryColors.metodo}`}>
+                        {categoryIcons[category] || categoryIcons.metodo}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-foreground mb-2">
+                          {consiglio.title}
+                        </h3>
+                        <p className="text-sm text-foreground-light leading-relaxed whitespace-pre-line">
+                          {consiglio.content}
+                        </p>
+                        <div className="flex items-center gap-3 mt-4 text-xs text-foreground-muted">
+                          {consiglio.professor && (
+                            <span className="flex items-center gap-1">
+                              <User className="size-3" />
+                              {consiglio.professor.name}
+                            </span>
+                          )}
+                          <span>
+                            {new Date(consiglio.created_at).toLocaleDateString('it-IT', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric',
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="neu-card p-10 text-center"
+            >
+              <div className="w-16 h-16 rounded-neu-xl gradient-lavender flex items-center justify-center mx-auto mb-4 shadow-neu-lg">
+                <Lightbulb className="size-8 text-white" />
+              </div>
+              <h2 className="text-xl font-semibold text-foreground mb-2">
+                Nessun consiglio disponibile
+              </h2>
+              <p className="text-sm text-foreground-light max-w-md mx-auto leading-relaxed">
+                I consigli verranno aggiunti gradualmente dall&apos;amministrazione.
+                Torna a visitare questa pagina per scoprire nuovi suggerimenti!
+              </p>
+            </motion.div>
+          )}
         </div>
 
         <Footer />
       </main>
+
+      {toast && <Toast {...toast} onClose={hideToast} />}
     </div>
   );
 }

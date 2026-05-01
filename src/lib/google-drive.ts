@@ -541,3 +541,14 @@ export async function revokeProfessorDriveConnection(professorId: string): Promi
     })
     .eq('id', connection.id);
 }
+
+export async function deleteFileFromDrive(professorId: string, driveFileId: string): Promise<void> {
+  try {
+    const authorized = await getAuthorizedDriveForProfessor(professorId);
+    const drive = getDrive(authorized.auth);
+    await drive.files.delete({ fileId: driveFileId });
+  } catch (error) {
+    console.warn('Unable to delete file from Google Drive:', error);
+    throw error;
+  }
+}

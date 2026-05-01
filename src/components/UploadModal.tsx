@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, Plus, Shield, Mail } from 'lucide-react';
+import { X, Check, Plus, Shield } from 'lucide-react';
 import GoogleDriveUploader from './GoogleDriveUploader';
 
 interface Subject {
@@ -31,8 +31,6 @@ interface UploadModalProps {
   subjectProfessors: SubjectProfessor[];
 }
 
-const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@notehub.local';
-
 export default function UploadModal({ isOpen, onClose, subjects, professors, subjectProfessors }: UploadModalProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
@@ -40,6 +38,7 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
   const [selectedProfessor, setSelectedProfessor] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('');
   const [uploaderName, setUploaderName] = useState('');
+  const [step, setStep] = useState(1);
 
   useEffect(() => {
     if (!isOpen) {
@@ -48,6 +47,7 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
       setUploaderName('');
       setError('');
       setSuccess(false);
+      setStep(1);
     }
   }, [isOpen]);
 
@@ -67,6 +67,27 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
   const handleError = (err: string) => {
     setError(err);
     setUploading(false);
+  };
+
+  const handleContinue = () => {
+    setError('');
+    if (step === 1) {
+      if (!selectedProfessor) {
+        setError('Seleziona un professore');
+        return;
+      }
+      if (filteredSubjects.length === 0) {
+        setError('Nessuna materia associata a questo professore');
+        return;
+      }
+      setStep(2);
+    } else if (step === 2) {
+      if (!selectedSubject) {
+        setError('Seleziona una materia');
+        return;
+      }
+      setStep(3);
+    }
   };
 
   return (
@@ -107,18 +128,11 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                   <Shield className="size-4 text-foreground-light mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-semibold text-foreground">
-                      I file non possono essere eliminati dopo il caricamento
+                      I file caricati non possono essere modificati o eliminati dall&apos;utente
                     </p>
                     <p className="text-xs text-foreground-light mt-1">
-                      Per richiedere la rimozione di un file, contatta l&apos;amministratore:
+                      Solo l&apos;amministratore puÃ² eliminare i file dalla piattaforma.
                     </p>
-                    <a
-                      href={`mailto:${ADMIN_EMAIL}`}
-                      className="inline-flex items-center gap-1 mt-1 text-xs font-semibold text-lavender-dark hover:underline"
-                    >
-                      <Mail className="size-3" />
-                      {ADMIN_EMAIL}
-                    </a>
                   </div>
                 </div>
               </div>
@@ -136,43 +150,54 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                 </motion.div>
               ) : (
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-foreground mb-1">
-                      Il tuo nome <span className="text-foreground-muted font-normal">(facoltativo)</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={uploaderName}
-                      onChange={(e) => setUploaderName(e.target.value)}
-                      placeholder="Anonimo"
-                      maxLength={100}
-                       className="w-full px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition"
-                    />
+                  {/* Step indicator */}
+                  <div className="flex items-center justify-center gap-2 mb-4">
+                    {[1, 2, 3].map((s) => (
+                      <div key={s} className={`w-8 h-1 rounded-full ${s <= step ? 'bg-[#FF8C42]' : 'bg-neu-base'}`} />
+                    ))}
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-foreground mb-1">
-                      Professore <span className="text-coral-dark font-normal">*</span>
-                    </label>
-                    <select
-                      value={selectedProfessor}
-                      onChange={(e) => {
-                        setSelectedProfessor(e.target.value);
-                        setSelectedSubject('');
-                      }}
-                      required
-                       className="w-full px-4 py-3 neu-input rounded-neu text-foreground outline-none premium-transition [&>option]:bg-neu-surface"
-                     >
-                       <option value="">Seleziona professore</option>
-                      {professors.map((professor) => (
-                        <option key={professor.id} value={professor.id}>
-                          {professor.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  {step === 1 && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-semibold text-foreground mb-1">
+                          Il tuo nome <span className="text-foreground-muted font-normal">(facoltativo)</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={uploaderName}
+                          onChange={(e) => setUploaderName(e.target.value)}
+                          placeholder="Anonimo"
+                          maxLength={100}
+                          className="w-full px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition"
+                        />
+                      </div>
 
-                  {selectedProfessor && (
+                      <div>
+                        <label className="block text-sm font-semibold text-foreground mb-1">
+                          Professore <span className="text-coral-dark font-normal">*</span>
+                        </label>
+                        <select
+                          value={selectedProfessor}
+                          onChange={(e) => {
+                            setSelectedProfessor(e.target.value);
+                            setSelectedSubject('');
+                          }}
+                          required
+                          className="w-full px-4 py-3 neu-input rounded-neu text-foreground outline-none premium-transition [&>option]:bg-neu-surface"
+                        >
+                          <option value="">Seleziona professore</option>
+                          {professors.map((professor) => (
+                            <option key={professor.id} value={professor.id}>
+                              {professor.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </>
+                  )}
+
+                  {step === 2 && (
                     <div>
                       <label className="block text-sm font-semibold text-foreground mb-1">
                         Materia <span className="text-coral-dark font-normal">*</span>
@@ -181,9 +206,9 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                         value={selectedSubject}
                         onChange={(e) => setSelectedSubject(e.target.value)}
                         required
-                       className="w-full px-4 py-3 neu-input rounded-neu text-foreground outline-none premium-transition [&>option]:bg-neu-surface"
-                       >
-                         <option value="">Seleziona materia</option>
+                        className="w-full px-4 py-3 neu-input rounded-neu text-foreground outline-none premium-transition [&>option]:bg-neu-surface"
+                      >
+                        <option value="">Seleziona materia</option>
                         {filteredSubjects.length > 0 ? filteredSubjects.map((subject) => (
                           <option key={subject.id} value={subject.id}>
                             {subject.name}
@@ -195,7 +220,7 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                     </div>
                   )}
 
-                  {selectedSubject && (
+                  {step === 3 && selectedSubject && (
                     <GoogleDriveUploader
                       subjectId={selectedSubject}
                       professorId={selectedProfessor}
@@ -206,19 +231,28 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                   )}
 
                   {error && (
-                      <div className="p-3 bg-coral/10 border border-coral/20 text-coral-dark text-sm rounded-neu">
+                    <div className="p-3 bg-coral/10 border border-coral/20 text-coral-dark text-sm rounded-neu">
                       {error}
                     </div>
                   )}
 
-                  <div className="flex justify-end space-x-3 pt-2">
+                  <div className="flex justify-between pt-2">
                     <button
                       type="button"
                       onClick={onClose}
-                       className="px-5 py-2.5 text-sm font-semibold text-foreground neu-button rounded-neu premium-transition"
+                      className="px-5 py-2.5 text-sm font-semibold text-foreground neu-button rounded-neu premium-transition"
                     >
                       Annulla
                     </button>
+                    {step < 3 && (
+                      <button
+                        type="button"
+                        onClick={handleContinue}
+                        className="px-5 py-2.5 text-sm font-semibold text-white gradient-primary rounded-neu premium-transition"
+                      >
+                        Continua
+                      </button>
+                    )}
                   </div>
                 </div>
               )}

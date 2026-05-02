@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { BookOpen, FileText, Users, Clock, ChevronRight, Plus, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
@@ -8,6 +8,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Toast, { useToast } from '@/components/Toast';
 import UploadModal from '@/components/UploadModal';
+import { supabase } from '@/lib/supabase';
 
 interface Subject {
   id: string;
@@ -64,43 +65,73 @@ export default function DashboardPage() {
   const [uploadCounts, setUploadCounts] = useState<Record<string, number>>({});
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const { toast, showToast, hideToast } = useToast();
+  const dataLoadedRef = useRef(false);
+
+  const fetchCatalog = async () => {
+    try {
+      const catalogRes = await fetch('/api/public/catalog');
+      if (catalogRes.ok) {
+        const data = await catalogRes.json();
+        setSubjects(data.subjects || []);
+        setProfessors(data.professors || []);
+        setSubjectProfessors(data.subjectProfessors || []);
+        dataLoadedRef.current = true;
+      }
+    } catch (error) {
+      console.error('Catalog fetch error:', error);
+    }
+  };
+
+  const fetchUploads = async () => {
+    try {
+      const uploadsRes = await fetch('/api/files?limit=50');
+      if (uploadsRes.ok) {
+        const data = await uploadsRes.json();
+        setRecentUploads(data.uploads || []);
+
+        const counts: Record<string, number> = {};
+        (data.uploads || []).forEach((u: Upload) => {
+          if (u.subject_slug) {
+            counts[u.subject_slug] = (counts[u.subject_slug] || 0) + 1;
+          }
+        });
+        setUploadCounts(counts);
+      }
+    } catch (error) {
+      console.error('Uploads fetch error:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [catalogRes, uploadsRes] = await Promise.all([
-          fetch('/api/public/catalog'),
-          fetch('/api/files?limit=10'),
-        ]);
-
-        if (catalogRes.ok) {
-          const data = await catalogRes.json();
-          setSubjects(data.subjects || []);
-          setProfessors(data.professors || []);
-          setSubjectProfessors(data.subjectProfessors || []);
-        }
-
-        if (uploadsRes.ok) {
-          const data = await uploadsRes.json();
-          setRecentUploads(data.uploads || []);
-
-          const counts: Record<string, number> = {};
-          (data.uploads || []).forEach((u: Upload) => {
-            if (u.subject_slug) {
-              counts[u.subject_slug] = (counts[u.subject_slug] || 0) + 1;
-            }
-          });
-          setUploadCounts(counts);
-        }
-      } catch (error) {
-        console.error('Fetch error:', error);
-      }
-    };
-    fetchData();
+    fetchCatalog();
+    fetchUploads();
 
     const handleOpenUpload = () => setUploadModalOpen(true);
     window.addEventListener('open-upload', handleOpenUpload);
-    return () => window.removeEventListener('open-upload', handleOpenUpload);
+
+    const spChannel = supabase
+      .channel('public:subject_professors')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'subject_professors' },
+        () => fetchCatalog()
+      )
+      .subscribe();
+
+    const uploadsChannel = supabase
+      .channel('public:uploads')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'uploads' },
+        () => fetchUploads()
+      )
+      .subscribe();
+
+    return () => {
+      window.removeEventListener('open-upload', handleOpenUpload);
+      supabase.removeChannel(spChannel);
+      supabase.removeChannel(uploadsChannel);
+    };
   }, []);
 
   return (

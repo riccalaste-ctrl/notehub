@@ -142,7 +142,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10"
+            className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10"
           >
             <div className="neu-card p-5 bg-[#7BAFDE]">
               <div className="flex items-center gap-3">
@@ -152,6 +152,17 @@ export default function DashboardPage() {
                 <div>
                   <p className="text-2xl font-bold text-white">{subjects.length}</p>
                   <p className="text-xs text-blue-100">Materie</p>
+                </div>
+              </div>
+            </div>
+            <div className="neu-card p-5 bg-[#B992C9]">
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-neu bg-purple-400/30 flex items-center justify-center">
+                  <Users className="size-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-white">{professors.length}</p>
+                  <p className="text-xs text-purple-100">Professori</p>
                 </div>
               </div>
             </div>

@@ -37,14 +37,30 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    console.log('[Google Drive Callback] Step 1: Verifying OAuth state');
     const { professorId } = verifyProfessorOAuthState(state);
+    console.log(`[Google Drive Callback] Step 2: State verified for professor ${professorId}`);
+
+    console.log(`[Google Drive Callback] Step 3: Exchanging token for professor ${professorId}`);
     await exchangeAndSaveProfessorTokens(code, professorId, request);
+    console.log(`[Google Drive Callback] Step 4: Success! Drive connected for professor ${professorId}`);
+
     return redirectToAdmin(request, 'success', 'Drive collegato correttamente');
   } catch (error) {
-    console.error('Google Drive OAuth callback error:', error);
+    const errorDetails = error instanceof Error 
+      ? error.message 
+      : JSON.stringify(error, null, 2);
+    
+    console.error('[Google Drive Callback] Error occurred:', {
+      error: errorDetails,
+      errorType: error?.constructor?.name,
+      fullError: error,
+    });
+
     const message = error instanceof Error 
       ? error.message 
-      : 'Errore sconosciuto durante il collegamento di Google Drive. Riprova.';
+      : 'Errore sconosciuto durante il collegamento di Google Drive. Controlla i log del server per dettagli.';
+    
     return redirectToAdmin(request, 'error', message);
   }
 }

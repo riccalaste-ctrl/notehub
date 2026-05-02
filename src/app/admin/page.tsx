@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import Toast, { useToast } from '@/components/Toast';
+import ErrorAlert from '@/components/ErrorAlert';
 import {
   Activity,
   BarChart3,
@@ -122,6 +123,7 @@ export default function AdminPage() {
   const [subjectForm, setSubjectForm] = useState({ name: '', slug: '', enabled: true });
   const [professorForm, setProfessorForm] = useState({ name: '' });
   const [consiglioForm, setConsiglioForm] = useState({ title: '', content: '', professor_id: '', published: true });
+  const [criticalError, setCriticalError] = useState<{ title: string; message: string } | null>(null);
   const { toast, showToast, hideToast } = useToast();
 
   const fetchData = useCallback(async () => {
@@ -175,7 +177,14 @@ export default function AdminPage() {
     const message = params.get('message');
 
     if (driveStatusParam && message) {
-      showToast(message, driveStatusParam === 'success' ? 'success' : 'error');
+      if (driveStatusParam === 'success') {
+        showToast(message, 'success');
+      } else {
+        setCriticalError({
+          title: 'Errore Connessione Google Drive',
+          message: decodeURIComponent(message),
+        });
+      }
       window.history.replaceState(null, '', '/admin');
     }
   }, [showToast]);
@@ -423,6 +432,13 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-neu-base">
+      {criticalError && (
+        <ErrorAlert
+          title={criticalError.title}
+          message={criticalError.message}
+          onClose={() => setCriticalError(null)}
+        />
+      )}
       <header className="neu-header sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
           <div className="flex items-center space-x-3">

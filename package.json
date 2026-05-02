@@ -1,9 +1,0 @@
-{
-  "name": "notehub-root",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "vercel-build": "cd notehub && npm run build",
-    "build": "cd notehub && npm run build"
-  }
-}

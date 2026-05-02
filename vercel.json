@@ -1,5 +1,0 @@
-{
-  "buildCommand": "cd notehub && npm run build",
-  "installCommand": "cd notehub && npm install",
-  "outputDirectory": "notehub/.next"
-}

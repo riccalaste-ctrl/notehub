@@ -208,70 +208,105 @@ export async function exchangeAndSaveProfessorTokens(
   professorId: string,
   request: Request
 ): Promise<DriveConnection> {
-  const redirectUri = getGoogleOAuthRedirectUri(request);
-  const oauth2Client = createGoogleOAuthClient(redirectUri);
-  const { tokens } = await oauth2Client.getToken(code);
+  try {
+    console.log('[exchangeAndSaveProfessorTokens] 1/5: Getting redirect URI');
+    const redirectUri = getGoogleOAuthRedirectUri(request);
+    console.log(`[exchangeAndSaveProfessorTokens] Redirect URI: ${redirectUri}`);
 
-  let refreshToken = tokens.refresh_token || null;
+    console.log('[exchangeAndSaveProfessorTokens] 2/5: Creating OAuth client');
+    const oauth2Client = createGoogleOAuthClient(redirectUri);
 
-  if (!refreshToken) {
-    const { data: existing } = await supabaseAdmin
-      .from('professor_drive_connections')
-      .select('encrypted_refresh_token')
-      .eq('professor_id', professorId)
-      .maybeSingle();
+    console.log('[exchangeAndSaveProfessorTokens] 3/5: Exchanging authorization code for tokens');
+    const { tokens } = await oauth2Client.getToken(code);
+    console.log('[exchangeAndSaveProfessorTokens] Tokens received:', {
+      hasAccessToken: !!tokens.access_token,
+      hasRefreshToken: !!tokens.refresh_token,
+      hasIdToken: !!tokens.id_token,
+    });
 
-    if (existing?.encrypted_refresh_token) {
-      refreshToken = decryptSecret(existing.encrypted_refresh_token);
+    let refreshToken = tokens.refresh_token || null;
+
+    if (!refreshToken) {
+      console.log('[exchangeAndSaveProfessorTokens] No refresh token in response, checking for existing');
+      const { data: existing } = await supabaseAdmin
+        .from('professor_drive_connections')
+        .select('encrypted_refresh_token')
+        .eq('professor_id', professorId)
+        .maybeSingle();
+
+      if (existing?.encrypted_refresh_token) {
+        console.log('[exchangeAndSaveProfessorTokens] Found existing refresh token');
+        refreshToken = decryptSecret(existing.encrypted_refresh_token);
+      }
     }
+
+    if (!refreshToken) {
+      throw new Error('Google non ha restituito un refresh token. Revoca l\'accesso dell\'app dal tuo account Google e riprova.');
+    }
+
+    console.log('[exchangeAndSaveProfessorTokens] 4/5: Setting credentials and fetching user info');
+    oauth2Client.setCredentials({
+      ...tokens,
+      refresh_token: refreshToken,
+    });
+
+    const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
+    const { data: userInfo } = await oauth2.userinfo.get();
+    console.log('[exchangeAndSaveProfessorTokens] User info:', {
+      email: userInfo.email,
+      id: userInfo.id,
+      name: userInfo.name,
+    });
+
+    if (!userInfo.email) {
+      throw new Error('Account Google non valido: email mancante');
+    }
+
+    console.log('[exchangeAndSaveProfessorTokens] 5/5: Creating Drive root folder');
+    const rootFolderId = await getOrCreateFolder(oauth2Client, DRIVE_ROOT_FOLDER_NAME);
+    console.log(`[exchangeAndSaveProfessorTokens] Root folder created/found: ${rootFolderId}`);
+
+    const now = new Date().toISOString();
+
+    console.log('[exchangeAndSaveProfessorTokens] Saving connection to database');
+    const { data: connection, error } = await supabaseAdmin
+      .from('professor_drive_connections')
+      .upsert(
+        {
+          professor_id: professorId,
+          google_email: userInfo.email,
+          google_account_id: userInfo.id || null,
+          encrypted_refresh_token: encryptSecret(refreshToken),
+          encrypted_access_token: tokens.access_token ? encryptSecret(tokens.access_token) : null,
+          access_token_expires_at: tokens.expiry_date
+            ? new Date(tokens.expiry_date).toISOString()
+            : null,
+          root_folder_id: rootFolderId,
+          status: 'connected',
+          last_error: null,
+          connected_at: now,
+          disconnected_at: null,
+          updated_at: now,
+        },
+        { onConflict: 'professor_id' }
+      )
+      .select('*')
+      .single();
+
+    if (error) {
+      console.error('[exchangeAndSaveProfessorTokens] Database error:', error);
+      throw error;
+    }
+
+    console.log('[exchangeAndSaveProfessorTokens] ✅ Success! Connection saved');
+    return connection as DriveConnection;
+  } catch (error) {
+    console.error('[exchangeAndSaveProfessorTokens] ❌ Fatal error:', {
+      message: error instanceof Error ? error.message : String(error),
+      error,
+    });
+    throw error;
   }
-
-  if (!refreshToken) {
-    throw new Error('Google non ha restituito un refresh token. Revoca l\'accesso dell\'app dal tuo account Google e riprova.');
-  }
-
-  oauth2Client.setCredentials({
-    ...tokens,
-    refresh_token: refreshToken,
-  });
-
-  const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
-  const { data: userInfo } = await oauth2.userinfo.get();
-
-  if (!userInfo.email) {
-    throw new Error('Account Google non valido: email mancante');
-  }
-
-  const rootFolderId = await getOrCreateFolder(oauth2Client, DRIVE_ROOT_FOLDER_NAME);
-  const now = new Date().toISOString();
-
-  const { data: connection, error } = await supabaseAdmin
-    .from('professor_drive_connections')
-    .upsert(
-      {
-        professor_id: professorId,
-        google_email: userInfo.email,
-        google_account_id: userInfo.id || null,
-        encrypted_refresh_token: encryptSecret(refreshToken),
-        encrypted_access_token: tokens.access_token ? encryptSecret(tokens.access_token) : null,
-        access_token_expires_at: tokens.expiry_date
-          ? new Date(tokens.expiry_date).toISOString()
-          : null,
-        root_folder_id: rootFolderId,
-        status: 'connected',
-        last_error: null,
-        connected_at: now,
-        disconnected_at: null,
-        updated_at: now,
-      },
-      { onConflict: 'professor_id' }
-    )
-    .select('*')
-    .single();
-
-  if (error) throw error;
-
-  return connection as DriveConnection;
 }
 
 async function fetchDriveConnection(professorId: string): Promise<DriveConnection> {

@@ -52,10 +52,19 @@ function uploadFileToGoogle(
         return;
       }
 
-      reject(new Error(`Upload Google Drive non riuscito (${xhr.status})`));
+      let errorMsg = `Upload Google Drive non riuscito (${xhr.status})`;
+      try {
+        const errorData = JSON.parse(xhr.responseText);
+        if (errorData.error?.message) {
+          errorMsg += `: ${errorData.error.message}`;
+        }
+      } catch {
+        if (xhr.responseText) errorMsg += `: ${xhr.responseText}`;
+      }
+      reject(new Error(errorMsg));
     });
 
-    xhr.addEventListener('error', () => reject(new Error('Upload Google Drive non riuscito')));
+    xhr.addEventListener('error', () => reject(new Error('Errore di rete durante l\'upload su Google Drive')));
     xhr.addEventListener('abort', () => reject(new Error('Upload annullato')));
 
     xhr.open('PUT', uploadUrl);

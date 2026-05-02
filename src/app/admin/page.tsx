@@ -22,6 +22,8 @@ import {
   Trash2,
   UserCheck,
   Users,
+  Link as LinkIcon,
+  XCircle,
 } from 'lucide-react';
 
 interface Subject {
@@ -64,7 +66,15 @@ interface Consiglio {
   professor?: { id: string; name: string };
 }
 
-type Tab = 'dashboard' | 'subjects' | 'professors' | 'uploads' | 'consigli';
+interface SubjectProfessor {
+  id: string;
+  subject_id: string;
+  professor_id: string;
+  subject?: { id: string; name: string; slug: string };
+  professor?: { id: string; name: string };
+}
+
+type Tab = 'dashboard' | 'subjects' | 'professors' | 'uploads' | 'consigli' | 'subject-professors';
 
 function formatBytes(bytes: number) {
   if (!bytes) return '0 B';
@@ -116,6 +126,7 @@ export default function AdminPage() {
   const [professors, setProfessors] = useState<Professor[]>([]);
   const [uploads, setUploads] = useState<Upload[]>([]);
   const [consigli, setConsigli] = useState<Consiglio[]>([]);
+  const [subjectProfessors, setSubjectProfessors] = useState<SubjectProfessor[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingSubjectId, setEditingSubjectId] = useState<string | null>(null);
   const [editingProfessorId, setEditingProfessorId] = useState<string | null>(null);
@@ -123,16 +134,18 @@ export default function AdminPage() {
   const [subjectForm, setSubjectForm] = useState({ name: '', slug: '', enabled: true });
   const [professorForm, setProfessorForm] = useState({ name: '' });
   const [consiglioForm, setConsiglioForm] = useState({ title: '', content: '', professor_id: '', published: true });
+  const [spForm, setSpForm] = useState({ subject_id: '', professor_id: '' });
   const [criticalError, setCriticalError] = useState<{ title: string; message: string } | null>(null);
   const { toast, showToast, hideToast } = useToast();
 
   const fetchData = useCallback(async () => {
     try {
-      const [subjectsRes, professorsRes, uploadsRes, consigliRes] = await Promise.all([
+      const [subjectsRes, professorsRes, uploadsRes, consigliRes, spRes] = await Promise.all([
         fetch('/api/admin/subjects'),
         fetch('/api/admin/professors'),
         fetch('/api/admin/uploads?limit=100'),
         fetch('/api/admin/consigli'),
+        fetch('/api/admin/subject-professors'),
       ]);
 
       if (subjectsRes.ok) {
@@ -153,6 +166,11 @@ export default function AdminPage() {
       if (consigliRes.ok) {
         const data = await consigliRes.json();
         setConsigli(data.consigli || []);
+      }
+
+      if (spRes.ok) {
+        const data = await spRes.json();
+        setSubjectProfessors(data.associations || []);
       }
     } catch (error) {
       console.error('Fetch error:', error);
@@ -370,6 +388,42 @@ export default function AdminPage() {
     }
   };
 
+  const resetSpForm = () => {
+    setSpForm({ subject_id: '', professor_id: '' });
+  };
+
+  const handleSpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!spForm.subject_id || !spForm.professor_id) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch('/api/admin/subject-professors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(spForm),
+      });
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.error || 'Errore associazione');
+
+      showToast('Professore associato alla materia', 'success');
+      resetSpForm();
+      await fetchData();
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Errore', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteSp = async (id: string) => {
+    if (!confirm('Rimuovere questa associazione?')) return;
+    await fetch(`/api/admin/subject-professors?id=${id}`, { method: 'DELETE' });
+    showToast('Associazione rimossa', 'success');
+    await fetchData();
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neu-base px-4">
@@ -464,6 +518,7 @@ export default function AdminPage() {
               { id: 'dashboard' as const, label: 'Dashboard', icon: LayoutDashboard },
               { id: 'subjects' as const, label: 'Materie', icon: BookOpen },
               { id: 'professors' as const, label: 'Professori', icon: Users },
+              { id: 'subject-professors' as const, label: 'Associazioni', icon: LinkIcon },
               { id: 'uploads' as const, label: 'File', icon: FileText },
               { id: 'consigli' as const, label: 'Consigli', icon: Lightbulb },
             ].map((tab) => {
@@ -755,6 +810,96 @@ export default function AdminPage() {
                       </div>
                     );
                   })}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'subject-professors' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-1">
+              <div className="neu-card p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 rounded-neu gradient-lavender flex items-center justify-center">
+                    <LinkIcon className="size-4 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground">Associa Professore a Materia</h3>
+                </div>
+
+                <form onSubmit={handleSpSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">Materia</label>
+                    <select
+                      value={spForm.subject_id}
+                      onChange={(e) => setSpForm({ ...spForm, subject_id: e.target.value })}
+                      className="w-full px-4 py-3 neu-input rounded-neu text-foreground outline-none premium-transition [&>option]:bg-neu-surface"
+                      required
+                    >
+                      <option value="">Seleziona materia</option>
+                      {subjects.map((s) => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-foreground mb-2">Professore</label>
+                    <select
+                      value={spForm.professor_id}
+                      onChange={(e) => setSpForm({ ...spForm, professor_id: e.target.value })}
+                      className="w-full px-4 py-3 neu-input rounded-neu text-foreground outline-none premium-transition [&>option]:bg-neu-surface"
+                      required
+                    >
+                      <option value="">Seleziona professore</option>
+                      {professors.map((p) => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3 bg-[#6366F1] text-white font-semibold rounded-neu premium-transition shadow-neu disabled:opacity-50"
+                  >
+                    {loading ? 'Elaborazione...' : 'Associa'}
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <div className="lg:col-span-2">
+              <div className="neu-card overflow-hidden">
+                <div className="px-6 py-4 border-b border-stone-200/50 flex items-center gap-3">
+                  <LinkIcon className="size-5 text-[#6366F1]" />
+                  <h3 className="text-lg font-semibold text-foreground">Associazioni ({subjectProfessors.length})</h3>
+                </div>
+                <div className="divide-y divide-stone-200/50">
+                  {subjectProfessors.map((sp) => (
+                    <div key={sp.id} className="px-6 py-4 flex justify-between items-center hover:bg-neu-base/50 transition">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-neu bg-[#6366F1]/10 flex items-center justify-center">
+                          <Users className="size-5 text-[#6366F1]" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-foreground">{sp.professor?.name || '-'}</p>
+                          <p className="text-sm text-foreground-light">→ {sp.subject?.name || '-'}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => deleteSp(sp.id)}
+                        className="px-4 py-2 text-sm bg-[#EF4444]/10 hover:bg-[#EF4444]/20 text-[#EF4444] rounded-neu flex items-center gap-1.5 font-medium premium-transition"
+                      >
+                        <XCircle className="size-3.5" />
+                        Rimuovi
+                      </button>
+                    </div>
+                  ))}
+                  {subjectProfessors.length === 0 && (
+                    <div className="px-6 py-12 text-center text-foreground-light">
+                      <LinkIcon className="size-12 text-stone-300 mx-auto mb-3" />
+                      <p className="text-sm">Nessuna associazione presente</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

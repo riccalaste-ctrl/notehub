@@ -1,21 +1,21 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
     const [subjectsResult, professorsResult, associationsResult] = await Promise.all([
-      supabase
+      supabaseAdmin
         .from('subjects')
         .select('id, name, slug, enabled')
         .eq('enabled', true)
         .order('name'),
-      supabase
+      supabaseAdmin
         .from('professors')
         .select('id, name')
         .order('name'),
-      supabase
+      supabaseAdmin
         .from('subject_professors')
         .select(`
           id,

@@ -343,9 +343,11 @@ export async function getAuthorizedDriveForProfessor(professorId: string): Promi
       expiry_date: expiresAt,
     });
 
+    console.log(`[Google Drive] Using cached access token for professor ${professorId}`);
     return { auth: oauth2Client, accessToken, connection };
   }
 
+  console.log(`[Google Drive] Refreshing access token for professor ${professorId}`);
   oauth2Client.setCredentials({ refresh_token: refreshToken });
 
   try {
@@ -355,6 +357,8 @@ export async function getAuthorizedDriveForProfessor(professorId: string): Promi
     if (!accessToken) {
       throw new Error('Google did not return an access token');
     }
+
+    console.log(`[Google Drive] New access token obtained for professor ${professorId}`);
 
     const expiryDate = oauth2Client.credentials.expiry_date || Date.now() + 3600 * 1000;
     const now = new Date().toISOString();
@@ -378,6 +382,7 @@ export async function getAuthorizedDriveForProfessor(professorId: string): Promi
     return { auth: oauth2Client, accessToken, connection };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unable to refresh Google token';
+    console.error(`[Google Drive] Token refresh failed for professor ${professorId}:`, message);
 
     await supabaseAdmin
       .from('professor_drive_connections')
@@ -479,7 +484,13 @@ export async function createResumableUploadSession({
   );
 
   if (!response.ok) {
-    throw new Error(`Unable to create Google upload session (${response.status})`);
+    const errorText = await response.text();
+    console.error('[Google Drive] Failed to create upload session:', {
+      status: response.status,
+      statusText: response.statusText,
+      error: errorText,
+    });
+    throw new Error(`Unable to create Google upload session (${response.status}): ${errorText}`);
   }
 
   const uploadUrl = response.headers.get('location');

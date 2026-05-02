@@ -65,42 +65,56 @@ export default function DashboardPage() {
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const { toast, showToast, hideToast } = useToast();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [catalogRes, uploadsRes] = await Promise.all([
-          fetch('/api/public/catalog'),
-          fetch('/api/files?limit=50'),
-        ]);
-
-        if (catalogRes.ok) {
-          const data = await catalogRes.json();
-          setSubjects(data.subjects || []);
-          setProfessors(data.professors || []);
-          setSubjectProfessors(data.subjectProfessors || []);
-        }
-
-        if (uploadsRes.ok) {
-          const data = await uploadsRes.json();
-          setRecentUploads(data.uploads || []);
-
-          const counts: Record<string, number> = {};
-          (data.uploads || []).forEach((u: Upload) => {
-            if (u.subject_slug) {
-              counts[u.subject_slug] = (counts[u.subject_slug] || 0) + 1;
-            }
-          });
-          setUploadCounts(counts);
-        }
-      } catch (error) {
-        console.error('Fetch error:', error);
+  const fetchCatalog = async () => {
+    try {
+      const catalogRes = await fetch('/api/public/catalog');
+      if (catalogRes.ok) {
+        const data = await catalogRes.json();
+        setSubjects(data.subjects || []);
+        setProfessors(data.professors || []);
+        setSubjectProfessors(data.subjectProfessors || []);
       }
-    };
-    fetchData();
+    } catch (error) {
+      console.error('Catalog fetch error:', error);
+    }
+  };
+
+  const fetchUploads = async () => {
+    try {
+      const uploadsRes = await fetch('/api/files?limit=50');
+      if (uploadsRes.ok) {
+        const data = await uploadsRes.json();
+        setRecentUploads(data.uploads || []);
+
+        const counts: Record<string, number> = {};
+        (data.uploads || []).forEach((u: Upload) => {
+          if (u.subject_slug) {
+            counts[u.subject_slug] = (counts[u.subject_slug] || 0) + 1;
+          }
+        });
+        setUploadCounts(counts);
+      }
+    } catch (error) {
+      console.error('Uploads fetch error:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCatalog();
+    fetchUploads();
 
     const handleOpenUpload = () => setUploadModalOpen(true);
     window.addEventListener('open-upload', handleOpenUpload);
-    return () => window.removeEventListener('open-upload', handleOpenUpload);
+
+    const interval = setInterval(() => {
+      fetchCatalog();
+      fetchUploads();
+    }, 10000);
+
+    return () => {
+      window.removeEventListener('open-upload', handleOpenUpload);
+      clearInterval(interval);
+    };
   }, []);
 
   return (

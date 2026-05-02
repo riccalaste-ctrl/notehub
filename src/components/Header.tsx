@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GraduationCap, LayoutGrid, BookOpen, Lightbulb, Plus, Menu, X, Search, Compass, ChevronRight } from 'lucide-react';
@@ -28,7 +29,7 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
       <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 z-40 flex-col items-center gap-8 w-56 h-full p-6 neu-sidebar border-r border-stone-200/50">
         <Link href="/" className="flex items-center gap-2 w-full">
           <div className="size-9 rounded-neu neu-surface flex justify-center items-center p-1">
-            <img src="/logo.svg" alt="SKAKK-UP" className="w-full h-full" />
+            <Image src="/logo.svg" alt="SKAKK-UP" width={36} height={36} className="w-full h-full" />
           </div>
           <span className="font-semibold text-lg leading-7 tracking-tight text-foreground">
             SKAKK-UP
@@ -65,7 +66,7 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
               <Menu className="size-5 text-foreground" />
             </button>
             <Link href="/" className="size-8 rounded-neu neu-surface flex justify-center items-center p-0.5">
-              <img src="/logo.svg" alt="SKAKK-UP" className="w-full h-full" />
+              <Image src="/logo.svg" alt="SKAKK-UP" width={36} height={36} className="w-full h-full" />
             </Link>
             <span className="font-semibold text-base tracking-tight text-foreground">
               SKAKK-UP
@@ -119,13 +120,13 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               className="fixed left-0 top-0 bottom-0 z-50 w-64 neu-sidebar border-r border-stone-200/50 p-6 lg:hidden"
             >
-              <div className="flex justify-between items-center mb-8">
-                <div className="flex items-center gap-2">
-                  <div className="size-9 rounded-neu neu-surface flex justify-center items-center p-1">
-                    <img src="/logo.svg" alt="SKAKK-UP" className="w-full h-full" />
+                <div className="flex justify-between items-center mb-8">
+                  <div className="flex items-center gap-2">
+                    <div className="size-9 rounded-neu neu-surface flex justify-center items-center p-1">
+                      <Image src="/logo.svg" alt="SKAKK-UP" width={36} height={36} className="w-full h-full" />
+                    </div>
+                    <span className="font-semibold text-lg text-foreground">SKAKK-UP</span>
                   </div>
-                  <span className="font-semibold text-lg text-foreground">SKAKK-UP</span>
-                </div>
                 <button onClick={() => setSidebarOpen(false)} className="p-2 rounded-neu neu-button">
                   <X className="size-5 text-foreground" />
                 </button>

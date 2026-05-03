@@ -76,6 +76,8 @@ export async function POST(request: NextRequest) {
         'Content-Range': rangeHeader,
       },
       body: chunk.stream(),
+      // @ts-ignore
+      duplex: 'half',
     });
 
     console.log('[upload/chunk] Google response status:', uploadRes.status);

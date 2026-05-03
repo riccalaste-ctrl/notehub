@@ -92,7 +92,7 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-neu-base">
+    <div className="min-h-screen bg-neu-base admin-gray">
       <Header breadcrumbs={[{ label: 'Dashboard' }]} onOpenUpload={() => setUploadModalOpen(true)} />
 
       <main className="lg:pl-56 pt-16">

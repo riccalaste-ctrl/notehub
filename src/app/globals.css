@@ -89,6 +89,31 @@ body {
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   }
 
+  .admin-gray .neu-header {
+    background: #E0E5EC;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .admin-gray .neu-nav {
+    background: #E0E5EC;
+  }
+
+  .admin-gray .neu-card {
+    background: #E0E5EC;
+    border-radius: var(--neu-radius-lg);
+    box-shadow: 5px 5px 10px #c5cad1, -5px -5px 10px #f4f9ff;
+    border: none;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .admin-gray .neu-surface,
+  .admin-gray .neu-surface-pressed {
+    background: #E0E5EC;
+    border-radius: var(--neu-radius);
+    box-shadow: 5px 5px 10px #c5cad1, -5px -5px 10px #f4f9ff;
+    transition: all 0.3s ease-in-out;
+  }
+
   .neu-input {
     background: linear-gradient(145deg, #dce1e8, #e4e9f0);
     border: none;

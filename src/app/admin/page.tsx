@@ -526,7 +526,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neu-base">
+    <div className="min-h-screen bg-neu-base admin-gray">
       {criticalError && (
         <ErrorAlert
           title={criticalError.title}
@@ -552,7 +552,7 @@ export default function AdminPage() {
         </div>
       </header>
 
-      <div className="neu-surface rounded-none border-b border-stone-200/50">
+      <div className="neu-nav neu-surface rounded-none border-b border-stone-200/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex space-x-6 overflow-x-auto">
             {[

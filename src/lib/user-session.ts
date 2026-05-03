@@ -1,3 +1,5 @@
+'use server';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { supabaseAdmin } from '@/lib/supabase';
@@ -83,9 +85,4 @@ export function setUserSessionCookie(response: NextResponse, accessToken: string
 
 export function clearUserSessionCookie(response: NextResponse) {
   response.cookies.delete(USER_SESSION_COOKIE);
-}
-
-export function buildInstitutionDisclaimer(supportEmail?: string) {
-  const fallbackEmail = supportEmail || 'support@liceoscacchibari.it';
-  return `Gli amministratori non sono responsabili dei file caricati ma si impegnano a rimuovere contenuti vietati segnalati alla mail ${fallbackEmail}.`;
 }

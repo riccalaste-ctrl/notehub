@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { buildInstitutionDisclaimer } from '@/lib/user-session';
+import { buildInstitutionDisclaimer } from '@/lib/user-session-client';
 
 interface Settings {
   support_email?: string;

@@ -27,7 +27,7 @@ import {
   XCircle,
   Settings,
 } from 'lucide-react';
-import { buildInstitutionDisclaimer } from '@/lib/user-session';
+import { buildInstitutionDisclaimer } from '@/lib/user-session-client';
 
 interface Subject {
   id: string;

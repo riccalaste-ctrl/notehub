@@ -43,9 +43,15 @@ function getCategoryFromContent(content: string): string {
 export default function ConsigliPage() {
   const [consigli, setConsigli] = useState<Consiglio[]>([]);
   const [loading, setLoading] = useState(true);
+  const [consigliEmail, setConsigliEmail] = useState<string>('');
   const { toast, showToast, hideToast } = useToast();
 
   useEffect(() => {
+    fetch('/api/public/settings')
+      .then((res) => res.json())
+      .then((data) => setConsigliEmail(data.settings?.consigli_email || ''))
+      .catch(() => {});
+
     fetch('/api/consigli')
       .then((res) => {
         if (!res.ok) throw new Error('Errore nel caricamento');
@@ -80,8 +86,18 @@ export default function ConsigliPage() {
               </h1>
             </div>
             <p className="text-base text-foreground-light">
-              Trucchi per lo studio, info sui professori e consigli per organizzarsi al meglio
+              Trucchi per lo studio, info sui professori e consigli per organizzarti al meglio
             </p>
+            {consigliEmail && (
+              <div className="mt-4 p-4 rounded-neu gray-card">
+                <p className="text-sm text-foreground-light">
+                  Hai un consiglio da condividere? Scrivici a:{' '}
+                  <a href={`mailto:${consigliEmail}`} className="text-[#6366F1] hover:underline font-semibold">
+                    {consigliEmail}
+                  </a>
+                </p>
+              </div>
+            )}
           </motion.div>
 
           {loading ? (

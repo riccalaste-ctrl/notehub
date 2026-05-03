@@ -156,7 +156,7 @@ export default function AdminPage() {
   const [criticalError, setCriticalError] = useState<{ title: string; message: string } | null>(null);
   const { toast, showToast, hideToast } = useToast();
   const [settings, setSettings] = useState<Record<string, string>>({});
-  const [settingsForm, setSettingsForm] = useState({ support_email: '', site_policy: '', allowed_external_emails: '' });
+  const [settingsForm, setSettingsForm] = useState({ support_email: '', site_policy: '', allowed_external_emails: '', consigli_email: '' });
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
 
   const fetchData = useCallback(async () => {
@@ -203,6 +203,7 @@ export default function AdminPage() {
           support_email: data.settings?.support_email || data.settings?.admin_email || '',
           site_policy: data.settings?.site_policy || '',
           allowed_external_emails: data.settings?.allowed_external_emails || '',
+          consigli_email: data.settings?.consigli_email || '',
         });
       }
 
@@ -1012,17 +1013,26 @@ export default function AdminPage() {
         {activeTab === 'consigli' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1">
-              <div className="neu-card p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-8 h-8 rounded-neu gradient-lavender flex items-center justify-center">
-                    <Lightbulb className="size-4 text-white" />
+                <div className="neu-card p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-8 h-8 rounded-neu gradient-lavender flex items-center justify-center">
+                      <Lightbulb className="size-4 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground">
+                      {editingConsiglioId ? 'Modifica Consiglio' : 'Aggiungi Consiglio'}
+                    </h3>
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground">
-                    {editingConsiglioId ? 'Modifica Consiglio' : 'Aggiungi Consiglio'}
-                  </h3>
-                </div>
 
-                <form onSubmit={handleConsiglioSubmit} className="space-y-4">
+                  <div className="mb-4 p-3 rounded-neu neu-surface-pressed">
+                    <p className="text-sm text-foreground-light">
+                      Email per ricevere consigli dagli studenti:{' '}
+                      <span className="font-semibold text-foreground">
+                        {settings.consigli_email || 'Non configurata'}
+                      </span>
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleConsiglioSubmit} className="space-y-4">
                   <div>
                     <label className="block text-sm font-semibold text-foreground mb-2">Titolo</label>
                     <input
@@ -1160,6 +1170,45 @@ export default function AdminPage() {
             </div>
 
             <div className="space-y-6">
+              <div className="neu-card p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Mail className="size-5 text-[#6366F1]" />
+                  Email per Consigli Studenti
+                </h3>
+                <p className="text-sm text-foreground-light mb-4">
+                  Questa email verrà mostrata nella pagina Consigli per permettere agli studenti di inviare suggerimenti.
+                </p>
+                <div className="flex gap-3">
+                  <input
+                    type="email"
+                    value={settingsForm.consigli_email || ''}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, consigli_email: e.target.value })}
+                    placeholder="consigli@esempio.com"
+                    className="flex-1 px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition"
+                  />
+                  <button
+                    onClick={async () => {
+                      try {
+                        const res = await fetch('/api/admin/settings', {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ key: 'consigli_email', value: settingsForm.consigli_email }),
+                        });
+                        if (res.ok) {
+                          showToast('Email consigli aggiornata', 'success');
+                          fetchData();
+                        }
+                      } catch (error) {
+                        showToast('Errore aggiornamento', 'error');
+                      }
+                    }}
+                    className="px-6 py-3 bg-[#6366F1] text-white font-semibold rounded-neu premium-transition"
+                  >
+                    Salva
+                  </button>
+                </div>
+              </div>
+
               <div className="neu-card p-6">
                 <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                   <Mail className="size-5 text-[#6366F1]" />

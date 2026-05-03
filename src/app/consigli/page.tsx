@@ -38,37 +38,35 @@ export default function ConsigliPage() {
   const { toast, showToast, hideToast } = useToast();
 
   useEffect(() => {
-    fetch('/api/public/settings')
-      .then((res) => res.json())
-      .then((data) => setConsigliEmail(data.settings?.consigli_email || ''))
-      .catch(() => {});
+    const loadData = async () => {
+      fetch('/api/public/settings')
+        .then((res) => res.json())
+        .then((data) => setConsigliEmail(data.settings?.consigli_email || ''))
+        .catch(() => {});
 
-    Promise.all([
-      fetch('/api/consigli'),
-      fetch('/api/public/consigli-files').catch(() => ({ ok: false })),
-    ])
-      .then(([consigliRes, filesRes]) => {
-        if (consigliRes.ok) {
-          return consigliRes.json().then((data) => {
-            const published = (data.consigli || []).filter((c: Consiglio) => c.published);
-            setConsigli(published);
-            if (filesRes.ok) {
-              return filesRes.json().then((fd: any) => {
-                const filesByConsiglio: Record<string, ConsiglioFile[]> = {};
-                (fd.files || []).forEach((f: ConsiglioFile) => {
-                  if (!filesByConsiglio[f.consiglio_id]) filesByConsiglio[f.consiglio_id] = [];
-                  filesByConsiglio[f.consiglio_id].push(f);
-                });
-                setConsigliFiles(filesByConsiglio);
-              });
-            }
+      const filesRes = await fetch('/api/public/consigli-files').catch(() => null);
+      const consigliRes = await fetch('/api/consigli');
+
+      if (consigliRes.ok) {
+        const data = await consigliRes.json();
+        const published = (data.consigli || []).filter((c: Consiglio) => c.published);
+        setConsigli(published);
+
+        if (filesRes?.ok) {
+          const fd = await filesRes.json();
+          const filesByConsiglio: Record<string, ConsiglioFile[]> = {};
+          (fd.files || []).forEach((f: ConsiglioFile) => {
+            if (!filesByConsiglio[f.consiglio_id]) filesByConsiglio[f.consiglio_id] = [];
+            filesByConsiglio[f.consiglio_id].push(f);
           });
+          setConsigliFiles(filesByConsiglio);
         }
-      })
-      .catch((err) => {
-        console.error('Consigli fetch error:', err);
-      })
-      .finally(() => setLoading(false));
+      }
+
+      setLoading(false);
+    };
+
+    loadData();
   }, []);
 
   return (

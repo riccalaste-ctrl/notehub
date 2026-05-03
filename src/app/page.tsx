@@ -92,7 +92,7 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-neu-base admin-gray">
+    <div className="min-h-screen bg-neu-base">
       <Header breadcrumbs={[{ label: 'Dashboard' }]} onOpenUpload={() => setUploadModalOpen(true)} />
 
       <main className="lg:pl-56 pt-16">
@@ -171,6 +171,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
+            className="gray-cards"
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-foreground">Materie</h2>
@@ -214,7 +215,7 @@ export default function DashboardPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="mt-10"
+              className="mt-10 gray-cards"
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-foreground">Ultimi caricamenti</h2>

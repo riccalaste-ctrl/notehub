@@ -392,9 +392,14 @@ export default function AdminPage() {
 
   const deleteConsiglio = async (id: string) => {
     if (!confirm('Eliminare questo consiglio?')) return;
-    await fetch(`/api/admin/consigli?id=${id}`, { method: 'DELETE' });
-    showToast('Consiglio eliminato', 'success');
-    await fetchData();
+    try {
+      const res = await fetch(`/api/admin/consigli?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Errore durante l\'eliminazione');
+      showToast('Consiglio eliminato', 'success');
+      await fetchData();
+    } catch (error) {
+      showToast('Errore durante l\'eliminazione', 'error');
+    }
   };
 
   const deleteUpload = async (id: string) => {

@@ -9,9 +9,9 @@ module.exports = {
     extend: {
       colors: {
         neu: {
-          base: '#E0E5EC',
-          surface: '#E0E5EC',
-          light: '#FFFFFF',
+          base: '#ffffff',
+          surface: '#ffffff',
+          light: '#ffffff',
           dark: 'rgba(163, 177, 198, 0.6)',
         },
         foreground: {

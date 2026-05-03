@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --neu-base: #E0E5EC;
-  --neu-surface: #E0E5EC;
-  --neu-light: #FFFFFF;
+  --neu-base: #ffffff;
+  --neu-surface: #ffffff;
+  --neu-light: #ffffff;
   --neu-dark: rgba(163, 177, 198, 0.6);
   --neu-dark-strong: rgba(163, 177, 198, 0.8);
   --foreground: #000000;
@@ -66,16 +66,17 @@ body {
   }
 
   .neu-card {
-    background: linear-gradient(145deg, #e6ebf2, #d8dde4);
+    background: #ffffff;
     border-radius: var(--neu-radius-lg);
-    box-shadow: 6px 6px 12px #c5cad1, -6px -6px 12px #f4f9ff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.04);
     transition: all 0.3s ease-in-out;
     color: #000000;
   }
 
   .neu-card:hover {
     transform: translateY(-2px);
-    box-shadow: 8px 8px 16px #c5cad1, -8px -8px 16px #f4f9ff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   }
 
   .neu-sidebar {
@@ -136,15 +137,16 @@ body {
   }
 
   .neu-bento-card {
-    background: linear-gradient(145deg, #e6ebf2, #d8dde4);
+    background: #ffffff;
     border-radius: var(--neu-radius-xl);
-    box-shadow: 8px 8px 16px #c5cad1, -8px -8px 16px #f4f9ff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.04);
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .neu-bento-card:hover {
     transform: translateY(-4px);
-    box-shadow: 10px 10px 20px #c5cad1, -10px -10px 20px #f4f9ff;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   }
 
   .neu-badge {

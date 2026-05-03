@@ -19,7 +19,6 @@ export async function GET(request: NextRequest) {
     options: {
       redirectTo,
       queryParams: {
-        hd: process.env.ALLOWED_EMAIL_DOMAIN || 'liceoscacchibari.it',
         prompt: 'select_account',
       },
     },

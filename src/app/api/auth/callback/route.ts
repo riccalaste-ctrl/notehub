@@ -10,8 +10,8 @@ export async function GET(request: NextRequest) {
   const error = params.get('error');
   const errorDescription = params.get('error_description');
 
-  console.log('[AUTH] Callback hit. URL:', request.nextUrl.toString());
-  console.log('[AUTH] All params:', Object.fromEntries(params.entries()));
+  console.log('[AUTH] Callback URL:', request.nextUrl.toString());
+  console.log('[AUTH] Query params:', Object.fromEntries(params.entries()));
 
   if (error) {
     console.log('[AUTH] OAuth error:', error, errorDescription);
@@ -19,10 +19,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (!code) {
-    console.log('[AUTH] Missing code parameter. This usually means:');
-    console.log('[AUTH] 1. The redirect URL is not correctly configured in Supabase');
-    console.log('[AUTH] 2. The Google OAuth callback in Supabase is misconfigured');
-    console.log('[AUTH] 3. The Site URL in Supabase is wrong');
+    console.log('[AUTH] No code param. Headers:', Object.fromEntries(request.headers.entries()));
     return NextResponse.redirect(new URL('/login?error=missing_code', request.nextUrl.origin));
   }
 
@@ -39,7 +36,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
   if (exchangeError || !data.session?.access_token || !data.user) {
-    console.log('[AUTH] OAuth exchange failed:', exchangeError);
+    console.log('[AUTH] Exchange error:', exchangeError);
     return NextResponse.redirect(new URL('/login?error=oauth_exchange_failed', request.nextUrl.origin));
   }
 
@@ -57,9 +54,9 @@ export async function GET(request: NextRequest) {
   }
 
   const origin = request.nextUrl.origin;
-  console.log('[AUTH] Setting cookie, token length:', data.session.access_token.length, 'redirect to:', origin + '/');
+  console.log('[AUTH] Token length:', data.session.access_token.length);
   const response = NextResponse.redirect(new URL('/', origin));
   setUserSessionCookie(response, data.session.access_token);
-  console.log('[AUTH] Cookie set, redirecting to home');
+  console.log('[AUTH] Cookie set, redirecting');
   return response;
 }

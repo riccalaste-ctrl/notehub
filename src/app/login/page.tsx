@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Shield } from 'lucide-react';
-import { buildInstitutionDisclaimer } from '@/lib/user-session-client';
+import { buildInstitutionDisclaimer, signInWithGoogle } from '@/lib/user-session-client';
 
 interface SettingsResponse {
   settings?: {
@@ -15,6 +15,7 @@ interface SettingsResponse {
 export default function LoginPage() {
   const [supportEmail, setSupportEmail] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/public/settings')
@@ -24,14 +25,19 @@ export default function LoginPage() {
         setSupportEmail(email);
       })
       .catch(() => {});
-  }, []);
 
-  const errorParam =
-    typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('error') : null;
-  const errorMessage =
-    errorParam === 'invalid_domain'
-      ? 'Accesso consentito solo con email @liceoscacchibari.it.'
-      : null;
+    const params = new URLSearchParams(window.location.search);
+    const errorParam = params.get('error');
+    if (errorParam) {
+      setError(
+        errorParam === 'invalid_domain'
+          ? 'La tua email non è autorizzata all\'accesso.'
+          : errorParam === 'oauth_exchange_failed'
+            ? 'Errore durante il login. Riprova.'
+            : 'Errore di autenticazione. Riprova.'
+      );
+    }
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-neu-base px-4">
@@ -47,17 +53,22 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {errorMessage && (
+        {(error) && (
           <div className="px-4 py-3 bg-[#EF4444]/10 border border-[#EF4444]/20 text-[#EF4444] text-sm rounded-neu mb-4">
-            {errorMessage}
+            {error}
           </div>
         )}
 
         <button
           type="button"
-          onClick={() => {
+          onClick={async () => {
             setLoading(true);
-            window.location.href = '/api/auth/google/login';
+            setError(null);
+            const { error: signInError } = await signInWithGoogle();
+            if (signInError) {
+              setError(signInError);
+              setLoading(false);
+            }
           }}
           disabled={loading}
           className="w-full py-3 bg-gradient-to-br from-[#6366F1] to-[#4F46E5] text-white font-semibold rounded-neu premium-transition disabled:opacity-60"

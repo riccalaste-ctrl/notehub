@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Shield } from 'lucide-react';
-import { buildInstitutionDisclaimer } from '@/lib/user-session';
+import { buildInstitutionDisclaimer } from '@/lib/user-session-client';
 
 interface SettingsResponse {
   settings?: {

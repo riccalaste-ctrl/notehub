@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "src/app/api/upload/direct/route.ts": {
-      "maxDuration": 60
-    }
-  }
-}

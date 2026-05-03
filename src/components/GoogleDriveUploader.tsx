@@ -11,7 +11,7 @@ const ALLOWED_UPLOAD_MIME_TYPES = [
   'image/png',
 ];
 
-const MAX_UPLOAD_SIZE_MB = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB || '4');
+const MAX_UPLOAD_SIZE_MB = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB || '50');
 const MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024;
 
 const ALLOWED_EXTENSIONS = '.pdf,.doc,.docx,.jpg,.jpeg,.png';
@@ -30,6 +30,52 @@ function formatFileSize(bytes: number): string {
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+function uploadToGoogleDrive(
+  uploadUrl: string,
+  file: File,
+  onProgress: (percent: number) => void
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+
+    xhr.upload.addEventListener('progress', (event) => {
+      if (event.lengthComputable) {
+        onProgress(Math.round((event.loaded / event.total) * 100));
+      }
+    });
+
+    xhr.addEventListener('load', () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const data = JSON.parse(xhr.responseText);
+          if (data?.id) {
+            resolve(data.id);
+          } else {
+            reject(new Error('Google non ha restituito un ID file valido'));
+          }
+        } catch {
+          reject(new Error('Risposta non valida da Google Drive'));
+        }
+      } else {
+        let msg = `Upload fallito (${xhr.status})`;
+        try {
+          const parsed = JSON.parse(xhr.responseText);
+          if (parsed?.error?.message) msg += `: ${parsed.error.message}`;
+        } catch {
+          if (xhr.responseText) msg += `: ${xhr.responseText.slice(0, 200)}`;
+        }
+        reject(new Error(msg));
+      }
+    });
+
+    xhr.addEventListener('error', () => reject(new Error('Errore di rete durante l\'upload')));
+    xhr.addEventListener('abort', () => reject(new Error('Upload annullato')));
+
+    xhr.open('PUT', uploadUrl);
+    xhr.send(file);
+  });
 }
 
 export default function GoogleDriveUploader({
@@ -77,51 +123,53 @@ export default function GoogleDriveUploader({
     }
 
     setUploading(true);
-    setProgress(10);
-
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-    formData.append('subjectId', subjectId);
-    formData.append('professorId', professorId);
-    formData.append('uploaderName', uploaderName);
+    setProgress(5);
 
     try {
-      const xhr = new XMLHttpRequest();
-
-      xhr.upload.addEventListener('progress', (event) => {
-        if (event.lengthComputable) {
-          const percent = Math.round((event.loaded / event.total) * 80) + 10;
-          setProgress(percent);
-        }
+      const sessionRes = await fetch('/api/upload/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subjectId,
+          professorId,
+          uploaderName,
+          originalFilename: selectedFile.name,
+          mimeType: selectedFile.type,
+          sizeBytes: selectedFile.size,
+        }),
       });
 
-      xhr.addEventListener('load', () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          setProgress(100);
-          setTimeout(() => onSuccess(), 300);
-        } else {
-          try {
-            const data = JSON.parse(xhr.responseText);
-            onError(data.error || 'Upload fallito');
-          } catch {
-            onError('Upload fallito');
-          }
-        }
-        setUploading(false);
+      const sessionData = await sessionRes.json();
+
+      if (!sessionRes.ok) {
+        throw new Error(sessionData.error || 'Impossibile creare la sessione di upload');
+      }
+
+      const { uploadUrl, sessionId } = sessionData;
+
+      const driveFileId = await uploadToGoogleDrive(uploadUrl, selectedFile, (pct) => {
+        setProgress(Math.round(10 + (pct / 100) * 70));
       });
 
-      xhr.addEventListener('error', () => {
-        onError('Errore di rete. Verifica la connessione e riprova.');
-        setUploading(false);
+      setProgress(85);
+
+      const completeRes = await fetch('/api/upload/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          driveFileId,
+        }),
       });
 
-      xhr.addEventListener('abort', () => {
-        onError('Upload annullato');
-        setUploading(false);
-      });
+      const completeData = await completeRes.json();
 
-      xhr.open('POST', '/api/upload/direct');
-      xhr.send(formData);
+      if (!completeRes.ok) {
+        throw new Error(completeData.error || 'Impossibile completare il salvataggio del file');
+      }
+
+      setProgress(100);
+      setTimeout(() => onSuccess(), 300);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Upload fallito';
       onError(message);

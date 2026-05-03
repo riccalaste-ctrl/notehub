@@ -156,7 +156,7 @@ export default function AdminPage() {
   const [criticalError, setCriticalError] = useState<{ title: string; message: string } | null>(null);
   const { toast, showToast, hideToast } = useToast();
   const [settings, setSettings] = useState<Record<string, string>>({});
-  const [settingsForm, setSettingsForm] = useState({ support_email: '', site_policy: '' });
+  const [settingsForm, setSettingsForm] = useState({ support_email: '', site_policy: '', allowed_external_emails: '' });
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
 
   const fetchData = useCallback(async () => {
@@ -202,6 +202,7 @@ export default function AdminPage() {
         setSettingsForm({
           support_email: data.settings?.support_email || data.settings?.admin_email || '',
           site_policy: data.settings?.site_policy || '',
+          allowed_external_emails: data.settings?.allowed_external_emails || '',
         });
       }
 
@@ -1223,6 +1224,46 @@ export default function AdminPage() {
                   className="mt-4 px-6 py-3 bg-[#6366F1] text-white font-semibold rounded-neu premium-transition"
                 >
                   Salva Policy
+                </button>
+              </div>
+
+              <div className="neu-card p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Email esterne consentite (temporanee)</h3>
+                <p className="text-sm text-foreground-light mb-4">
+                  Inserisci email ospiti separate da virgola. Solo queste, oltre al dominio istituzionale, potranno accedere.
+                </p>
+                <textarea
+                  value={settingsForm.allowed_external_emails}
+                  onChange={(e) => setSettingsForm({ ...settingsForm, allowed_external_emails: e.target.value })}
+                  rows={4}
+                  className="w-full px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition resize-none"
+                  placeholder="ospite1@gmail.com,ospite2@gmail.com"
+                />
+                <button
+                  onClick={async () => {
+                    try {
+                      const sanitized = settingsForm.allowed_external_emails
+                        .split(',')
+                        .map((value) => value.trim().toLowerCase())
+                        .filter(Boolean)
+                        .join(',');
+
+                      const res = await fetch('/api/admin/settings', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ key: 'allowed_external_emails', value: sanitized }),
+                      });
+                      if (res.ok) {
+                        showToast('Whitelist email esterne aggiornata', 'success');
+                        fetchData();
+                      }
+                    } catch {
+                      showToast('Errore aggiornamento whitelist', 'error');
+                    }
+                  }}
+                  className="mt-4 px-6 py-3 bg-[#6366F1] text-white font-semibold rounded-neu premium-transition"
+                >
+                  Salva whitelist esterni
                 </button>
               </div>
 

@@ -126,7 +126,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    console.error('Create upload session error:', error);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('Create upload session error:', { message, stack: error instanceof Error ? error.stack : undefined });
+
+    if (message.includes('not found') || message.includes('404')) {
+      return NextResponse.json(
+        { error: 'Cartella Drive non trovata. Ricollega Google Drive dal pannello admin.' },
+        { status: 400 }
+      );
+    }
+
+    if (message.includes('permission') || message.includes('403')) {
+      return NextResponse.json(
+        { error: 'Permessi Drive insufficienti. Ricollega Google Drive dal pannello admin.' },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Impossibile creare la sessione di upload Drive' },
       { status: 500 }

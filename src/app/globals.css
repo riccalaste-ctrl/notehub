@@ -68,13 +68,15 @@ body {
   .neu-card {
     background: var(--neu-surface);
     border-radius: var(--neu-radius-lg);
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: var(--neu-shadow-raised);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     transition: all 0.3s ease-in-out;
     color: #000000;
   }
 
   .neu-card:hover {
     transform: translateY(-4px);
+    box-shadow: var(--neu-shadow-hover);
   }
 
   .neu-sidebar {
@@ -130,12 +132,14 @@ body {
   .neu-bento-card {
     background: var(--neu-surface);
     border-radius: var(--neu-radius-xl);
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: var(--neu-shadow-raised-lg);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .neu-bento-card:hover {
     transform: translateY(-6px);
+    box-shadow: var(--neu-shadow-hover-xl);
   }
 
   .neu-badge {

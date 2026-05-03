@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
         title: title.trim(),
         content: content.trim(),
         professor_id,
-        published: published !== undefined ? published : true,
+        published: published !== undefined ? published : false,
       })
       .select()
       .single();

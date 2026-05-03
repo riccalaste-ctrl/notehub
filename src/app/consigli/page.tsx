@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Lightbulb, Plus, Brain, BookOpen, Target, User } from 'lucide-react';
+import { Lightbulb, FileText, User, Mail } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Toast, { useToast } from '@/components/Toast';
@@ -20,28 +20,19 @@ interface Consiglio {
   };
 }
 
-const categoryIcons: Record<string, React.ReactNode> = {
-  metodo: <Brain className="size-5 text-mint-dark" />,
-  risorse: <BookOpen className="size-5 text-lavender-dark" />,
-  organizzazione: <Target className="size-5 text-coral-dark" />,
-};
-
-const categoryColors: Record<string, string> = {
-  metodo: 'bg-mint/20',
-  risorse: 'bg-lavender/20',
-  organizzazione: 'bg-coral/20',
-};
-
-function getCategoryFromContent(content: string): string {
-  const lower = content.toLowerCase();
-  if (lower.includes('studio') || lower.includes('metodo') || lower.includes('tecnica')) return 'metodo';
-  if (lower.includes('libro') || lower.includes('risorsa') || lower.includes('materiale')) return 'risorse';
-  if (lower.includes('organizz') || lower.includes('pianif') || lower.includes('scadenz')) return 'organizzazione';
-  return 'metodo';
+interface ConsiglioFile {
+  id: string;
+  consiglio_id: string;
+  original_filename: string;
+  mime_type: string;
+  size_bytes: number;
+  download_url?: string;
+  view_url?: string;
 }
 
 export default function ConsigliPage() {
   const [consigli, setConsigli] = useState<Consiglio[]>([]);
+  const [consigliFiles, setConsigliFiles] = useState<Record<string, ConsiglioFile[]>>({});
   const [loading, setLoading] = useState(true);
   const [consigliEmail, setConsigliEmail] = useState<string>('');
   const { toast, showToast, hideToast } = useToast();
@@ -52,13 +43,27 @@ export default function ConsigliPage() {
       .then((data) => setConsigliEmail(data.settings?.consigli_email || ''))
       .catch(() => {});
 
-    fetch('/api/consigli')
-      .then((res) => {
-        if (!res.ok) throw new Error('Errore nel caricamento');
-        return res.json();
-      })
-      .then((data) => {
-        setConsigli(data.consigli || []);
+    Promise.all([
+      fetch('/api/consigli'),
+      fetch('/api/public/consigli-files').catch(() => ({ ok: false })),
+    ])
+      .then(([consigliRes, filesRes]) => {
+        if (consigliRes.ok) {
+          return consigliRes.json().then((data) => {
+            const published = (data.consigli || []).filter((c: Consiglio) => c.published);
+            setConsigli(published);
+            if (filesRes.ok) {
+              return filesRes.json().then((fd: any) => {
+                const filesByConsiglio: Record<string, ConsiglioFile[]> = {};
+                (fd.files || []).forEach((f: ConsiglioFile) => {
+                  if (!filesByConsiglio[f.consiglio_id]) filesByConsiglio[f.consiglio_id] = [];
+                  filesByConsiglio[f.consiglio_id].push(f);
+                });
+                setConsigliFiles(filesByConsiglio);
+              });
+            }
+          });
+        }
       })
       .catch((err) => {
         console.error('Consigli fetch error:', err);
@@ -88,16 +93,22 @@ export default function ConsigliPage() {
             <p className="text-base text-foreground-light">
               Trucchi per lo studio, info sui professori e consigli per organizzarti al meglio
             </p>
-            {consigliEmail && (
-              <div className="mt-4 p-4 rounded-neu gray-card">
-                <p className="text-sm text-foreground-light">
-                  Hai un consiglio da condividere? Scrivici a:{' '}
-                  <a href={`mailto:${consigliEmail}`} className="text-[#6366F1] hover:underline font-semibold">
-                    {consigliEmail}
-                  </a>
-                </p>
+            {consigliEmail ? (
+              <div className="mt-4 p-4 rounded-neu gray-card flex items-center gap-3">
+                <div className="w-10 h-10 rounded-neu flex items-center justify-center flex-shrink-0 bg-[#6366F1]/10">
+                  <Mail className="size-5 text-[#6366F1]" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Hai un consiglio da condividere?</p>
+                  <p className="text-sm text-foreground-light">
+                    Scrivici a:{' '}
+                    <a href={`mailto:${consigliEmail}`} className="text-[#6366F1] hover:underline font-semibold">
+                      {consigliEmail}
+                    </a>
+                  </p>
+                </div>
               </div>
-            )}
+            ) : null}
           </motion.div>
 
           {loading ? (
@@ -113,7 +124,7 @@ export default function ConsigliPage() {
           ) : consigli.length > 0 ? (
             <div className="space-y-4">
               {consigli.map((consiglio, index) => {
-                const category = getCategoryFromContent(consiglio.content);
+                const files = consigliFiles[consiglio.id] || [];
                 return (
                   <motion.div
                     key={consiglio.id}
@@ -123,8 +134,8 @@ export default function ConsigliPage() {
                     className="neu-card p-6"
                   >
                     <div className="flex items-start gap-4">
-                      <div className={`w-10 h-10 rounded-neu flex items-center justify-center flex-shrink-0 ${categoryColors[category] || categoryColors.metodo}`}>
-                        {categoryIcons[category] || categoryIcons.metodo}
+                      <div className="w-10 h-10 rounded-neu gradient-lavender flex items-center justify-center flex-shrink-0">
+                        <Lightbulb className="size-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-foreground mb-2">
@@ -133,6 +144,27 @@ export default function ConsigliPage() {
                         <p className="text-sm text-foreground-light leading-relaxed whitespace-pre-line">
                           {consiglio.content}
                         </p>
+                        {files.length > 0 && (
+                          <div className="mt-4 pt-3 border-t border-stone-200/30">
+                            <p className="text-xs font-semibold text-foreground mb-2">File allegati</p>
+                            <div className="space-y-1">
+                              {files.map((file) => (
+                                <a
+                                  key={file.id}
+                                  href={file.view_url || file.download_url || '#'}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-2 px-3 py-1.5 rounded-neu-sm neu-surface text-xs hover:bg-[#6366F1]/10 transition"
+                                >
+                                  <FileText className="size-3 text-[#6366F1]" />
+                                  <span className="font-medium text-foreground-light hover:text-foreground truncate">
+                                    {file.original_filename}
+                                  </span>
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                         <div className="flex items-center gap-3 mt-4 text-xs text-foreground-muted">
                           {consiglio.professor && (
                             <span className="flex items-center gap-1">

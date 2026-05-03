@@ -158,6 +158,9 @@ export default function AdminPage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [settingsForm, setSettingsForm] = useState({ support_email: '', site_policy: '', allowed_external_emails: '', consigli_email: '' });
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [consigliFiles, setConsigliFiles] = useState<Record<string, any[]>>({});
+  const [consigliDriveConnected, setConsigliDriveConnected] = useState(false);
+  const [consigliDriveEmail, setConsigliDriveEmail] = useState('');
 
   const fetchData = useCallback(async () => {
     try {
@@ -206,6 +209,19 @@ export default function AdminPage() {
           consigli_email: data.settings?.consigli_email || '',
         });
       }
+
+      try {
+        const driveRes = await fetch('/api/admin/consigli-files');
+        if (driveRes.ok) {
+          const data = await driveRes.json();
+          const filesByConsiglio: Record<string, any[]> = {};
+          (data.files || []).forEach((f: any) => {
+            if (!filesByConsiglio[f.consiglio_id]) filesByConsiglio[f.consiglio_id] = [];
+            filesByConsiglio[f.consiglio_id].push(f);
+          });
+          setConsigliFiles(filesByConsiglio);
+        }
+      } catch {}
 
       if (auditRes.ok) {
         const data = await auditRes.json();
@@ -397,9 +413,73 @@ export default function AdminPage() {
       const res = await fetch(`/api/admin/consigli?id=${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Errore durante l\'eliminazione');
       showToast('Consiglio eliminato', 'success');
+      setConsigliFiles((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
       await fetchData();
     } catch (error) {
       showToast('Errore durante l\'eliminazione', 'error');
+    }
+  };
+
+  const toggleConsiglioPublished = async (id: string, currentPublished: boolean) => {
+    try {
+      const res = await fetch('/api/admin/consigli', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, published: !currentPublished }),
+      });
+      if (res.ok) {
+        showToast(!currentPublished ? 'Consiglio pubblicato' : 'Consiglio messo in bozza', 'success');
+        await fetchData();
+      }
+    } catch (error) {
+      showToast('Errore', 'error');
+    }
+  };
+
+  const handleConsiglioFileUpload = async (consiglioId: string, file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('consiglio_id', consiglioId);
+
+      const res = await fetch('/api/admin/consigli-files', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Upload failed');
+      }
+
+      const data = await res.json();
+      setConsigliFiles((prev) => ({
+        ...prev,
+        [consiglioId]: [...(prev[consiglioId] || []), data.file],
+      }));
+      showToast('File caricato', 'success');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Errore upload', 'error');
+    }
+  };
+
+  const handleConsiglioFileDelete = async (consiglioId: string, fileId: string) => {
+    if (!confirm('Eliminare questo file?')) return;
+    try {
+      const res = await fetch(`/api/admin/consigli-files?file_id=${fileId}`, { method: 'DELETE' });
+      if (res.ok) {
+        setConsigliFiles((prev) => ({
+          ...prev,
+          [consiglioId]: (prev[consiglioId] || []).filter((f: any) => f.id !== fileId),
+        }));
+        showToast('File eliminato', 'success');
+      }
+    } catch (error) {
+      showToast('Errore', 'error');
     }
   };
 
@@ -1024,11 +1104,61 @@ export default function AdminPage() {
                   </div>
 
                   <div className="mb-4 p-3 rounded-neu neu-surface-pressed">
-                    <p className="text-sm text-foreground-light">
-                      Email per ricevere consigli dagli studenti:{' '}
-                      <span className="font-semibold text-foreground">
-                        {settings.consigli_email || 'Non configurata'}
-                      </span>
+                    <p className="text-sm font-semibold text-foreground mb-2">1. Collega Drive per i consigli</p>
+                    <button
+                      onClick={async () => {
+                        try {
+                          const res = await fetch('/api/admin/consigli-files?action=connect', { method: 'PUT' });
+                          if (res.ok) {
+                            const data = await res.json();
+                            window.location.href = data.authUrl;
+                          }
+                        } catch (error) {
+                          showToast('Errore', 'error');
+                        }
+                      }}
+                      className="w-full py-2 text-sm bg-[#6366F1] text-white font-semibold rounded-neu premium-transition"
+                    >
+                      Collega Google Account
+                    </button>
+                    <p className="text-xs text-foreground-muted mt-2">
+                      Serve per caricare file allegati ai consigli
+                    </p>
+                  </div>
+
+                  <div className="mb-4 p-3 rounded-neu neu-surface-pressed">
+                    <p className="text-sm font-semibold text-foreground mb-2">2. Email per ricevere consigli dagli studenti</p>
+                    <div className="flex gap-2">
+                      <input
+                        type="email"
+                        value={settingsForm.consigli_email || ''}
+                        onChange={(e) => setSettingsForm({ ...settingsForm, consigli_email: e.target.value })}
+                        placeholder="email-consigli@gmail.com"
+                        className="flex-1 px-3 py-2 neu-input rounded-neu text-sm text-foreground placeholder-foreground-muted outline-none premium-transition"
+                      />
+                      <button
+                        onClick={async () => {
+                          try {
+                            const res = await fetch('/api/admin/settings', {
+                              method: 'PUT',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ key: 'consigli_email', value: settingsForm.consigli_email }),
+                            });
+                            if (res.ok) {
+                              showToast('Email consigli aggiornata', 'success');
+                              fetchData();
+                            }
+                          } catch (error) {
+                            showToast('Errore aggiornamento', 'error');
+                          }
+                        }}
+                        className="px-4 py-2 text-sm bg-[#6366F1] text-white font-semibold rounded-neu premium-transition"
+                      >
+                        Salva
+                      </button>
+                    </div>
+                    <p className="text-xs text-foreground-muted mt-2">
+                      Questa email apparirà nella pagina Consigli per gli studenti
                     </p>
                   </div>
 
@@ -1077,14 +1207,14 @@ export default function AdminPage() {
                       onChange={(e) => setConsiglioForm({ ...consiglioForm, published: e.target.checked })}
                       className="rounded border-stone-300 text-[#6366F1] focus:ring-[#6366F1]"
                     />
-                    <label htmlFor="consiglio-published" className="text-sm font-medium text-foreground">Pubblicato</label>
+                    <label htmlFor="consiglio-published" className="text-sm font-medium text-foreground">Pubblica subito</label>
                   </div>
                   <button
                     type="submit"
                     disabled={loading}
                     className="w-full py-3 bg-[#9B72B0] text-white font-semibold rounded-neu premium-transition shadow-neu disabled:opacity-50"
                   >
-                    {loading ? 'Elaborazione...' : editingConsiglioId ? 'Aggiorna' : 'Pubblica'}
+                    {loading ? 'Elaborazione...' : editingConsiglioId ? 'Aggiorna' : 'Salva come bozza'}
                   </button>
                   {editingConsiglioId && (
                     <button
@@ -1107,13 +1237,24 @@ export default function AdminPage() {
                 </div>
                 <div className="divide-y divide-stone-200/50">
                   {consigli.map((consiglio) => (
-                    <div key={consiglio.id} className="px-6 py-4 hover:bg-neu-base/50 transition">
+                    <div key={consiglio.id} className="px-6 py-4">
                       <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <p className="font-semibold text-foreground">{consiglio.title}</p>
-                          <p className="text-xs text-foreground-light mt-1 line-clamp-2">{consiglio.content}</p>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="font-semibold text-foreground">{consiglio.title}</p>
+                            <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${consiglio.published ? 'bg-[#52B788]/20 text-[#2D8A60]' : 'bg-[#F59E0B]/20 text-[#B76B00]'}`}>
+                              {consiglio.published ? 'Pubblicato' : 'Bozza'}
+                            </span>
+                          </div>
+                          <p className="text-xs text-foreground-light line-clamp-2">{consiglio.content}</p>
                         </div>
                         <div className="flex gap-2 ml-4 flex-shrink-0">
+                          <button
+                            onClick={() => toggleConsiglioPublished(consiglio.id, consiglio.published)}
+                            className={`px-3 py-1.5 text-xs rounded-neu flex items-center gap-1 font-medium premium-transition ${consiglio.published ? 'bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 text-[#B76B00]' : 'bg-[#52B788]/10 hover:bg-[#52B788]/20 text-[#2D8A60]'}`}
+                          >
+                            {consiglio.published ? 'Metti in bozza' : 'Pubblica'}
+                          </button>
                           <button
                             onClick={() => {
                               setConsiglioForm({
@@ -1138,20 +1279,56 @@ export default function AdminPage() {
                           </button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-foreground-muted">
+                      <div className="flex items-center gap-3 text-xs text-foreground-muted mt-2">
                         <span className="flex items-center gap-1">
                           <Users className="size-3" />
                           {consiglio.professor?.name || '-'}
                         </span>
-                        <span>{consiglio.published ? 'Pubblicato' : 'Bozza'}</span>
                         <span>{new Date(consiglio.created_at).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                      </div>
+
+                      <div className="mt-3 pt-3 border-t border-stone-200/30">
+                        <p className="text-xs font-semibold text-foreground mb-2">File allegati ({(consigliFiles[consiglio.id] || []).length})</p>
+                        {(consigliFiles[consiglio.id] || []).length > 0 && (
+                          <div className="space-y-1 mb-3">
+                            {(consigliFiles[consiglio.id] || []).map((f: any) => (
+                              <div key={f.id} className="flex items-center justify-between px-3 py-1.5 rounded-neu-sm neu-surface text-xs">
+                                <a href={f.view_url} target="_blank" rel="noopener noreferrer" className="font-medium text-foreground-light hover:text-foreground truncate mr-2">
+                                  {f.original_filename}
+                                </a>
+                                <button
+                                  onClick={() => handleConsiglioFileDelete(consiglio.id, f.id)}
+                                  className="text-[#EF4444] hover:text-[#DC2626] flex-shrink-0"
+                                >
+                                  <Trash2 className="size-3" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-[#6366F1]/10 hover:bg-[#6366F1]/20 text-[#6366F1] rounded-neu font-medium premium-transition cursor-pointer">
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                handleConsiglioFileUpload(consiglio.id, file);
+                                e.target.value = '';
+                              }
+                            }}
+                          />
+                          <Plus className="size-3" />
+                          Allega file
+                        </label>
                       </div>
                     </div>
                   ))}
                   {consigli.length === 0 && (
                     <div className="px-6 py-12 text-center text-foreground-light">
                       <Lightbulb className="size-12 text-stone-300 mx-auto mb-3" />
-                      <p className="text-sm">Nessun consiglio pubblicato</p>
+                      <p className="text-sm">Nessun consiglio</p>
                     </div>
                   )}
                 </div>

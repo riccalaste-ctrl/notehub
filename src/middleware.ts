@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
 import { jwtVerify } from 'jose';
 
 const ADMIN_JWT_COOKIE = 'notehub_admin_jwt';
-const USER_JWT_COOKIE = 'notehub_user_jwt';
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'development-secret-key-min-32-chars-long'
 );
@@ -27,6 +27,32 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  let response = NextResponse.next({ request });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value;
+        },
+        set(name: string, value: string, options: any) {
+          request.cookies.set({ name, value, ...options });
+          response = NextResponse.next({ request });
+          response.cookies.set({ name, value, ...options });
+        },
+        remove(name: string, options: any) {
+          request.cookies.set({ name, value: '', ...options, maxAge: 0 });
+          response = NextResponse.next({ request });
+          response.cookies.set({ name, value: '', ...options, maxAge: 0 });
+        },
+      },
+    }
+  );
+
+  await supabase.auth.getSession();
+
   const isPublicAdminAPI = pathname === '/api/admin/login' || pathname === '/api/admin/verify-password';
   if (pathname.startsWith('/api/admin') && !isPublicAdminAPI) {
     const adminToken = request.cookies.get(ADMIN_JWT_COOKIE);
@@ -41,6 +67,7 @@ export async function middleware(request: NextRequest) {
 
   const isPublicPath =
     pathname === '/login' ||
+    pathname === '/auth/callback' ||
     pathname.startsWith('/api/auth') ||
     pathname.startsWith('/api/public') ||
     pathname.startsWith('/admin') ||
@@ -57,8 +84,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/api/user/');
 
   if (needsUserAuth && !isPublicPath) {
-    const userToken = request.cookies.get(USER_JWT_COOKIE)?.value;
-    if (!userToken) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
       if (pathname.startsWith('/api/')) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
@@ -67,12 +94,13 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {
   matcher: [
     '/',
+    '/auth/callback',
     '/materie/:path*',
     '/consigli',
     '/i-miei-appunti',

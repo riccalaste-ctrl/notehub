@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
 import { supabaseAdmin } from '@/lib/supabase';
 
 export const USER_SESSION_COOKIE = 'notehub_user_jwt';
@@ -47,27 +48,37 @@ export async function isAllowedUserEmail(email: string | undefined): Promise<boo
   return allowedEmails.has(normalizedEmail);
 }
 
+export async function getUserFromRequest(request: NextRequest) {
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value;
+        },
+      },
+    }
+  );
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.user) return null;
+  if (!(await isAllowedUserEmail(session.user.email))) return null;
+
+  return session.user;
+}
+
+// Deprecated: kept for backward compatibility with old API routes
 export async function getAuthenticatedUserFromRequest(request: NextRequest) {
-  const token = request.cookies.get(USER_SESSION_COOKIE)?.value;
-  if (!token) return null;
-
-  const { data, error } = await supabaseAdmin.auth.getUser(token);
-  if (error || !data.user) return null;
-  if (!(await isAllowedUserEmail(data.user.email))) return null;
-
-  return data.user;
+  return getUserFromRequest(request);
 }
 
 export function setUserSessionCookie(response: NextResponse, accessToken: string) {
-  response.cookies.set(USER_SESSION_COOKIE, accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    maxAge: 60 * 60 * 8,
-    path: '/',
-  });
+  // No longer needed - @supabase/ssr handles cookies automatically
+  return;
 }
 
 export function clearUserSessionCookie(response: NextResponse) {
-  response.cookies.delete(USER_SESSION_COOKIE);
+  // No longer needed - @supabase/ssr handles cookies automatically
+  return;
 }

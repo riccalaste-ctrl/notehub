@@ -1,17 +1,27 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { supabaseAdmin } from '@/lib/supabase';
-import { USER_SESSION_COOKIE, isAllowedUserEmail } from '@/lib/user-session';
+import { createServerClient } from '@supabase/ssr';
+import { isAllowedUserEmail } from '@/lib/user-session';
 
 export async function getAuthenticatedUserFromCookies() {
   const cookieStore = await cookies();
-  const token = cookieStore.get(USER_SESSION_COOKIE)?.value;
-  if (!token) return null;
 
-  const { data, error } = await supabaseAdmin.auth.getUser(token);
-  if (error || !data.user) return null;
-  if (!(await isAllowedUserEmail(data.user.email))) return null;
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+      },
+    }
+  );
 
-  return data.user;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.user) return null;
+  if (!(await isAllowedUserEmail(session.user.email))) return null;
+
+  return session.user;
 }

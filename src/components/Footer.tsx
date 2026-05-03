@@ -43,7 +43,7 @@ export default function Footer() {
         </div>
 
         {settings.site_policy && (
-          <div className="neu-card p-6 max-w-4xl mx-auto">
+          <div className="neu-card gray-card p-6 max-w-4xl mx-auto">
             <h3 className="text-lg font-semibold text-foreground mb-4 text-center">
               Policy & Responsabilità
             </h3>

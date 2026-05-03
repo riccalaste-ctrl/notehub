@@ -109,10 +109,7 @@ export default function MateriePage() {
 
   useEffect(() => {
     if (selectedSubject && selectedProfessor) {
-      const timer = setTimeout(() => {
-        fetchData(selectedSubject.id, selectedProfessor.id);
-      }, 300);
-      return () => clearTimeout(timer);
+      fetchData(selectedSubject.id, selectedProfessor.id);
     }
   }, [selectedSubject, selectedProfessor, search, fetchData]);
 

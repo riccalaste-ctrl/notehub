@@ -16,6 +16,7 @@ import {
   LayoutDashboard,
   Lightbulb,
   LogOut,
+  Mail,
   Plus,
   School,
   Shield,
@@ -24,6 +25,7 @@ import {
   Users,
   Link as LinkIcon,
   XCircle,
+  Settings,
 } from 'lucide-react';
 
 interface Subject {
@@ -74,7 +76,13 @@ interface SubjectProfessor {
   professor?: { id: string; name: string };
 }
 
-type Tab = 'dashboard' | 'subjects' | 'professors' | 'uploads' | 'consigli' | 'subject-professors';
+interface AppSetting {
+  key: string;
+  value: string;
+  description?: string;
+}
+
+type Tab = 'dashboard' | 'subjects' | 'professors' | 'uploads' | 'consigli' | 'subject-professors' | 'settings';
 
 function formatBytes(bytes: number) {
   if (!bytes) return '0 B';
@@ -137,15 +145,18 @@ export default function AdminPage() {
   const [spForm, setSpForm] = useState({ subject_id: '', professor_id: '' });
   const [criticalError, setCriticalError] = useState<{ title: string; message: string } | null>(null);
   const { toast, showToast, hideToast } = useToast();
+  const [settings, setSettings] = useState<Record<string, string>>({});
+  const [settingsForm, setSettingsForm] = useState({ admin_email: '', site_policy: '' });
 
   const fetchData = useCallback(async () => {
     try {
-      const [subjectsRes, professorsRes, uploadsRes, consigliRes, spRes] = await Promise.all([
+      const [subjectsRes, professorsRes, uploadsRes, consigliRes, spRes, settingsRes] = await Promise.all([
         fetch('/api/admin/subjects'),
         fetch('/api/admin/professors'),
         fetch('/api/admin/uploads?limit=100'),
         fetch('/api/admin/consigli'),
         fetch('/api/admin/subject-professors'),
+        fetch('/api/admin/settings'),
       ]);
 
       if (subjectsRes.ok) {
@@ -171,6 +182,15 @@ export default function AdminPage() {
       if (spRes.ok) {
         const data = await spRes.json();
         setSubjectProfessors(data.associations || []);
+      }
+
+      if (settingsRes.ok) {
+        const data = await settingsRes.json();
+        setSettings(data.settings || {});
+        setSettingsForm({
+          admin_email: data.settings?.admin_email || '',
+          site_policy: data.settings?.site_policy || '',
+        });
       }
     } catch (error) {
       console.error('Fetch error:', error);
@@ -521,6 +541,7 @@ export default function AdminPage() {
               { id: 'subject-professors' as const, label: 'Associazioni', icon: LinkIcon },
               { id: 'uploads' as const, label: 'File', icon: FileText },
               { id: 'consigli' as const, label: 'Consigli', icon: Lightbulb },
+              { id: 'settings' as const, label: 'Impostazioni', icon: Settings },
             ].map((tab) => {
               const Icon = tab.icon;
               return (
@@ -1097,6 +1118,92 @@ export default function AdminPage() {
                     </div>
                   )}
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-10 h-10 rounded-neu bg-stone-200 flex items-center justify-center">
+                <Settings className="size-5 text-foreground" />
+              </div>
+              <h2 className="text-2xl font-semibold text-foreground">Impostazioni Sito</h2>
+            </div>
+
+            <div className="space-y-6">
+              <div className="neu-card p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Mail className="size-5 text-[#6366F1]" />
+                  Email di Contatto Admin
+                </h3>
+                <p className="text-sm text-foreground-light mb-4">
+                  Questa email verrà visualizzata nel footer del sito per le segnalazioni.
+                </p>
+                <div className="flex gap-3">
+                  <input
+                    type="email"
+                    value={settingsForm.admin_email}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, admin_email: e.target.value })}
+                    placeholder="admin@esempio.com"
+                    className="flex-1 px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition"
+                  />
+                  <button
+                    onClick={async () => {
+                      try {
+                        const res = await fetch('/api/admin/settings', {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ key: 'admin_email', value: settingsForm.admin_email }),
+                        });
+                        if (res.ok) {
+                          showToast('Email aggiornata', 'success');
+                          fetchData();
+                        }
+                      } catch (error) {
+                        showToast('Errore aggiornamento', 'error');
+                      }
+                    }}
+                    className="px-6 py-3 bg-[#6366F1] text-white font-semibold rounded-neu premium-transition"
+                  >
+                    Salva
+                  </button>
+                </div>
+              </div>
+
+              <div className="neu-card p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Policy & Responsabilità</h3>
+                <p className="text-sm text-foreground-light mb-4">
+                  Questo testo apparirà nella finestra della policy accessibile dal footer.
+                </p>
+                <textarea
+                  value={settingsForm.site_policy}
+                  onChange={(e) => setSettingsForm({ ...settingsForm, site_policy: e.target.value })}
+                  rows={6}
+                  className="w-full px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition resize-none"
+                  placeholder="Inserisci la policy del sito..."
+                />
+                <button
+                  onClick={async () => {
+                    try {
+                      const res = await fetch('/api/admin/settings', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ key: 'site_policy', value: settingsForm.site_policy }),
+                      });
+                      if (res.ok) {
+                        showToast('Policy aggiornata', 'success');
+                        fetchData();
+                      }
+                    } catch (error) {
+                      showToast('Errore aggiornamento', 'error');
+                    }
+                  }}
+                  className="mt-4 px-6 py-3 bg-[#6366F1] text-white font-semibold rounded-neu premium-transition"
+                >
+                  Salva Policy
+                </button>
               </div>
             </div>
           </div>

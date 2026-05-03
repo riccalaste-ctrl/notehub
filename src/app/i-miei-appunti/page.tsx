@@ -30,7 +30,7 @@ export default function MyNotesPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-neu-base">
+    <div className="min-h-screen bg-neu-base gray-cards">
       <Header breadcrumbs={[{ label: 'I miei appunti' }]} />
       <main className="lg:pl-56 pt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

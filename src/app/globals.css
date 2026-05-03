@@ -107,7 +107,8 @@ body {
   }
 
   .gray-cards .neu-card,
-  .gray-cards .bento-card {
+  .gray-cards .bento-card,
+  .gray-cards .neu-bento-card {
     background: #E0E5EC;
     border-radius: var(--neu-radius-lg);
     box-shadow: 5px 5px 10px #c5cad1, -5px -5px 10px #f4f9ff;
@@ -116,7 +117,8 @@ body {
   }
 
   .gray-cards .neu-card:hover,
-  .gray-cards .bento-card:hover {
+  .gray-cards .bento-card:hover,
+  .gray-cards .neu-bento-card:hover {
     transform: translateY(-2px);
     box-shadow: 8px 8px 16px #c5cad1, -8px -8px 16px #f4f9ff;
   }

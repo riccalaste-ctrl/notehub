@@ -155,7 +155,7 @@ export default function MateriePage() {
   };
 
   return (
-    <div className="min-h-screen bg-neu-base">
+    <div className="min-h-screen bg-neu-base gray-cards">
       <Header
         breadcrumbs={getBreadcrumbs().map(crumb => ({
           label: crumb.label,

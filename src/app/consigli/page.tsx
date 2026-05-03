@@ -61,7 +61,7 @@ export default function ConsigliPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-neu-base">
+    <div className="min-h-screen bg-neu-base gray-cards">
       <Header breadcrumbs={[{ label: 'Consigli' }]} />
 
       <main className="lg:pl-56 pt-16">

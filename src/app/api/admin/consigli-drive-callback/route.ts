@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const payload = verifySignedState(state);
+    const payload = verifySignedState<{ type: string }>(state);
     if (payload.type !== 'consigli_drive') {
       throw new Error('Invalid state type');
     }

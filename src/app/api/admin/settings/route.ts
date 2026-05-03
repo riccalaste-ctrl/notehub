@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { supabaseAdmin } from '@/lib/supabase';
 import { requireAdmin } from '@/lib/auth';
+import { logAuditEvent } from '@/lib/audit';
 
 export async function GET() {
   const authError = await requireAdmin();
@@ -9,7 +10,7 @@ export async function GET() {
 
   try {
     const { data, error } = await supabaseAdmin
-      .from('app_settings')
+      .from('site_settings')
       .select('key, value, description');
 
     if (error) throw error;
@@ -45,13 +46,21 @@ export async function PUT(request: NextRequest) {
     }
 
     const { data, error } = await supabaseAdmin
-      .from('app_settings')
+      .from('site_settings')
       .update({ value, updated_at: new Date().toISOString() })
       .eq('key', key)
       .select()
       .single();
 
     if (error) throw error;
+
+    await logAuditEvent({
+      actor_email: 'admin@notehub.local',
+      action: 'setting_updated',
+      target_type: 'site_settings',
+      target_id: key,
+      metadata: { key },
+    });
 
     return NextResponse.json({ setting: data });
   } catch (error) {

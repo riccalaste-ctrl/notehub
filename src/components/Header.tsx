@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GraduationCap, LayoutGrid, BookOpen, Lightbulb, Plus, Menu, X, Search, Compass, ChevronRight } from 'lucide-react';
 import { usePathname } from 'next/navigation';
@@ -15,13 +15,21 @@ interface HeaderProps {
 
 export default function Header({ onOpenUpload, currentSection, breadcrumbs }: HeaderProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const pathname = usePathname();
 
   const navItems = [
     { label: 'Dashboard', href: '/', icon: LayoutGrid },
     { label: 'Materie', href: '/materie', icon: BookOpen },
     { label: 'Consigli', href: '/consigli', icon: Lightbulb },
+    { label: 'I miei appunti', href: '/i-miei-appunti', icon: FileText },
   ];
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((res) => setIsAuthenticated(res.ok))
+      .catch(() => setIsAuthenticated(false));
+  }, []);
 
   return (
     <>
@@ -95,6 +103,21 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
 
           {/* Right side */}
           <div className="flex items-center gap-3">
+            {isAuthenticated ? (
+              <button
+                onClick={async () => {
+                  await fetch('/api/auth/logout', { method: 'POST' });
+                  window.location.href = '/login';
+                }}
+                className="px-3 py-2 text-sm font-semibold text-foreground hover:shadow-neu-badge rounded-neu premium-transition"
+              >
+                Esci
+              </button>
+            ) : (
+              <Link href="/login" className="px-3 py-2 text-sm font-semibold text-foreground hover:shadow-neu-badge rounded-neu premium-transition">
+                Login
+              </Link>
+            )}
             <Link href="/admin" className="px-3 py-2 text-sm font-semibold text-foreground hover:shadow-neu-badge rounded-neu premium-transition">
               Admin
             </Link>

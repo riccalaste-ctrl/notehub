@@ -27,6 +27,7 @@ import {
   XCircle,
   Settings,
 } from 'lucide-react';
+import { buildInstitutionDisclaimer } from '@/lib/user-session';
 
 interface Subject {
   id: string;
@@ -80,6 +81,15 @@ interface AppSetting {
   key: string;
   value: string;
   description?: string;
+}
+
+interface AuditLog {
+  id: string;
+  actor_email?: string | null;
+  action: string;
+  target_type: string;
+  target_id?: string | null;
+  created_at: string;
 }
 
 type Tab = 'dashboard' | 'subjects' | 'professors' | 'uploads' | 'consigli' | 'subject-professors' | 'settings';
@@ -146,17 +156,19 @@ export default function AdminPage() {
   const [criticalError, setCriticalError] = useState<{ title: string; message: string } | null>(null);
   const { toast, showToast, hideToast } = useToast();
   const [settings, setSettings] = useState<Record<string, string>>({});
-  const [settingsForm, setSettingsForm] = useState({ admin_email: '', site_policy: '' });
+  const [settingsForm, setSettingsForm] = useState({ support_email: '', site_policy: '' });
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
 
   const fetchData = useCallback(async () => {
     try {
-      const [subjectsRes, professorsRes, uploadsRes, consigliRes, spRes, settingsRes] = await Promise.all([
+      const [subjectsRes, professorsRes, uploadsRes, consigliRes, spRes, settingsRes, auditRes] = await Promise.all([
         fetch('/api/admin/subjects'),
         fetch('/api/admin/professors'),
         fetch('/api/admin/uploads?limit=100'),
         fetch('/api/admin/consigli'),
         fetch('/api/admin/subject-professors'),
         fetch('/api/admin/settings'),
+        fetch('/api/admin/audit-logs?limit=50'),
       ]);
 
       if (subjectsRes.ok) {
@@ -188,9 +200,14 @@ export default function AdminPage() {
         const data = await settingsRes.json();
         setSettings(data.settings || {});
         setSettingsForm({
-          admin_email: data.settings?.admin_email || '',
+          support_email: data.settings?.support_email || data.settings?.admin_email || '',
           site_policy: data.settings?.site_policy || '',
         });
+      }
+
+      if (auditRes.ok) {
+        const data = await auditRes.json();
+        setAuditLogs(data.logs || []);
       }
     } catch (error) {
       console.error('Fetch error:', error);
@@ -455,6 +472,9 @@ export default function AdminPage() {
               </div>
               <h1 className="text-3xl font-semibold text-foreground">SKAKK-UP Admin</h1>
               <p className="text-foreground-light mt-2 text-sm">Pannello di amministrazione</p>
+              <p className="text-foreground-light mt-2 text-xs">
+                {buildInstitutionDisclaimer(settingsForm.support_email)}
+              </p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-4">
@@ -1144,8 +1164,8 @@ export default function AdminPage() {
                 <div className="flex gap-3">
                   <input
                     type="email"
-                    value={settingsForm.admin_email}
-                    onChange={(e) => setSettingsForm({ ...settingsForm, admin_email: e.target.value })}
+                    value={settingsForm.support_email}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, support_email: e.target.value })}
                     placeholder="admin@esempio.com"
                     className="flex-1 px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition"
                   />
@@ -1155,7 +1175,7 @@ export default function AdminPage() {
                         const res = await fetch('/api/admin/settings', {
                           method: 'PUT',
                           headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ key: 'admin_email', value: settingsForm.admin_email }),
+                          body: JSON.stringify({ key: 'support_email', value: settingsForm.support_email }),
                         });
                         if (res.ok) {
                           showToast('Email aggiornata', 'success');
@@ -1204,6 +1224,34 @@ export default function AdminPage() {
                 >
                   Salva Policy
                 </button>
+              </div>
+
+              <div className="neu-card p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Audit Log</h3>
+                <p className="text-sm text-foreground-light mb-4">
+                  Scarica il report PDF con le ultime azioni sensibili registrate.
+                </p>
+                <button
+                  onClick={() => window.open('/api/admin/audit-logs/pdf', '_blank')}
+                  className="px-6 py-3 bg-[#6366F1] text-white font-semibold rounded-neu premium-transition"
+                >
+                  Scarica Audit PDF
+                </button>
+                <div className="mt-5 space-y-2 max-h-64 overflow-auto">
+                  {auditLogs.length === 0 ? (
+                    <p className="text-sm text-foreground-light">Nessun evento registrato</p>
+                  ) : (
+                    auditLogs.map((log) => (
+                      <div key={log.id} className="p-3 rounded-neu neu-surface text-xs text-foreground-light">
+                        <p className="font-semibold text-foreground">
+                          {log.action} · {log.target_type}
+                        </p>
+                        <p>{new Date(log.created_at).toLocaleString('it-IT')}</p>
+                        <p>{log.actor_email || 'system'}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
           </div>

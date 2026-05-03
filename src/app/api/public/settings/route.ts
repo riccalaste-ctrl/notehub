@@ -7,7 +7,7 @@ export async function GET() {
     const { data, error } = await supabaseAdmin
       .from('site_settings')
       .select('key, value')
-      .in('key', ['admin_email', 'support_email', 'site_policy']);
+      .in('key', ['admin_email', 'support_email', 'site_policy', 'consigli_email']);
 
     if (error) throw error;
 
@@ -20,7 +20,7 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching public settings:', error);
     return NextResponse.json(
-      { settings: { admin_email: '', support_email: '', site_policy: '' } }
+      { settings: { admin_email: '', support_email: '', site_policy: '', consigli_email: '' } }
     );
   }
 }

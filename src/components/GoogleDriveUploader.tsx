@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { Upload, Loader2, FileText } from 'lucide-react';
 
 const ALLOWED_UPLOAD_MIME_TYPES = [
@@ -15,6 +15,8 @@ const MAX_UPLOAD_SIZE_MB = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB || 
 const MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024;
 
 const ALLOWED_EXTENSIONS = '.pdf,.doc,.docx,.jpg,.jpeg,.png';
+
+const CHUNK_SIZE = 3 * 1024 * 1024;
 
 interface GoogleDriveUploaderProps {
   subjectId: string;
@@ -32,50 +34,30 @@ function formatFileSize(bytes: number): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 }
 
-function uploadToGoogleDrive(
-  uploadUrl: string,
-  file: File,
-  onProgress: (percent: number) => void
-): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
+async function uploadChunkToServer(
+  sessionId: string,
+  chunk: Blob,
+  chunkIndex: number,
+  totalChunks: number
+): Promise<{ success: boolean; driveFileId: string | null; isComplete: boolean }> {
+  const formData = new FormData();
+  formData.append('sessionId', sessionId);
+  formData.append('chunkIndex', String(chunkIndex));
+  formData.append('totalChunks', String(totalChunks));
+  formData.append('chunk', chunk);
 
-    xhr.upload.addEventListener('progress', (event) => {
-      if (event.lengthComputable) {
-        onProgress(Math.round((event.loaded / event.total) * 100));
-      }
-    });
-
-    xhr.addEventListener('load', () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          const data = JSON.parse(xhr.responseText);
-          if (data?.id) {
-            resolve(data.id);
-          } else {
-            reject(new Error('Google non ha restituito un ID file valido'));
-          }
-        } catch {
-          reject(new Error('Risposta non valida da Google Drive'));
-        }
-      } else {
-        let msg = `Upload fallito (${xhr.status})`;
-        try {
-          const parsed = JSON.parse(xhr.responseText);
-          if (parsed?.error?.message) msg += `: ${parsed.error.message}`;
-        } catch {
-          if (xhr.responseText) msg += `: ${xhr.responseText.slice(0, 200)}`;
-        }
-        reject(new Error(msg));
-      }
-    });
-
-    xhr.addEventListener('error', () => reject(new Error('Errore di rete durante l\'upload')));
-    xhr.addEventListener('abort', () => reject(new Error('Upload annullato')));
-
-    xhr.open('PUT', uploadUrl);
-    xhr.send(file);
+  const response = await fetch('/api/upload/chunk', {
+    method: 'POST',
+    body: formData,
   });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || `Chunk upload failed (${response.status})`);
+  }
+
+  return data;
 }
 
 export default function GoogleDriveUploader({
@@ -116,7 +98,7 @@ export default function GoogleDriveUploader({
     setSelectedFile(file);
   };
 
-  const handleUpload = async () => {
+  const handleUpload = useCallback(async () => {
     if (!selectedFile) {
       onError('Seleziona un file da caricare');
       return;
@@ -145,13 +127,33 @@ export default function GoogleDriveUploader({
         throw new Error(sessionData.error || 'Impossibile creare la sessione di upload');
       }
 
-      const { uploadUrl, sessionId } = sessionData;
+      const { sessionId } = sessionData;
 
-      const driveFileId = await uploadToGoogleDrive(uploadUrl, selectedFile, (pct) => {
-        setProgress(Math.round(10 + (pct / 100) * 70));
-      });
+      const totalSize = selectedFile.size;
+      const totalChunks = Math.ceil(totalSize / CHUNK_SIZE);
 
-      setProgress(85);
+      let driveFileId: string | null = null;
+
+      for (let i = 0; i < totalChunks; i++) {
+        const start = i * CHUNK_SIZE;
+        const end = Math.min(start + CHUNK_SIZE, totalSize);
+        const chunk = selectedFile.slice(start, end);
+
+        const result = await uploadChunkToServer(sessionId, chunk, i, totalChunks);
+
+        if (result.driveFileId) {
+          driveFileId = result.driveFileId;
+        }
+
+        const pct = Math.round(((i + 1) / totalChunks) * 80) + 10;
+        setProgress(Math.min(pct, 90));
+      }
+
+      if (!driveFileId) {
+        throw new Error('Google Drive non ha restituito un ID file');
+      }
+
+      setProgress(95);
 
       const completeRes = await fetch('/api/upload/complete', {
         method: 'POST',
@@ -175,7 +177,7 @@ export default function GoogleDriveUploader({
       onError(message);
       setUploading(false);
     }
-  };
+  }, [selectedFile, subjectId, professorId, uploaderName, onSuccess, onError]);
 
   return (
     <div className="space-y-4">

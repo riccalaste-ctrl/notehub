@@ -22,7 +22,11 @@ export async function GET(request: NextRequest) {
     let query = supabaseAdmin
       .from('uploads')
       .select(`
-        *,
+        id,
+        original_filename,
+        mime_type,
+        size_bytes,
+        created_at,
         subject:subjects(name, slug),
         professor:professors(name)
       `)

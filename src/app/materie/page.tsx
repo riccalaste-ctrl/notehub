@@ -10,6 +10,7 @@ import FileCard from '@/components/FileCard';
 import { FileListSkeleton } from '@/components/Skeleton';
 import UploadModal from '@/components/UploadModal';
 import Toast, { useToast } from '@/components/Toast';
+import { getSubjectIcon, getSubjectGradient } from '@/lib/subject-config';
 
 interface Subject {
   id: string;
@@ -41,27 +42,6 @@ interface Upload {
   download_url?: string;
   view_url?: string;
 }
-
-const subjectIcons: Record<string, string> = {
-  matematica: '∑',
-  fisica: '⚛',
-  chimica: '⬡',
-  biologia: '🧬',
-  italiano: '📖',
-  latino: '🏛',
-  storia: '📜',
-  filosofia: '🧠',
-  inglese: '🌍',
-  informatica: '💻',
-  arte: '🎨',
-  scienze: '🔬',
-};
-
-const gradientClasses = [
-  'gradient-mint',
-  'gradient-lavender',
-  'gradient-coral',
-];
 
 export default function MateriePage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -185,30 +165,28 @@ export default function MateriePage() {
 
       <main className="lg:pl-56 pt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Subject Selection View */}
+          {/* Step 1: Subject Cards */}
           {!selectedSubject && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               <h1 className="text-3xl font-semibold text-foreground mb-2 mt-6">
                 Materie
               </h1>
               <p className="text-foreground-light mb-8">
-                Seleziona una materia per visualizzare i professori e i file
+                Seleziona una materia per visualizzare i professori
               </p>
 
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {subjects.filter(s => s.enabled).map((subject, i) => {
+                {subjects.filter(s => s.enabled).map((subject) => {
                   const profs = getProfessorsForSubject(subject.id);
-                  const icon = subjectIcons[subject.slug.toLowerCase()] || '📚';
+                  const icon = getSubjectIcon(subject.slug);
+                  const gradient = getSubjectGradient(subject.slug);
                   return (
                     <button
                       key={subject.id}
                       onClick={() => handleSubjectClick(subject)}
                       className="neu-card p-5 text-left block w-full"
                     >
-                      <div className={`size-12 rounded-neu ${gradientClasses[i % gradientClasses.length]} flex items-center justify-center text-white text-xl font-bold mb-3 shadow-lg`}>
+                      <div className={`size-12 rounded-neu bg-gradient-to-br ${gradient} flex items-center justify-center text-white text-xl font-bold mb-3 shadow-lg`}>
                         {icon}
                       </div>
                       <h3 className="font-semibold text-foreground text-sm mb-1">
@@ -224,12 +202,9 @@ export default function MateriePage() {
             </motion.div>
           )}
 
-          {/* Professor Selection View (after subject selected) */}
+          {/* Step 2: Professor Cards (after subject selected) */}
           {selectedSubject && !selectedProfessor && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               <div className="flex items-center gap-4 mb-8 mt-6">
                 <button
                   onClick={handleBackToRoot}
@@ -237,8 +212,8 @@ export default function MateriePage() {
                 >
                   <ChevronRight className="size-5 text-foreground-light rotate-180" />
                 </button>
-                <div className="size-14 rounded-neu gradient-lavender flex items-center justify-center">
-                  <BookOpen className="size-7 text-white" />
+                <div className={`size-14 rounded-neu bg-gradient-to-br ${getSubjectGradient(selectedSubject.slug)} flex items-center justify-center text-white text-2xl font-bold`}>
+                  {getSubjectIcon(selectedSubject.slug)}
                 </div>
                 <div>
                   <h1 className="text-2xl font-semibold text-foreground">
@@ -275,13 +250,9 @@ export default function MateriePage() {
             </motion.div>
           )}
 
-          {/* Files View (after subject and professor selected) */}
+          {/* Step 3: Files (after subject and professor selected) */}
           {selectedSubject && selectedProfessor && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              {/* Subject Header */}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               <div className="flex items-center gap-4 mb-8 mt-6">
                 <button
                   onClick={handleBackToSubjects}
@@ -289,7 +260,7 @@ export default function MateriePage() {
                 >
                   <ChevronRight className="size-5 text-foreground-light rotate-180" />
                 </button>
-                <div className="size-14 rounded-neu gradient-lavender flex items-center justify-center">
+                <div className="size-14 rounded-neu gradient-mint flex items-center justify-center">
                   <GraduationCap className="size-7 text-white" />
                 </div>
                 <div>

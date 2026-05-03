@@ -8,9 +8,9 @@
   --neu-light: #FFFFFF;
   --neu-dark: rgba(163, 177, 198, 0.6);
   --neu-dark-strong: rgba(163, 177, 198, 0.8);
-  --foreground: #1a1a2e;
-  --foreground-light: #2d2d44;
-  --foreground-muted: #555566;
+  --foreground: #000000;
+  --foreground-light: #1a1a1a;
+  --foreground-muted: #444444;
   --accent-lavender: #FF8C42;
   --accent-mint: #A8D5BA;
   --accent-coral: #FFB5A0;
@@ -70,10 +70,12 @@ body {
     border-radius: var(--neu-radius-lg);
     border: 1px solid rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease-in-out;
+    color: #333333;
   }
 
   .neu-card:hover {
     transform: translateY(-4px);
+    color: #000000;
   }
 
   .neu-sidebar {
@@ -101,11 +103,13 @@ body {
     border: 1px solid rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease-in-out;
     cursor: pointer;
+    color: #333333;
   }
 
   .neu-button:hover {
     border-color: rgba(0, 0, 0, 0.15);
     transform: translateY(-2px);
+    color: #000000;
   }
 
   .neu-button:active {

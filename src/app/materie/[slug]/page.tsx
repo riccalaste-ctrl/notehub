@@ -10,6 +10,7 @@ import FileCard from '@/components/FileCard';
 import { FileListSkeleton } from '@/components/Skeleton';
 import UploadModal from '@/components/UploadModal';
 import Toast, { useToast } from '@/components/Toast';
+import { getSubjectIcon, getSubjectGradient } from '@/lib/subject-config';
 
 interface Subject {
   id: string;
@@ -41,21 +42,6 @@ interface Upload {
   download_url?: string;
   view_url?: string;
 }
-
-const subjectIcons: Record<string, string> = {
-  matematica: '∑',
-  fisica: '⚛',
-  chimica: '⬡',
-  biologia: '🧬',
-  italiano: '📖',
-  latino: '🏛',
-  storia: '📜',
-  filosofia: '🧠',
-  inglese: '🌍',
-  informatica: '💻',
-  arte: '🎨',
-  scienze: '🔬',
-};
 
 export default function SubjectPage() {
   const params = useParams();
@@ -141,7 +127,8 @@ export default function SubjectPage() {
     .map((sp) => sp.professor)
     .filter(Boolean) as Professor[];
 
-  const icon = subjectIcons[subject.slug.toLowerCase()] || '📚';
+  const icon = getSubjectIcon(subject.slug);
+  const gradient = getSubjectGradient(subject.slug);
 
   const getBreadcrumbs = () => {
     if (selectedProfessor) {
@@ -171,11 +158,7 @@ export default function SubjectPage() {
             >
               <ArrowLeft className="size-5 text-foreground-light" />
             </button>
-            <div className={`size-14 rounded-neu flex items-center justify-center shadow-neu text-white text-2xl font-bold ${
-              subject.slug === 'matematica' ? 'gradient-mint' :
-              subject.slug === 'fisica' ? 'gradient-lavender' :
-              'gradient-coral'
-            }`}>
+            <div className={`size-14 rounded-neu bg-gradient-to-br ${gradient} flex items-center justify-center shadow-neu text-white text-2xl font-bold`}>
               {icon}
             </div>
             <div>
@@ -189,7 +172,7 @@ export default function SubjectPage() {
             </div>
           </div>
 
-          {/* Professor Selection (when no professor selected yet) */}
+          {/* Professor Selection */}
           {!selectedProfessor && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               <h2 className="text-xl font-semibold text-foreground mb-4">Professori</h2>
@@ -216,7 +199,7 @@ export default function SubjectPage() {
                 ))}
               </div>
 
-              {/* All files for this subject (no professor filter) */}
+              {/* All files for this subject */}
               <div className="mt-10">
                 <h2 className="text-xl font-semibold text-foreground mb-4">Tutti i file della materia</h2>
                 <SubjectAllFiles subject={subject} />
@@ -227,7 +210,6 @@ export default function SubjectPage() {
           {/* Files View (after professor selected) */}
           {selectedProfessor && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              {/* Professor Header */}
               <div className="flex items-center gap-4 mb-6">
                 <button
                   onClick={() => { setSelectedProfessor(null); setUploads([]); setSearch(''); }}
@@ -298,7 +280,6 @@ export default function SubjectPage() {
         <Footer />
       </main>
 
-      {/* Floating Upload Button */}
       <div className="fixed right-6 bottom-6 z-30">
         <motion.button
           whileHover={{ scale: 1.05 }}

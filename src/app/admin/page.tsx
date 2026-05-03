@@ -1357,11 +1357,12 @@ function CleanupSection() {
       <div className="neu-card p-6 mb-6">
         <h3 className="text-lg font-semibold text-foreground mb-2">Cosa viene pulito</h3>
         <ul className="text-sm text-foreground-light space-y-2">
-          <li>• Sessioni di upload scadute (più vecchie di 24 ore)</li>
-          <li>• Sessioni completate vecchie (più di 7 giorni)</li>
+          <li>• Sessioni di upload scadute mai completate (più vecchie di 24 ore)</li>
           <li>• Sessioni fallite/scadute vecchie (più di 48 ore)</li>
-          <li>• Log di audit vecchi (più di 30 giorni)</li>
         </ul>
+        <p className="text-xs text-foreground-muted mt-3">
+          I file caricati, le connessioni Drive, i log di audit e le informazioni sugli uploader NON vengono eliminati.
+        </p>
       </div>
 
       <div className="flex gap-3 mb-6">

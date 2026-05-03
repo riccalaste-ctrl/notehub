@@ -8,6 +8,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Toast, { useToast } from '@/components/Toast';
 import UploadModal from '@/components/UploadModal';
+import { getSubjectIcon, getSubjectGradient } from '@/lib/subject-config';
 
 interface Subject {
   id: string;
@@ -34,27 +35,6 @@ interface Upload {
   subject_slug?: string;
   created_at: string;
 }
-
-const subjectIcons: Record<string, string> = {
-  matematica: '∑',
-  fisica: '⚛',
-  chimica: '⬡',
-  biologia: '🧬',
-  italiano: '📖',
-  latino: '🏛',
-  storia: '📜',
-  filosofia: '🧠',
-  inglese: '🌍',
-  informatica: '💻',
-  arte: '🎨',
-  scienze: '🔬',
-};
-
-const gradientClasses = [
-  'from-[#6366F1] to-[#4F46E5]',
-  'from-[#10B981] to-[#059669]',
-  'from-[#F59E0B] to-[#D97706]',
-];
 
 export default function DashboardPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -138,7 +118,7 @@ export default function DashboardPage() {
             transition={{ delay: 0.1 }}
             className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10"
           >
-            <div className="neu-card p-5 bg-[#7BAFDE]">
+            <div className="neu-card p-5 bg-gradient-to-br from-[#6366F1] to-[#4F46E5]">
               <div className="flex items-center gap-3">
                 <div className="size-10 rounded-neu bg-blue-400/30 flex items-center justify-center">
                   <BookOpen className="size-5 text-white" />
@@ -149,38 +129,38 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-            <div className="neu-card p-5 bg-[#B992C9]">
+            <div className="neu-card p-5 bg-gradient-to-br from-[#10B981] to-[#059669]">
               <div className="flex items-center gap-3">
-                <div className="size-10 rounded-neu bg-purple-400/30 flex items-center justify-center">
+                <div className="size-10 rounded-neu bg-white/20 flex items-center justify-center">
                   <Users className="size-5 text-white" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-white">{professors.length}</p>
-                  <p className="text-xs text-purple-100">Professori</p>
+                  <p className="text-xs text-green-100">Professori</p>
                 </div>
               </div>
             </div>
-            <div className="neu-card p-5 bg-[#B992C9]">
+            <div className="neu-card p-5 bg-gradient-to-br from-[#F59E0B] to-[#D97706]">
               <div className="flex items-center gap-3">
-                <div className="size-10 rounded-neu bg-yellow-400/30 flex items-center justify-center">
+                <div className="size-10 rounded-neu bg-white/20 flex items-center justify-center">
                   <FileText className="size-5 text-white" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-white">
                     {Object.values(uploadCounts).reduce((a, b) => a + b, 0)}
                   </p>
-                  <p className="text-xs text-purple-100">File totali</p>
+                  <p className="text-xs text-yellow-100">File totali</p>
                 </div>
               </div>
             </div>
-            <Link href="/consigli" className="neu-card p-5 bento-card block bg-[#72C9A4]">
+            <Link href="/consigli" className="neu-card p-5 bento-card block bg-gradient-to-br from-[#8B5CF6] to-[#7C3AED]">
               <div className="flex items-center gap-3">
-                <div className="size-10 rounded-neu bg-mint/30 flex items-center justify-center">
+                <div className="size-10 rounded-neu bg-white/20 flex items-center justify-center">
                   <TrendingUp className="size-5 text-white" />
                 </div>
                 <div>
                   <p className="text-sm font-bold text-white">Consigli</p>
-                  <p className="text-xs text-green-100">Scopri di più →</p>
+                  <p className="text-xs text-purple-100">Scopri di più →</p>
                 </div>
               </div>
             </Link>
@@ -203,8 +183,9 @@ export default function DashboardPage() {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {subjects.map((subject, i) => {
-                const icon = subjectIcons[subject.slug.toLowerCase()] || '📚';
+              {subjects.map((subject) => {
+                const icon = getSubjectIcon(subject.slug);
+                const gradient = getSubjectGradient(subject.slug);
                 const count = uploadCounts[subject.slug] || 0;
                 return (
                   <Link
@@ -212,7 +193,7 @@ export default function DashboardPage() {
                     href={`/materie/${subject.slug}`}
                     className="neu-card p-5 block group"
                   >
-                    <div className={`size-12 rounded-neu-lg bg-gradient-to-br ${gradientClasses[i % gradientClasses.length]} flex items-center justify-center text-white text-xl font-bold mb-3 shadow-lg group-hover:scale-110 premium-transition`}>
+                    <div className={`size-12 rounded-neu-lg bg-gradient-to-br ${gradient} flex items-center justify-center text-white text-xl font-bold mb-3 shadow-lg group-hover:scale-110 premium-transition`}>
                       {icon}
                     </div>
                     <h3 className="font-semibold text-foreground text-sm mb-1">

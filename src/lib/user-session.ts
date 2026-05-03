@@ -1,7 +1,4 @@
-'use server';
-
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { supabaseAdmin } from '@/lib/supabase';
 
 export const USER_SESSION_COOKIE = 'notehub_user_jwt';
@@ -52,18 +49,6 @@ export async function isAllowedUserEmail(email: string | undefined): Promise<boo
 
 export async function getAuthenticatedUserFromRequest(request: NextRequest) {
   const token = request.cookies.get(USER_SESSION_COOKIE)?.value;
-  if (!token) return null;
-
-  const { data, error } = await supabaseAdmin.auth.getUser(token);
-  if (error || !data.user) return null;
-  if (!(await isAllowedUserEmail(data.user.email))) return null;
-
-  return data.user;
-}
-
-export async function getAuthenticatedUserFromCookies() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(USER_SESSION_COOKIE)?.value;
   if (!token) return null;
 
   const { data, error } = await supabaseAdmin.auth.getUser(token);

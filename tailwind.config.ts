@@ -15,9 +15,9 @@ module.exports = {
           dark: 'rgba(163, 177, 198, 0.6)',
         },
         foreground: {
-          DEFAULT: '#3D4F5F',
-          light: '#6B7B8C',
-          muted: '#8A9AAF',
+          DEFAULT: '#000000',
+          light: '#000000',
+          muted: '#000000',
         },
         mint: {
           DEFAULT: '#A8D5BA',

@@ -70,12 +70,11 @@ body {
     border-radius: var(--neu-radius-lg);
     border: 1px solid rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease-in-out;
-    color: #333333;
+    color: #000000;
   }
 
   .neu-card:hover {
     transform: translateY(-4px);
-    color: #000000;
   }
 
   .neu-sidebar {
@@ -103,7 +102,7 @@ body {
     border: 1px solid rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease-in-out;
     cursor: pointer;
-    color: #333333;
+    color: #000000;
   }
 
   .neu-button:hover {

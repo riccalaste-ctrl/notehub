@@ -1313,19 +1313,29 @@ function CleanupSection() {
   const { toast, showToast, hideToast } = useToast();
   const [cleanupResults, setCleanupResults] = useState<Record<string, { deleted: number; error?: string }> | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingDeep, setLoadingDeep] = useState(false);
   const [dryRunLoading, setDryRunLoading] = useState(false);
+  const [dryRunDeepLoading, setDryRunDeepLoading] = useState(false);
 
-  const runCleanup = async (dryRun: boolean) => {
-    if (dryRun) {
-      setDryRunLoading(true);
+  const runCleanup = async (dryRun: boolean, deep: boolean) => {
+    if (deep) {
+      if (dryRun) {
+        setDryRunDeepLoading(true);
+      } else {
+        setLoadingDeep(true);
+      }
     } else {
-      setLoading(true);
+      if (dryRun) {
+        setDryRunLoading(true);
+      } else {
+        setLoading(true);
+      }
     }
     try {
       const res = await fetch('/api/admin/cleanup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dryRun }),
+        body: JSON.stringify({ dryRun, deep }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -1337,10 +1347,10 @@ function CleanupSection() {
     } catch {
       showToast('Errore di connessione', 'error');
     } finally {
-      if (dryRun) {
-        setDryRunLoading(false);
+      if (deep) {
+        if (dryRun) setDryRunDeepLoading(false); else setLoadingDeep(false);
       } else {
-        setLoading(false);
+        if (dryRun) setDryRunLoading(false); else setLoading(false);
       }
     }
   };
@@ -1354,36 +1364,65 @@ function CleanupSection() {
         <h2 className="text-2xl font-semibold text-foreground">Pulizia Database</h2>
       </div>
 
+      {/* Basic cleanup - always safe */}
       <div className="neu-card p-6 mb-6">
-        <h3 className="text-lg font-semibold text-foreground mb-2">Cosa viene pulito</h3>
-        <ul className="text-sm text-foreground-light space-y-2">
-          <li>• Sessioni di upload scadute mai completate (più vecchie di 24 ore)</li>
-          <li>• Sessioni fallite/scadute vecchie (più di 48 ore)</li>
-        </ul>
-        <p className="text-xs text-foreground-muted mt-3">
-          I file caricati, le connessioni Drive, i log di audit e le informazioni sugli uploader NON vengono eliminati.
+        <h3 className="text-lg font-semibold text-foreground mb-2">Pulizia Base (sicura)</h3>
+        <p className="text-sm text-foreground-light mb-2">
+          Elimina solo sessioni di upload mai completate o fallite. Non tocca file, connessioni Drive, log audit o info uploader.
         </p>
+        <ul className="text-xs text-foreground-muted space-y-1 mb-4">
+          <li>• Sessioni scadute pendenti (&gt;24 ore)</li>
+          <li>• Sessioni fallite/scadute (&gt;48 ore)</li>
+        </ul>
+        <div className="flex gap-3">
+          <button
+            onClick={() => runCleanup(true, false)}
+            disabled={dryRunLoading || loading || dryRunDeepLoading || loadingDeep}
+            className="px-5 py-2.5 bg-stone-300 text-foreground font-semibold rounded-neu premium-transition disabled:opacity-60 text-sm"
+          >
+            {dryRunLoading ? 'Analisi...' : 'Analizza'}
+          </button>
+          <button
+            onClick={() => runCleanup(false, false)}
+            disabled={dryRunLoading || loading || dryRunDeepLoading || loadingDeep}
+            className="px-5 py-2.5 bg-[#6366F1] text-white font-semibold rounded-neu premium-transition disabled:opacity-60 text-sm"
+          >
+            {loading ? 'Pulizia...' : 'Esegui'}
+          </button>
+        </div>
       </div>
 
-      <div className="flex gap-3 mb-6">
-        <button
-          onClick={() => runCleanup(true)}
-          disabled={dryRunLoading || loading}
-          className="px-6 py-3 bg-stone-300 text-foreground font-semibold rounded-neu premium-transition disabled:opacity-60"
-        >
-          {dryRunLoading ? 'Analisi...' : 'Analizza (Dry Run)'}
-        </button>
-        <button
-          onClick={() => {
-            if (confirm('Eliminare definitivamente i dati obsoleti?')) {
-              runCleanup(false);
-            }
-          }}
-          disabled={dryRunLoading || loading}
-          className="px-6 py-3 bg-[#EF4444] text-white font-semibold rounded-neu premium-transition disabled:opacity-60"
-        >
-          {loading ? 'Pulizia...' : 'Esegui Pulizia'}
-        </button>
+      {/* Deep cleanup - admin choice */}
+      <div className="neu-card p-6 mb-6 border-2 border-[#EF4444]/20">
+        <h3 className="text-lg font-semibold text-foreground mb-2">Pulizia Completa (avanzata)</h3>
+        <p className="text-sm text-foreground-light mb-2">
+          Include la pulizia base + elimina log audit e sessioni completate vecchie. I file caricati e le connessioni Drive NON vengono toccati.
+        </p>
+        <ul className="text-xs text-foreground-muted space-y-1 mb-4">
+          <li>• Tutto della pulizia base</li>
+          <li>• Log audit più vecchi di 30 giorni</li>
+          <li>• Sessioni completate più vecchie di 7 giorni (solo metadati, non i file)</li>
+        </ul>
+        <div className="flex gap-3">
+          <button
+            onClick={() => runCleanup(true, true)}
+            disabled={dryRunLoading || loading || dryRunDeepLoading || loadingDeep}
+            className="px-5 py-2.5 bg-stone-300 text-foreground font-semibold rounded-neu premium-transition disabled:opacity-60 text-sm"
+          >
+            {dryRunDeepLoading ? 'Analisi...' : 'Analizza'}
+          </button>
+          <button
+            onClick={() => {
+              if (confirm('Eliminare definitivamente log audit e sessioni vecchie? Questa azione non può essere annullata.')) {
+                runCleanup(false, true);
+              }
+            }}
+            disabled={dryRunLoading || loading || dryRunDeepLoading || loadingDeep}
+            className="px-5 py-2.5 bg-[#EF4444] text-white font-semibold rounded-neu premium-transition disabled:opacity-60 text-sm"
+          >
+            {loadingDeep ? 'Pulizia...' : 'Esegui Pulizia Completa'}
+          </button>
+        </div>
       </div>
 
       {cleanupResults && (

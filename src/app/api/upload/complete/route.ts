@@ -4,8 +4,6 @@ import { supabaseAdmin } from '@/lib/supabase';
 import {
   DriveNotConnectedError,
   getAuthorizedDriveForProfessor,
-  getDriveDownloadUrl,
-  getDriveViewUrl,
   verifyAndShareDriveFile,
 } from '@/lib/google-drive';
 
@@ -15,6 +13,14 @@ const completeUploadSchema = z.object({
   sessionId: z.string().uuid(),
   driveFileId: z.string().min(1).max(256),
 });
+
+function getPublicDownloadUrl(fileId: string): string {
+  return `https://drive.google.com/uc?id=${encodeURIComponent(fileId)}&export=download`;
+}
+
+function getPublicViewUrl(fileId: string): string {
+  return `https://drive.google.com/file/d/${encodeURIComponent(fileId)}/view?usp=sharing`;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -71,8 +77,8 @@ export async function POST(request: NextRequest) {
         drive_file_id: driveFileId,
         drive_folder_id: session.drive_folder_id,
         drive_connection_id: session.drive_connection_id,
-        download_url: driveFile.webContentLink || getDriveDownloadUrl(driveFileId),
-        view_url: driveFile.webViewLink || getDriveViewUrl(driveFileId),
+        download_url: getPublicDownloadUrl(driveFileId),
+        view_url: getPublicViewUrl(driveFileId),
         mime_type: driveFile.mimeType || session.mime_type,
         size_bytes: Number(driveFile.size || session.size_bytes),
         uploader_name: session.uploader_name || null,

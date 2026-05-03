@@ -24,10 +24,12 @@ const schema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('[upload/session] Starting...');
     const body = await request.json();
     const validation = schema.safeParse(body);
 
     if (!validation.success) {
+      console.error('[upload/session] Validation failed:', validation.error.errors);
       return NextResponse.json(
         { error: 'Dati upload non validi', details: validation.error.errors },
         { status: 400 }
@@ -35,6 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { subjectId, professorId, uploaderName, originalFilename, mimeType, sizeBytes } = validation.data;
+    console.log('[upload/session] Validated:', { subjectId, professorId, originalFilename, mimeType, sizeBytes });
 
     if (!isAllowedUploadMimeType(mimeType)) {
       return NextResponse.json(
@@ -43,24 +46,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data: subject } = await supabaseAdmin
+    console.log('[upload/session] Checking subject...');
+    const { data: subject, error: subjectError } = await supabaseAdmin
       .from('subjects')
       .select('id, name, enabled')
       .eq('id', subjectId)
       .eq('enabled', true)
       .maybeSingle();
 
+    if (subjectError) {
+      console.error('[upload/session] Subject error:', subjectError);
+      throw subjectError;
+    }
     if (!subject) {
       return NextResponse.json({ error: 'Materia non trovata o disattivata' }, { status: 404 });
     }
+    console.log('[upload/session] Subject OK:', subject.name);
 
-    const { data: association } = await supabaseAdmin
+    console.log('[upload/session] Checking association...');
+    const { data: association, error: assocError } = await supabaseAdmin
       .from('subject_professors')
       .select('id')
       .eq('subject_id', subjectId)
       .eq('professor_id', professorId)
       .maybeSingle();
 
+    if (assocError) {
+      console.error('[upload/session] Association error:', assocError);
+      throw assocError;
+    }
     if (!association) {
       return NextResponse.json(
         { error: 'Materia non associata a questo professore' },
@@ -68,14 +82,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log('[upload/session] Authorizing Drive...');
     const authorized = await getAuthorizedDriveForProfessor(professorId);
+    console.log('[upload/session] Drive authorized, Google email:', authorized.connection.google_email);
+
+    console.log('[upload/session] Getting folder...');
     const folderId = await getOrCreateSubjectFolder({
       professorId,
       subjectId,
       subjectName: subject.name,
       authorized,
     });
+    console.log('[upload/session] Folder ID:', folderId);
 
+    console.log('[upload/session] Creating resumable session...');
     const resumableRes = await fetch(
       'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name,mimeType,size,webViewLink,webContentLink,parents',
       {
@@ -96,7 +116,10 @@ export async function POST(request: NextRequest) {
 
     if (!resumableRes.ok) {
       const errText = await resumableRes.text();
-      console.error('[upload/session] Google resumable session creation failed:', resumableRes.status, errText);
+      console.error('[upload/session] Google resumable creation FAILED:', {
+        status: resumableRes.status,
+        error: errText.slice(0, 500),
+      });
       return NextResponse.json(
         { error: `Impossibile creare sessione Google (${resumableRes.status})` },
         { status: 500 }
@@ -105,11 +128,14 @@ export async function POST(request: NextRequest) {
 
     const uploadUrl = resumableRes.headers.get('location');
     if (!uploadUrl) {
+      console.error('[upload/session] No upload URL in Google response');
       return NextResponse.json({ error: 'Google non ha restituito un URL di upload' }, { status: 500 });
     }
+    console.log('[upload/session] Upload URL received');
 
     const expiresAt = new Date(Date.now() + 3600000).toISOString();
 
+    console.log('[upload/session] Saving session to DB...');
     const { data: session, error: insertError } = await supabaseAdmin
       .from('drive_upload_sessions')
       .insert({
@@ -129,8 +155,10 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (!session || insertError) {
+      console.error('[upload/session] DB insert error:', insertError);
       throw insertError || new Error('Failed to create session');
     }
+    console.log('[upload/session] Session created:', session.id);
 
     return NextResponse.json({
       sessionId: session.id,

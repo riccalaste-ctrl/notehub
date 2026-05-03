@@ -108,6 +108,7 @@ export default function GoogleDriveUploader({
     setProgress(5);
 
     try {
+      console.log('[Upload] Creating session...');
       const sessionRes = await fetch('/api/upload/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -122,6 +123,7 @@ export default function GoogleDriveUploader({
       });
 
       const sessionData = await sessionRes.json();
+      console.log('[Upload] Session response:', sessionRes.status, sessionData);
 
       if (!sessionRes.ok) {
         throw new Error(sessionData.error || 'Impossibile creare la sessione di upload');
@@ -131,6 +133,7 @@ export default function GoogleDriveUploader({
 
       const totalSize = selectedFile.size;
       const totalChunks = Math.ceil(totalSize / CHUNK_SIZE);
+      console.log('[Upload] File size:', totalSize, 'chunks:', totalChunks);
 
       let driveFileId: string | null = null;
 
@@ -138,8 +141,10 @@ export default function GoogleDriveUploader({
         const start = i * CHUNK_SIZE;
         const end = Math.min(start + CHUNK_SIZE, totalSize);
         const chunk = selectedFile.slice(start, end);
+        console.log(`[Upload] Uploading chunk ${i + 1}/${totalChunks} (${start}-${end})`);
 
         const result = await uploadChunkToServer(sessionId, chunk, i, totalChunks);
+        console.log(`[Upload] Chunk ${i + 1} result:`, result);
 
         if (result.driveFileId) {
           driveFileId = result.driveFileId;
@@ -174,6 +179,7 @@ export default function GoogleDriveUploader({
       setTimeout(() => onSuccess(), 300);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Upload fallito';
+      console.error('[Upload] Final error:', message);
       onError(message);
       setUploading(false);
     }

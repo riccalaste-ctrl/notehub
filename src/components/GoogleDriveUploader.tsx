@@ -11,7 +11,7 @@ const ALLOWED_UPLOAD_MIME_TYPES = [
   'image/png',
 ];
 
-const MAX_UPLOAD_SIZE_MB = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB || '50');
+const MAX_UPLOAD_SIZE_MB = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_SIZE_MB || '4');
 const MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024;
 
 const ALLOWED_EXTENSIONS = '.pdf,.doc,.docx,.jpg,.jpeg,.png';
@@ -77,79 +77,54 @@ export default function GoogleDriveUploader({
     }
 
     setUploading(true);
-    setProgress(0);
+    setProgress(10);
+
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    formData.append('subjectId', subjectId);
+    formData.append('professorId', professorId);
+    formData.append('uploaderName', uploaderName);
 
     try {
-      const sessionRes = await fetch('/api/upload/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          subjectId,
-          professorId,
-          uploaderName,
-          originalFilename: selectedFile.name,
-          mimeType: selectedFile.type,
-          sizeBytes: selectedFile.size,
-        }),
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+          const percent = Math.round((event.loaded / event.total) * 80) + 10;
+          setProgress(percent);
+        }
       });
 
-      const sessionData = await sessionRes.json();
-
-      if (!sessionRes.ok) {
-        throw new Error(sessionData.error || 'Impossibile creare la sessione di upload');
-      }
-
-      const { uploadUrl, sessionId } = sessionData;
-
-      setProgress(10);
-
-      const uploadRes = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': selectedFile.type,
-          'Content-Length': String(selectedFile.size),
-        },
-        body: selectedFile,
+      xhr.addEventListener('load', () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          setProgress(100);
+          setTimeout(() => onSuccess(), 300);
+        } else {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            onError(data.error || 'Upload fallito');
+          } catch {
+            onError('Upload fallito');
+          }
+        }
+        setUploading(false);
       });
 
-      if (!uploadRes.ok) {
-        const errorText = await uploadRes.text();
-        throw new Error(`Upload fallito (${uploadRes.status}): ${errorText}`);
-      }
-
-      setProgress(80);
-
-      const googleFileId = uploadRes.headers.get('X-Goog-Resource-Id') || '';
-      const uploadJson = await uploadRes.json().catch(() => null);
-      const driveFileId = uploadJson?.id || googleFileId;
-
-      if (!driveFileId) {
-        throw new Error('Impossibile ottenere l\'ID del file da Google Drive');
-      }
-
-      setProgress(90);
-
-      const completeRes = await fetch('/api/upload/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId,
-          driveFileId,
-        }),
+      xhr.addEventListener('error', () => {
+        onError('Errore di rete. Verifica la connessione e riprova.');
+        setUploading(false);
       });
 
-      const completeData = await completeRes.json();
+      xhr.addEventListener('abort', () => {
+        onError('Upload annullato');
+        setUploading(false);
+      });
 
-      if (!completeRes.ok) {
-        throw new Error(completeData.error || 'Impossibile completare l\'upload');
-      }
-
-      setProgress(100);
-      onSuccess();
+      xhr.open('POST', '/api/upload/direct');
+      xhr.send(formData);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Upload fallito';
       onError(message);
-    } finally {
       setUploading(false);
     }
   };

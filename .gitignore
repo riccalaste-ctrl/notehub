@@ -46,3 +46,6 @@ netlify.toml
 # Build artifacts
 *.tsbuildinfo
 .vercel
+
+# Temp upload files
+.tmp.driveupload/

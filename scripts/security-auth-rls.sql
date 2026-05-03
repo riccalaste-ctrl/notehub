@@ -16,6 +16,7 @@ insert into public.site_settings (key, value, description)
 values
   ('support_email', 'support@liceoscacchibari.it', 'Email usata per segnalazioni e disclaimer'),
   ('admin_email', 'admin@notehub.local', 'Compatibilita legacy'),
+  ('allowed_external_emails', 'riccalaste@gmail.com', 'Whitelist email esterne temporanee separate da virgola'),
   ('site_policy', 'Gli amministratori non sono responsabili dei file caricati ma si impegnano a rimuovere contenuti vietati segnalati alla mail support@liceoscacchibari.it.', 'Policy/disclaimer sito')
 on conflict (key) do nothing;
 
@@ -26,7 +27,7 @@ create policy site_settings_public_read
 on public.site_settings
 for select
 to anon, authenticated
-using (key in ('support_email', 'admin_email', 'site_policy'));
+using (key in ('support_email', 'admin_email', 'site_policy', 'allowed_external_emails'));
 
 -- 2) Audit logs
 create table if not exists public.audit_logs (

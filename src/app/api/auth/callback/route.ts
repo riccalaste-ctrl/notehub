@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { clearUserSessionCookie, INSTITUTION_DOMAIN, setUserSessionCookie } from '@/lib/user-session';
+import { clearUserSessionCookie, isAllowedUserEmail, setUserSessionCookie } from '@/lib/user-session';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,9 +31,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL('/login?error=oauth_exchange_failed', request.url));
   }
 
-  const email = data.user.email?.toLowerCase() || '';
-  const isInstitution = email.endsWith(`@${INSTITUTION_DOMAIN}`);
-  if (!isInstitution) {
+  const isAllowed = await isAllowedUserEmail(data.user.email);
+  if (!isAllowed) {
     await supabase.auth.signOut();
     const response = NextResponse.redirect(new URL('/login?error=invalid_domain', request.url));
     clearUserSessionCookie(response);

@@ -589,8 +589,8 @@ export default function AdminPage() {
         {activeTab === 'dashboard' && (
           <div>
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 rounded-neu bg-stone-200 flex items-center justify-center">
-                <Activity className="size-5 text-foreground" />
+              <div className="w-10 h-10 rounded-neu bg-[#6366F1]/10 flex items-center justify-center">
+                <Activity className="size-5 text-[#6366F1]" />
               </div>
               <h2 className="text-3xl font-semibold text-foreground">Panoramica</h2>
             </div>

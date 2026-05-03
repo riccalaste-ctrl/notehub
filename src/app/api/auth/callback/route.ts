@@ -5,9 +5,24 @@ import { clearUserSessionCookie, isAllowedUserEmail, setUserSessionCookie } from
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  const code = request.nextUrl.searchParams.get('code');
+  const params = request.nextUrl.searchParams;
+  const code = params.get('code');
+  const error = params.get('error');
+  const errorDescription = params.get('error_description');
+
+  console.log('[AUTH] Callback hit. URL:', request.nextUrl.toString());
+  console.log('[AUTH] All params:', Object.fromEntries(params.entries()));
+
+  if (error) {
+    console.log('[AUTH] OAuth error:', error, errorDescription);
+    return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(error)}`, request.nextUrl.origin));
+  }
+
   if (!code) {
-    console.log('[AUTH] Missing code');
+    console.log('[AUTH] Missing code parameter. This usually means:');
+    console.log('[AUTH] 1. The redirect URL is not correctly configured in Supabase');
+    console.log('[AUTH] 2. The Google OAuth callback in Supabase is misconfigured');
+    console.log('[AUTH] 3. The Site URL in Supabase is wrong');
     return NextResponse.redirect(new URL('/login?error=missing_code', request.nextUrl.origin));
   }
 
@@ -22,9 +37,9 @@ export async function GET(request: NextRequest) {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-  if (error || !data.session?.access_token || !data.user) {
-    console.log('[AUTH] OAuth exchange failed:', error);
+  const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+  if (exchangeError || !data.session?.access_token || !data.user) {
+    console.log('[AUTH] OAuth exchange failed:', exchangeError);
     return NextResponse.redirect(new URL('/login?error=oauth_exchange_failed', request.nextUrl.origin));
   }
 

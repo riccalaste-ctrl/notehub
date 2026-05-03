@@ -27,7 +27,7 @@ async function getDbAllowedEmails() {
   const value = data?.value || '';
   return value
     .split(',')
-    .map((item) => item.trim().toLowerCase())
+    .map((item: string) => item.trim().toLowerCase())
     .filter(Boolean);
 }
 

@@ -36,7 +36,7 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 z-40 flex-col items-center gap-8 w-56 h-full p-6 neu-sidebar border-r border-stone-200/50">
         <Link href="/" className="flex items-center gap-2 w-full">
-          <div className="size-9 rounded-neu neu-surface flex justify-center items-center p-1">
+          <div className="size-9 rounded-neu flex justify-center items-center p-1">
             <Image src="/logo.svg" alt="SKAKK-UP" width={36} height={36} className="w-full h-full" />
           </div>
           <span className="font-semibold text-lg leading-7 tracking-tight text-foreground">
@@ -73,7 +73,7 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
             <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-neu neu-button">
               <Menu className="size-5 text-foreground" />
             </button>
-            <Link href="/" className="size-8 rounded-neu neu-surface flex justify-center items-center p-0.5">
+            <Link href="/" className="size-8 rounded-neu flex justify-center items-center p-0.5">
               <Image src="/logo.svg" alt="SKAKK-UP" width={36} height={36} className="w-full h-full" />
             </Link>
             <span className="font-semibold text-base tracking-tight text-foreground">
@@ -145,7 +145,7 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
             >
                 <div className="flex justify-between items-center mb-8">
                   <div className="flex items-center gap-2">
-                    <div className="size-9 rounded-neu neu-surface flex justify-center items-center p-1">
+                    <div className="size-9 rounded-neu flex justify-center items-center p-1">
                       <Image src="/logo.svg" alt="SKAKK-UP" width={36} height={36} className="w-full h-full" />
                     </div>
                     <span className="font-semibold text-lg text-foreground">SKAKK-UP</span>

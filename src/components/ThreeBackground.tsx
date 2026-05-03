@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float } from '@react-three/drei';
 import * as THREE from 'three';
@@ -37,6 +37,12 @@ function AnimatedSphere({ position, color, speed }: SphereProps) {
 }
 
 export default function ThreeBackground() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+  }, []);
+
   const spheres: SphereProps[] = [
     { position: [-4, 2, -10], color: '#2E5BFF', speed: 0.3 },
     { position: [4, -2, -8], color: '#5B7DFF', speed: -0.2 },
@@ -48,8 +54,9 @@ export default function ThreeBackground() {
     <div className="fixed inset-0 -z-10">
       <Canvas
         camera={{ position: [0, 0, 5], fov: 75 }}
-        dpr={[1, 1.5]}
-        gl={{ antialias: true, alpha: true }}
+        dpr={isMobile ? 1 : [1, 1.5]}
+        gl={{ antialias: !isMobile, alpha: true }}
+        frameloop={isMobile ? 'demand' : 'always'}
       >
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} intensity={0.5} color="#5B7DFF" />

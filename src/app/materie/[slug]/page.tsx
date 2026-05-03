@@ -100,9 +100,10 @@ export default function SubjectPage() {
 
   useEffect(() => { fetchMetadata(); }, [fetchMetadata]);
   useEffect(() => {
-    const timer = setTimeout(() => { fetchUploads(); }, 300);
-    return () => clearTimeout(timer);
-  }, [fetchUploads]);
+    if (subject) {
+      fetchUploads();
+    }
+  }, [subject, search, professorFilter]);
 
   if (!subject) {
     return (

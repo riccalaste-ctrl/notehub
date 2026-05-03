@@ -106,14 +106,8 @@ export default function DashboardPage() {
     const handleOpenUpload = () => setUploadModalOpen(true);
     window.addEventListener('open-upload', handleOpenUpload);
 
-    const interval = setInterval(() => {
-      fetchCatalog();
-      fetchUploads();
-    }, 10000);
-
     return () => {
       window.removeEventListener('open-upload', handleOpenUpload);
-      clearInterval(interval);
     };
   }, []);
 

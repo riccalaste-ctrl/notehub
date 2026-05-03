@@ -61,8 +61,8 @@ export async function getAuthenticatedUserFromRequest(request: NextRequest) {
 export function setUserSessionCookie(response: NextResponse, accessToken: string) {
   response.cookies.set(USER_SESSION_COOKIE, accessToken, {
     httpOnly: true,
-    secure: true,
-    sameSite: 'none',
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
     maxAge: 60 * 60 * 8,
     path: '/',
   });

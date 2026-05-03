@@ -5,9 +5,9 @@ import { supabaseAdmin } from '@/lib/supabase';
 export async function GET() {
   try {
     const { data, error } = await supabaseAdmin
-      .from('app_settings')
+      .from('site_settings')
       .select('key, value')
-      .in('key', ['admin_email', 'site_policy']);
+      .in('key', ['admin_email', 'support_email', 'site_policy']);
 
     if (error) throw error;
 
@@ -20,7 +20,7 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching public settings:', error);
     return NextResponse.json(
-      { settings: { admin_email: '', site_policy: '' } }
+      { settings: { admin_email: '', support_email: '', site_policy: '' } }
     );
   }
 }

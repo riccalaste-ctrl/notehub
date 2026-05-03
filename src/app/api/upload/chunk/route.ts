@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { decryptSecret } from '@/lib/secure-tokens';
+import { getAuthenticatedUserFromRequest } from '@/lib/user-session';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await getAuthenticatedUserFromRequest(request);
+    if (!user) {
+      return NextResponse.json({ error: 'Accesso non autorizzato' }, { status: 401 });
+    }
+
     const formData = await request.formData();
 
     const sessionId = formData.get('sessionId') as string;
@@ -37,6 +43,9 @@ export async function POST(request: NextRequest) {
     if (!session) {
       console.error('[upload/chunk] Session not found or not pending:', sessionId);
       return NextResponse.json({ error: 'Sessione upload non trovata o scaduta' }, { status: 404 });
+    }
+    if (session.owner_id && session.owner_id !== user.id) {
+      return NextResponse.json({ error: 'Sessione upload non valida per questo utente' }, { status: 403 });
     }
 
     console.log('[upload/chunk] Session found:', { status: session.status, expiresAt: session.expires_at });

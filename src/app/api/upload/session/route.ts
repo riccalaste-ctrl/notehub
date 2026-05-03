@@ -10,6 +10,7 @@ import {
   MAX_UPLOAD_SIZE_BYTES,
   sanitizeDriveFileName,
 } from '@/lib/google-drive';
+import { getAuthenticatedUserFromRequest } from '@/lib/user-session';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +25,11 @@ const schema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await getAuthenticatedUserFromRequest(request);
+    if (!user) {
+      return NextResponse.json({ error: 'Accesso non autorizzato' }, { status: 401 });
+    }
+
     console.log('[upload/session] Starting...');
     const body = await request.json();
     const validation = schema.safeParse(body);
@@ -141,6 +147,7 @@ export async function POST(request: NextRequest) {
       .insert({
         professor_id: professorId,
         subject_id: subjectId,
+        owner_id: user.id,
         drive_connection_id: authorized.connection.id,
         drive_folder_id: folderId,
         original_filename: sanitizeDriveFileName(originalFilename),

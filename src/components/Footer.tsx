@@ -2,8 +2,10 @@
 
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { buildInstitutionDisclaimer } from '@/lib/user-session';
 
 interface Settings {
+  support_email?: string;
   admin_email?: string;
   site_policy?: string;
 }
@@ -30,9 +32,9 @@ export default function Footer() {
           <p className="text-sm text-foreground-light mb-2">
             SKAKK-UP - The Digital Agora
           </p>
-          {settings.admin_email && (
+          {(settings.support_email || settings.admin_email) && (
             <a
-              href={`mailto:${settings.admin_email}`}
+              href={`mailto:${settings.support_email || settings.admin_email}`}
               className="text-sm text-[#6366F1] hover:underline font-medium"
             >
               Contatta gli amministratori
@@ -48,14 +50,17 @@ export default function Footer() {
             <p className="text-sm text-foreground-light leading-relaxed text-center">
               {settings.site_policy}
             </p>
-            {settings.admin_email && (
+            {(settings.support_email || settings.admin_email) && (
               <p className="text-sm text-foreground-light mt-4 text-center">
                 Per problemi o segnalazioni:{' '}
-                <a href={`mailto:${settings.admin_email}`} className="text-[#6366F1] hover:underline">
-                  {settings.admin_email}
+                <a href={`mailto:${settings.support_email || settings.admin_email}`} className="text-[#6366F1] hover:underline">
+                  {settings.support_email || settings.admin_email}
                 </a>
               </p>
             )}
+            <p className="text-sm text-foreground-light mt-3 text-center">
+              {buildInstitutionDisclaimer(settings.support_email || settings.admin_email)}
+            </p>
           </div>
         )}
 

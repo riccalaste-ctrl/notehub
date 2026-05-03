@@ -6,6 +6,7 @@ import {
   getAuthorizedDriveForProfessor,
   verifyAndShareDriveFile,
 } from '@/lib/google-drive';
+import { getAuthenticatedUserFromRequest } from '@/lib/user-session';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +25,11 @@ function getPublicViewUrl(fileId: string): string {
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await getAuthenticatedUserFromRequest(request);
+    if (!user) {
+      return NextResponse.json({ error: 'Accesso non autorizzato' }, { status: 401 });
+    }
+
     const body = await request.json();
     const validation = completeUploadSchema.safeParse(body);
 
@@ -46,6 +52,9 @@ export async function POST(request: NextRequest) {
     if (sessionError) throw sessionError;
     if (!session) {
       return NextResponse.json({ error: 'Sessione upload non trovata o già completata' }, { status: 404 });
+    }
+    if (session.owner_id && session.owner_id !== user.id) {
+      return NextResponse.json({ error: 'Sessione upload non valida per questo utente' }, { status: 403 });
     }
 
     if (new Date(session.expires_at).getTime() < Date.now()) {
@@ -73,6 +82,7 @@ export async function POST(request: NextRequest) {
       .insert({
         subject_id: session.subject_id,
         professor_id: session.professor_id,
+        owner_id: session.owner_id || user.id,
         original_filename: session.original_filename,
         drive_file_id: driveFileId,
         drive_folder_id: session.drive_folder_id,

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createJWT } from '@/lib/jwt';
 import { serialize } from 'cookie';
+import { logAuditEvent } from '@/lib/audit';
 
 const ADMIN_JWT_COOKIE = 'notehub_admin_jwt';
 
@@ -14,8 +15,16 @@ export async function POST(request: NextRequest) {
     }
 
     const adminPassword = process.env.ADMIN_PASSWORD || 'NoteHub2026!';
+    if (!process.env.ADMIN_PASSWORD && process.env.NODE_ENV === 'production') {
+      return NextResponse.json({ error: 'ADMIN_PASSWORD non configurata' }, { status: 500 });
+    }
 
     if (password !== adminPassword) {
+      await logAuditEvent({
+        actor_email: 'unknown',
+        action: 'admin_login_failed',
+        target_type: 'admin_auth',
+      });
       return NextResponse.json({ error: 'Password non valida' }, { status: 401 });
     }
 
@@ -35,6 +44,12 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
         'Set-Cookie': cookie,
       },
+    });
+
+    await logAuditEvent({
+      actor_email: 'admin@notehub.local',
+      action: 'admin_login_success',
+      target_type: 'admin_auth',
     });
 
     return response;

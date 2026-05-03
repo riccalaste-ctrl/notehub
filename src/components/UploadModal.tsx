@@ -128,10 +128,10 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                   <Shield className="size-4 text-foreground-light mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-semibold text-foreground">
-                      I file caricati non possono essere modificati o eliminati dall&apos;utente
+                      Ogni file caricato viene associato al tuo account
                     </p>
                     <p className="text-xs text-foreground-light mt-1">
-                      Solo l&apos;amministratore puÃ² eliminare i file dalla piattaforma.
+                      Solo l&apos;autore puÃ² modificarlo o eliminarlo; l&apos;admin puÃ² rimuovere globalmente file segnalati.
                     </p>
                   </div>
                 </div>

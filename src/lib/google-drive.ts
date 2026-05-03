@@ -405,6 +405,23 @@ export async function getOrCreateSubjectFolder({
   const { auth, connection } = authorized;
   let rootFolderId = connection.root_folder_id;
 
+  if (rootFolderId) {
+    try {
+      const drive = getDrive(auth);
+      const rootCheck = await drive.files.get({
+        fileId: rootFolderId,
+        fields: 'id, trashed',
+      });
+      if (!rootCheck.data.id || rootCheck.data.trashed) {
+        console.log(`[Google Drive] Root folder ${rootFolderId} missing/trashed, recreating`);
+        rootFolderId = null;
+      }
+    } catch {
+      console.log(`[Google Drive] Root folder ${rootFolderId} not found, recreating`);
+      rootFolderId = null;
+    }
+  }
+
   if (!rootFolderId) {
     rootFolderId = await getOrCreateFolder(auth, DRIVE_ROOT_FOLDER_NAME);
     await supabaseAdmin

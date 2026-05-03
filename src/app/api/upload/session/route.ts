@@ -3,11 +3,9 @@ import { z } from 'zod';
 import { supabaseAdmin } from '@/lib/supabase';
 import { encryptSecret } from '@/lib/secure-tokens';
 import {
-  createResumableUploadSession,
   DriveNotConnectedError,
   getAuthorizedDriveForProfessor,
   getOrCreateSubjectFolder,
-  getUploadSessionExpiry,
   isAllowedUploadMimeType,
   MAX_UPLOAD_SIZE_BYTES,
   sanitizeDriveFileName,
@@ -15,7 +13,7 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-const uploadSessionSchema = z.object({
+const schema = z.object({
   subjectId: z.string().uuid(),
   professorId: z.string().uuid(),
   uploaderName: z.string().max(100).optional().or(z.literal('')),
@@ -27,7 +25,7 @@ const uploadSessionSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const validation = uploadSessionSchema.safeParse(body);
+    const validation = schema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json(
@@ -36,14 +34,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const {
-      subjectId,
-      professorId,
-      uploaderName,
-      originalFilename,
-      mimeType,
-      sizeBytes,
-    } = validation.data;
+    const { subjectId, professorId, uploaderName, originalFilename, mimeType, sizeBytes } = validation.data;
 
     if (!isAllowedUploadMimeType(mimeType)) {
       return NextResponse.json(
@@ -52,26 +43,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data: subject, error: subjectError } = await supabaseAdmin
+    const { data: subject } = await supabaseAdmin
       .from('subjects')
       .select('id, name, enabled')
       .eq('id', subjectId)
       .eq('enabled', true)
       .maybeSingle();
 
-    if (subjectError) throw subjectError;
     if (!subject) {
       return NextResponse.json({ error: 'Materia non trovata o disattivata' }, { status: 404 });
     }
 
-    const { data: association, error: associationError } = await supabaseAdmin
+    const { data: association } = await supabaseAdmin
       .from('subject_professors')
       .select('id')
       .eq('subject_id', subjectId)
       .eq('professor_id', professorId)
       .maybeSingle();
 
-    if (associationError) throw associationError;
     if (!association) {
       return NextResponse.json(
         { error: 'Materia non associata a questo professore' },
@@ -87,16 +76,41 @@ export async function POST(request: NextRequest) {
       authorized,
     });
 
-    const uploadUrl = await createResumableUploadSession({
-      accessToken: authorized.accessToken,
-      folderId,
-      filename: sanitizeDriveFileName(originalFilename),
-      mimeType,
-      sizeBytes,
-    });
+    const resumableRes = await fetch(
+      'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name,mimeType,size,webViewLink,webContentLink,parents',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${authorized.accessToken}`,
+          'Content-Type': 'application/json; charset=UTF-8',
+          'X-Upload-Content-Type': mimeType,
+          'X-Upload-Content-Length': String(sizeBytes),
+        },
+        body: JSON.stringify({
+          name: sanitizeDriveFileName(originalFilename),
+          mimeType,
+          parents: [folderId],
+        }),
+      }
+    );
 
-    const expiresAt = getUploadSessionExpiry();
-    const { data: uploadSession, error: insertError } = await supabaseAdmin
+    if (!resumableRes.ok) {
+      const errText = await resumableRes.text();
+      console.error('[upload/session] Google resumable session creation failed:', resumableRes.status, errText);
+      return NextResponse.json(
+        { error: `Impossibile creare sessione Google (${resumableRes.status})` },
+        { status: 500 }
+      );
+    }
+
+    const uploadUrl = resumableRes.headers.get('location');
+    if (!uploadUrl) {
+      return NextResponse.json({ error: 'Google non ha restituito un URL di upload' }, { status: 500 });
+    }
+
+    const expiresAt = new Date(Date.now() + 3600000).toISOString();
+
+    const { data: session, error: insertError } = await supabaseAdmin
       .from('drive_upload_sessions')
       .insert({
         professor_id: professorId,
@@ -114,11 +128,12 @@ export async function POST(request: NextRequest) {
       .select('id')
       .single();
 
-    if (insertError) throw insertError;
+    if (!session || insertError) {
+      throw insertError || new Error('Failed to create session');
+    }
 
     return NextResponse.json({
-      sessionId: uploadSession.id,
-      uploadUrl,
+      sessionId: session.id,
       expiresAt,
     });
   } catch (error) {
@@ -127,18 +142,11 @@ export async function POST(request: NextRequest) {
     }
 
     const message = error instanceof Error ? error.message : String(error);
-    console.error('Create upload session error:', { message, stack: error instanceof Error ? error.stack : undefined });
+    console.error('Create upload session error:', { message });
 
     if (message.includes('not found') || message.includes('404')) {
       return NextResponse.json(
         { error: 'Cartella Drive non trovata. Ricollega Google Drive dal pannello admin.' },
-        { status: 400 }
-      );
-    }
-
-    if (message.includes('permission') || message.includes('403')) {
-      return NextResponse.json(
-        { error: 'Permessi Drive insufficienti. Ricollega Google Drive dal pannello admin.' },
         { status: 400 }
       );
     }

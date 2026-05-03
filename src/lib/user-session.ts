@@ -39,7 +39,7 @@ export async function isAllowedUserEmail(email: string | undefined): Promise<boo
   const allowedEmails = getEnvAllowedEmails();
   try {
     const dbAllowedEmails = await getDbAllowedEmails();
-    dbAllowedEmails.forEach((item) => allowedEmails.add(item));
+    dbAllowedEmails.forEach((item: string) => allowedEmails.add(item));
   } catch {
     // Keep env fallback if DB lookup fails.
   }

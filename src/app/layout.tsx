@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import AutoLogout from "@/components/AutoLogout";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -25,7 +24,6 @@ export default function RootLayout({
   return (
     <html lang="it" className={inter.variable}>
       <body className="min-h-screen flex flex-col font-sans antialiased">
-        <AutoLogout />
         {children}
       </body>
     </html>

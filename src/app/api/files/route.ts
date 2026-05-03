@@ -22,11 +22,7 @@ export async function GET(request: NextRequest) {
     let query = supabaseAdmin
       .from('uploads')
       .select(`
-        id,
-        original_filename,
-        mime_type,
-        size_bytes,
-        created_at,
+        *,
         subject:subjects(name, slug),
         professor:professors(name)
       `)
@@ -63,12 +59,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const uploadsWithDetails = uploads?.map((upload) => ({
-      ...upload,
-      subject_name: upload.subject?.name,
-      subject_slug: upload.subject?.slug,
-      professor_name: upload.professor?.name,
-    })) || [];
+    const uploadsWithDetails = uploads?.map((upload) => {
+      const { owner_id, uploader_name, drive_file_id, drive_folder_id, ...safeUpload } = upload;
+      return {
+        ...safeUpload,
+        subject_name: upload.subject?.name,
+        subject_slug: upload.subject?.slug,
+        professor_name: upload.professor?.name,
+      };
+    }) || [];
 
     return NextResponse.json({
       uploads: uploadsWithDetails,

@@ -8,9 +8,9 @@
   --neu-light: #FFFFFF;
   --neu-dark: rgba(163, 177, 198, 0.6);
   --neu-dark-strong: rgba(163, 177, 198, 0.8);
-  --foreground: #000000;
-  --foreground-light: #111111;
-  --foreground-muted: #222222;
+  --foreground: #1a1a2e;
+  --foreground-light: #2d2d44;
+  --foreground-muted: #555566;
   --accent-lavender: #FF8C42;
   --accent-mint: #A8D5BA;
   --accent-coral: #FFB5A0;
@@ -149,15 +149,15 @@ body {
   }
 
   .gradient-lavender {
-    background: linear-gradient(135deg, #FF8C42 0%, #E8700 100%);
+    background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
   }
 
   .gradient-mint {
-    background: linear-gradient(135deg, #FF8C42 0%, #E8700 100%);
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
   }
 
   .gradient-coral {
-    background: linear-gradient(135deg, #FF8C42 0%, #E8700 100%);
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
   }
 
   .gradient-primary {

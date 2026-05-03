@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, ChevronRight, Plus, FileText, Users } from 'lucide-react';
+import { BookOpen, ChevronRight, Plus, FileText, GraduationCap } from 'lucide-react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -42,6 +42,27 @@ interface Upload {
   view_url?: string;
 }
 
+const subjectIcons: Record<string, string> = {
+  matematica: '∑',
+  fisica: '⚛',
+  chimica: '⬡',
+  biologia: '🧬',
+  italiano: '📖',
+  latino: '🏛',
+  storia: '📜',
+  filosofia: '🧠',
+  inglese: '🌍',
+  informatica: '💻',
+  arte: '🎨',
+  scienze: '🔬',
+};
+
+const gradientClasses = [
+  'gradient-mint',
+  'gradient-lavender',
+  'gradient-coral',
+];
+
 export default function MateriePage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [professors, setProfessors] = useState<Professor[]>([]);
@@ -54,15 +75,12 @@ export default function MateriePage() {
   const [search, setSearch] = useState('');
   const { toast, showToast, hideToast } = useToast();
 
-  const getSubjectsForProfessor = useCallback((professorId: string) => {
+  const getProfessorsForSubject = useCallback((subjectId: string) => {
     return subjectProfessors
-      .filter((sp) => sp.professor_id === professorId)
-      .map((sp) => {
-        const subject = subjects.find(s => s.id === sp.subject_id);
-        return subject;
-      })
-      .filter(Boolean) as Subject[];
-  }, [subjectProfessors, subjects]);
+      .filter((sp) => sp.subject_id === subjectId)
+      .map((sp) => sp.professor)
+      .filter(Boolean) as Professor[];
+  }, [subjectProfessors]);
 
   const fetchData = useCallback(async (subjectId: string, professorId: string) => {
     setLoading(true);
@@ -113,26 +131,28 @@ export default function MateriePage() {
     }
   }, [selectedSubject, selectedProfessor, search, fetchData]);
 
-  const handleProfessorClick = (professor: Professor) => {
-    setSelectedProfessor(professor);
-    setSelectedSubject(null);
+  const handleSubjectClick = (subject: Subject) => {
+    setSelectedSubject(subject);
+    setSelectedProfessor(null);
     setUploads([]);
     setSearch('');
   };
 
-  const handleSubjectClick = (subject: Subject) => {
-    setSelectedSubject(subject);
-  };
-
-  const handleBackToProfessors = () => {
-    setSelectedProfessor(null);
-    setSelectedSubject(null);
+  const handleProfessorClick = (professor: Professor) => {
+    setSelectedProfessor(professor);
     setUploads([]);
     setSearch('');
   };
 
   const handleBackToSubjects = () => {
+    setSelectedProfessor(null);
+    setUploads([]);
+    setSearch('');
+  };
+
+  const handleBackToRoot = () => {
     setSelectedSubject(null);
+    setSelectedProfessor(null);
     setUploads([]);
     setSearch('');
   };
@@ -141,14 +161,14 @@ export default function MateriePage() {
     if (selectedSubject && selectedProfessor) {
       return [
         { label: 'Materie', href: '/materie' },
-        { label: selectedProfessor.name, href: '/materie' },
-        { label: selectedSubject.name },
+        { label: selectedSubject.name, href: '/materie' },
+        { label: selectedProfessor.name },
       ];
     }
-    if (selectedProfessor) {
+    if (selectedSubject) {
       return [
         { label: 'Materie', href: '/materie' },
-        { label: selectedProfessor.name },
+        { label: selectedSubject.name },
       ];
     }
     return [{ label: 'Materie' }];
@@ -165,39 +185,37 @@ export default function MateriePage() {
 
       <main className="lg:pl-56 pt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Professor Selection View */}
-          {!selectedProfessor && (
+          {/* Subject Selection View */}
+          {!selectedSubject && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
               <h1 className="text-3xl font-semibold text-foreground mb-2 mt-6">
-                Tutti i Professori
+                Materie
               </h1>
-              <p className="text-base text-foreground-light mb-8">
-                Seleziona un professore per visualizzare le materie e i file disponibili
+              <p className="text-foreground-light mb-8">
+                Seleziona una materia per visualizzare i professori e i file
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {professors.map((professor) => {
-                  const professorSubjects = getSubjectsForProfessor(professor.id);
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {subjects.filter(s => s.enabled).map((subject, i) => {
+                  const profs = getProfessorsForSubject(subject.id);
+                  const icon = subjectIcons[subject.slug.toLowerCase()] || '📚';
                   return (
                     <button
-                      key={professor.id}
-                      onClick={() => handleProfessorClick(professor)}
-                      className="neu-card p-6 text-left block w-full"
+                      key={subject.id}
+                      onClick={() => handleSubjectClick(subject)}
+                      className="neu-card p-5 text-left block w-full"
                     >
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="size-12 rounded-neu gradient-lavender flex items-center justify-center">
-                          <Users className="size-6 text-white" />
-                        </div>
-                        <ChevronRight className="size-5 text-foreground-muted" />
+                      <div className={`size-12 rounded-neu ${gradientClasses[i % gradientClasses.length]} flex items-center justify-center text-white text-xl font-bold mb-3 shadow-lg`}>
+                        {icon}
                       </div>
-                      <h3 className="text-lg font-semibold text-foreground mb-1">
-                        {professor.name}
+                      <h3 className="font-semibold text-foreground text-sm mb-1">
+                        {subject.name}
                       </h3>
-                      <p className="text-sm text-foreground-light">
-                        {professorSubjects.length} {professorSubjects.length === 1 ? 'materia' : 'materie'}
+                      <p className="text-xs text-foreground-light">
+                        {profs.length} {profs.length === 1 ? 'professore' : 'professori'}
                       </p>
                     </button>
                   );
@@ -206,47 +224,47 @@ export default function MateriePage() {
             </motion.div>
           )}
 
-          {/* Subject Selection View (after professor selected) */}
-          {selectedProfessor && !selectedSubject && (
+          {/* Professor Selection View (after subject selected) */}
+          {selectedSubject && !selectedProfessor && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
               <div className="flex items-center gap-4 mb-8 mt-6">
                 <button
-                  onClick={handleBackToProfessors}
+                  onClick={handleBackToRoot}
                   className="p-2 rounded-neu neu-button premium-transition"
                 >
                   <ChevronRight className="size-5 text-foreground-light rotate-180" />
                 </button>
                 <div className="size-14 rounded-neu gradient-lavender flex items-center justify-center">
-                  <Users className="size-7 text-white" />
+                  <BookOpen className="size-7 text-white" />
                 </div>
                 <div>
                   <h1 className="text-2xl font-semibold text-foreground">
-                    {selectedProfessor.name}
+                    {selectedSubject.name}
                   </h1>
                   <p className="text-sm text-foreground-light">
-                    Seleziona una materia
+                    Seleziona un professore per visualizzare i file
                   </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {getSubjectsForProfessor(selectedProfessor.id).map((subject) => (
+                {getProfessorsForSubject(selectedSubject.id).map((professor) => (
                   <button
-                    key={subject.id}
-                    onClick={() => handleSubjectClick(subject)}
+                    key={professor.id}
+                    onClick={() => handleProfessorClick(professor)}
                     className="neu-card p-6 text-left block w-full"
                   >
                     <div className="flex items-center justify-between mb-4">
                       <div className="size-12 rounded-neu gradient-mint flex items-center justify-center">
-                        <BookOpen className="size-6 text-white" />
+                        <GraduationCap className="size-6 text-white" />
                       </div>
                       <ChevronRight className="size-5 text-foreground-muted" />
                     </div>
                     <h3 className="text-lg font-semibold text-foreground mb-1">
-                      {subject.name}
+                      {professor.name}
                     </h3>
                     <p className="text-sm text-foreground-light">
                       Clicca per visualizzare i file
@@ -257,8 +275,8 @@ export default function MateriePage() {
             </motion.div>
           )}
 
-          {/* Files View (after professor and subject selected) */}
-          {selectedProfessor && selectedSubject && (
+          {/* Files View (after subject and professor selected) */}
+          {selectedSubject && selectedProfessor && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -271,15 +289,15 @@ export default function MateriePage() {
                 >
                   <ChevronRight className="size-5 text-foreground-light rotate-180" />
                 </button>
-                <div className="size-14 rounded-neu gradient-mint flex items-center justify-center">
-                  <BookOpen className="size-7 text-white" />
+                <div className="size-14 rounded-neu gradient-lavender flex items-center justify-center">
+                  <GraduationCap className="size-7 text-white" />
                 </div>
                 <div>
                   <h1 className="text-2xl font-semibold text-foreground">
-                    {selectedSubject.name}
+                    {selectedProfessor.name}
                   </h1>
                   <p className="text-sm text-foreground-light">
-                    {selectedProfessor.name} · {uploads.length} {uploads.length === 1 ? 'file' : 'file'}
+                    {selectedSubject.name} · {uploads.length} {uploads.length === 1 ? 'file' : 'file'}
                   </p>
                 </div>
               </div>
@@ -311,7 +329,7 @@ export default function MateriePage() {
                   </div>
                   <h3 className="text-lg font-semibold text-foreground mb-2">Nessun file</h3>
                   <p className="text-sm text-foreground-light mb-6">
-                    Non ci sono file per questa materia
+                    Non ci sono file per questo professore
                   </p>
                   <motion.button
                     whileHover={{ scale: 1.05 }}

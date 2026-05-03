@@ -92,7 +92,7 @@ interface AuditLog {
   created_at: string;
 }
 
-type Tab = 'dashboard' | 'subjects' | 'professors' | 'uploads' | 'consigli' | 'subject-professors' | 'settings';
+type Tab = 'dashboard' | 'subjects' | 'professors' | 'uploads' | 'consigli' | 'subject-professors' | 'settings' | 'cleanup';
 
 function formatBytes(bytes: number) {
   if (!bytes) return '0 B';
@@ -563,6 +563,7 @@ export default function AdminPage() {
               { id: 'uploads' as const, label: 'File', icon: FileText },
               { id: 'consigli' as const, label: 'Consigli', icon: Lightbulb },
               { id: 'settings' as const, label: 'Impostazioni', icon: Settings },
+              { id: 'cleanup' as const, label: 'Pulizia DB', icon: Database },
             ].map((tab) => {
               const Icon = tab.icon;
               return (
@@ -1297,7 +1298,112 @@ export default function AdminPage() {
             </div>
           </div>
         )}
+
+        {activeTab === 'cleanup' && (
+          <CleanupSection />
+        )}
       </main>
+
+      {toast && <Toast {...toast} onClose={hideToast} />}
+    </div>
+  );
+}
+
+function CleanupSection() {
+  const { toast, showToast, hideToast } = useToast();
+  const [cleanupResults, setCleanupResults] = useState<Record<string, { deleted: number; error?: string }> | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [dryRunLoading, setDryRunLoading] = useState(false);
+
+  const runCleanup = async (dryRun: boolean) => {
+    if (dryRun) {
+      setDryRunLoading(true);
+    } else {
+      setLoading(true);
+    }
+    try {
+      const res = await fetch('/api/admin/cleanup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dryRun }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setCleanupResults(data.results);
+        showToast(data.message, 'success');
+      } else {
+        showToast(data.error || 'Errore durante la pulizia', 'error');
+      }
+    } catch {
+      showToast('Errore di connessione', 'error');
+    } finally {
+      if (dryRun) {
+        setDryRunLoading(false);
+      } else {
+        setLoading(false);
+      }
+    }
+  };
+
+  return (
+    <div className="max-w-2xl">
+      <div className="flex items-center gap-3 mb-8">
+        <div className="w-10 h-10 rounded-neu bg-stone-200 flex items-center justify-center">
+          <Database className="size-5 text-foreground" />
+        </div>
+        <h2 className="text-2xl font-semibold text-foreground">Pulizia Database</h2>
+      </div>
+
+      <div className="neu-card p-6 mb-6">
+        <h3 className="text-lg font-semibold text-foreground mb-2">Cosa viene pulito</h3>
+        <ul className="text-sm text-foreground-light space-y-2">
+          <li>• Sessioni di upload scadute (più vecchie di 24 ore)</li>
+          <li>• Sessioni completate vecchie (più di 7 giorni)</li>
+          <li>• Sessioni fallite/scadute vecchie (più di 48 ore)</li>
+          <li>• Log di audit vecchi (più di 30 giorni)</li>
+        </ul>
+      </div>
+
+      <div className="flex gap-3 mb-6">
+        <button
+          onClick={() => runCleanup(true)}
+          disabled={dryRunLoading || loading}
+          className="px-6 py-3 bg-stone-300 text-foreground font-semibold rounded-neu premium-transition disabled:opacity-60"
+        >
+          {dryRunLoading ? 'Analisi...' : 'Analizza (Dry Run)'}
+        </button>
+        <button
+          onClick={() => {
+            if (confirm('Eliminare definitivamente i dati obsoleti?')) {
+              runCleanup(false);
+            }
+          }}
+          disabled={dryRunLoading || loading}
+          className="px-6 py-3 bg-[#EF4444] text-white font-semibold rounded-neu premium-transition disabled:opacity-60"
+        >
+          {loading ? 'Pulizia...' : 'Esegui Pulizia'}
+        </button>
+      </div>
+
+      {cleanupResults && (
+        <div className="neu-card p-6">
+          <h3 className="text-lg font-semibold text-foreground mb-4">Risultati</h3>
+          <div className="space-y-2">
+            {Object.entries(cleanupResults).map(([key, result]) => (
+              <div key={key} className="flex justify-between items-center text-sm">
+                <span className="text-foreground-light">{key.replace(/_/g, ' ')}</span>
+                <span className="font-semibold text-foreground">
+                  {result.error ? `Errore: ${result.error}` : `${result.deleted} elementi`}
+                </span>
+              </div>
+            ))}
+            <div className="flex justify-between items-center text-sm font-bold pt-2 border-t border-stone-200">
+              <span className="text-foreground">Totale</span>
+              <span className="text-foreground">{Object.values(cleanupResults).reduce((sum, r) => sum + r.deleted, 0)} elementi</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {toast && <Toast {...toast} onClose={hideToast} />}
     </div>

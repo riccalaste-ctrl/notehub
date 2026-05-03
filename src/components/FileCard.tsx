@@ -103,9 +103,6 @@ export default function FileCard({ file, index = 0 }: FileCardProps) {
                 {file.subject_name}
               </span>
             )}
-            {file.professor_name && (
-              <span className="text-foreground-light font-medium">{file.professor_name}</span>
-            )}
           </div>
           <div className="flex items-center gap-2 mt-3 text-xs text-foreground-light font-medium">
             <span>{formatDate(file.created_at)}</span>

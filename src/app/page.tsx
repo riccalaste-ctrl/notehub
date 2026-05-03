@@ -51,9 +51,9 @@ const subjectIcons: Record<string, string> = {
 };
 
 const gradientClasses = [
-  'gradient-mint',
-  'gradient-lavender',
-  'gradient-coral',
+  'from-[#6366F1] to-[#4F46E5]',
+  'from-[#10B981] to-[#059669]',
+  'from-[#F59E0B] to-[#D97706]',
 ];
 
 export default function DashboardPage() {
@@ -212,7 +212,7 @@ export default function DashboardPage() {
                     href={`/materie/${subject.slug}`}
                     className="neu-card p-5 block group"
                   >
-                    <div className={`size-12 rounded-neu-lg gradient-lavender flex items-center justify-center text-white text-xl font-bold mb-3 shadow-lg group-hover:scale-110 premium-transition`}>
+                    <div className={`size-12 rounded-neu-lg bg-gradient-to-br ${gradientClasses[i % gradientClasses.length]} flex items-center justify-center text-white text-xl font-bold mb-3 shadow-lg group-hover:scale-110 premium-transition`}>
                       {icon}
                     </div>
                     <h3 className="font-semibold text-foreground text-sm mb-1">

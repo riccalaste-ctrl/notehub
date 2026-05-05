@@ -7,6 +7,7 @@ import {
   verifyAndShareDriveFile,
 } from '@/lib/google-drive';
 import { getAuthenticatedUserFromRequest } from '@/lib/user-session';
+import { logFileUpload } from '@/lib/audit-logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -107,6 +108,14 @@ export async function POST(request: NextRequest) {
         updated_at: new Date().toISOString(),
       })
       .eq('id', sessionId);
+
+    // Log the file upload
+    await logFileUpload(
+      user.email || 'unknown',
+      driveFileId,
+      session.original_filename,
+      Number(driveFile.size || session.size_bytes)
+    );
 
     return NextResponse.json({ success: true, upload });
   } catch (error) {

@@ -9,6 +9,7 @@ import {
   recordAdminLoginFailure,
   verifyConfiguredAdminPassword,
 } from '@/lib/admin-auth';
+import { logAdminLogin, logSecurityEvent } from '@/lib/audit-logger';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -43,6 +44,11 @@ export async function POST(request: NextRequest) {
 
     if (email !== adminEmail || !(await verifyConfiguredAdminPassword(password))) {
       recordAdminLoginFailure(request);
+      await logSecurityEvent('ADMIN_LOGIN_FAILED', {
+        email,
+        reason: 'invalid_credentials',
+        ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip'),
+      }, email);
       return NextResponse.json(
         { error: 'Invalid email or password' },
         { status: 401 }
@@ -52,6 +58,8 @@ export async function POST(request: NextRequest) {
     clearAdminLoginFailures(request);
     const jwt = await createJWT(email, 'admin');
     await setAdminCookie(jwt);
+
+    await logAdminLogin(email, true);
 
     return NextResponse.json({ 
       success: true,

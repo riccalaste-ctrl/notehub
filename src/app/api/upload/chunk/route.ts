@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { decryptSecret } from '@/lib/secure-tokens';
 import { getAuthenticatedUserFromRequest } from '@/lib/user-session';
+import { validateFileMagicBytes } from '@/lib/magic-bytes-validator';
+import { logSecurityEvent } from '@/lib/audit-logger';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -106,6 +108,46 @@ export async function POST(request: NextRequest) {
 
     const rangeHeader = `bytes ${start}-${end - 1}/${totalSize}`;
     console.log('[upload/chunk] Uploading to Google:', { range: rangeHeader, chunkSize });
+
+    // Validazione magic bytes: solo al primo chunk
+    if (chunkIndex === 0) {
+      console.log('[upload/chunk] Validating file magic bytes...');
+      const arrayBuffer = await chunk.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const validation = await validateFileMagicBytes(buffer, session.mime_type);
+
+      if (!validation.valid) {
+        console.warn('[upload/chunk] Magic bytes validation failed:', validation);
+        await logSecurityEvent('FILE_VALIDATION_FAILED', {
+          sessionId,
+          fileName: session.original_filename,
+          declaredType: session.mime_type,
+          detectedType: validation.detectedMimeType,
+          reason: validation.error,
+          mismatch: validation.mismatch,
+        }, user.email);
+
+        return NextResponse.json(
+          {
+            error: 'Validazione del file non riuscita',
+            details: validation.error,
+          },
+          { status: 400 }
+        );
+      }
+
+      if (validation.mismatch) {
+        console.warn('[upload/chunk] File MIME type mismatch detected:', validation);
+        await logSecurityEvent('FILE_MIME_TYPE_MISMATCH', {
+          sessionId,
+          fileName: session.original_filename,
+          declaredType: validation.mimeType,
+          detectedType: validation.detectedMimeType,
+        }, user.email);
+      }
+
+      console.log('[upload/chunk] Magic bytes validation passed:', validation.detectedMimeType);
+    }
 
     const uploadRes = await fetch(uploadUrl, {
       method: 'PUT',

@@ -1,0 +1,8 @@
+VERCEL-VARS.txt
+apikey.txt
+server.js
+storage/db.json
+scripts/generate-hash.mjs
+.env
+.env.local
+.env.*.local

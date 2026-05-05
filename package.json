@@ -16,6 +16,7 @@
     "@supabase/supabase-js": "^2.47.10",
     "bcryptjs": "^2.4.3",
     "cookie": "^1.1.1",
+    "file-type": "^22.0.1",
     "framer-motion": "^12.38.0",
     "gapi-script": "^1.2.0",
     "googleapis": "^171.4.0",

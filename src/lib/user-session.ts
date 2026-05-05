@@ -4,7 +4,6 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 export const USER_SESSION_COOKIE = 'notehub_user_jwt';
 export const INSTITUTION_DOMAIN = process.env.ALLOWED_EMAIL_DOMAIN || 'liceoscacchibari.it';
-const DEFAULT_ALLOWED_TEST_EMAILS = ['riccalaste@gmail.com'];
 
 function getEnvAllowedEmails() {
   const configuredTestEmails = (process.env.ALLOWED_TEST_EMAILS || '')
@@ -13,7 +12,6 @@ function getEnvAllowedEmails() {
     .filter(Boolean);
 
   return new Set([
-    ...DEFAULT_ALLOWED_TEST_EMAILS,
     ...configuredTestEmails,
   ]);
 }

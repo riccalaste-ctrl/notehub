@@ -30,7 +30,7 @@ Prima di continuare, genera il vero hash della password admin:
 npm run generate-password-hash
 ```
 
-Quando viene chiesto, inserisci: `NoteHub2026!`
+Quando viene chiesto, inserisci una password admin forte.
 
 Copia l'output (es: `$2a$10$...`) e aggiorna `.env.local`:
 ```
@@ -47,7 +47,7 @@ Visita: http://localhost:3000
 ### 5. Accedi all'Admin
 - URL: http://localhost:3000/admin/login
 - Email: `admin@notehub.local`
-- Password: `NoteHub2026!`
+- Password: usa la password admin forte scelta da voi
 
 ---
 
@@ -75,14 +75,14 @@ Nel dashboard di Vercel, vai in **Settings → Environment Variables** e aggiung
 
 #### Variabili Pubbliche (Supabase)
 ```
-NEXT_PUBLIC_SUPABASE_URL=https://kmgbacihnsjgqkdqrzqj.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<supabase-anon-key>
 NEXT_PUBLIC_APP_URL=https://notehub-your-username.vercel.app
 ```
 
 #### Variabili Private (Segrete)
 ```
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_SERVICE_ROLE_KEY=<supabase-service-role-key>
 JWT_SECRET=<long_random_secret_32_chars>
 SESSION_SECRET=<long_random_secret_32_chars>
 ADMIN_EMAIL=admin@notehub.local
@@ -115,7 +115,7 @@ Vercel rileverà automaticamente:
 ```bash
 curl -X POST https://notehub-your-url.vercel.app/api/admin/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@notehub.local","password":"NoteHub2026!"}'
+  -d '{"email":"admin@notehub.local","password":"<password-admin-forte>"}'
 ```
 
 ---

@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { buildInstitutionDisclaimer } from '@/lib/user-session-client';
 
@@ -63,6 +64,16 @@ export default function Footer() {
             </p>
           </div>
         )}
+
+        <div className="flex justify-center gap-6 mt-6 text-xs">
+          <Link href="/privacy-policy" className="text-foreground-muted hover:text-foreground hover:underline">
+            Privacy Policy
+          </Link>
+          <span className="text-foreground-muted/30">|</span>
+          <Link href="/cookie-policy" className="text-foreground-muted hover:text-foreground hover:underline">
+            Cookie Policy
+          </Link>
+        </div>
 
         <p className="text-xs text-foreground-muted text-center mt-6">
           Premium knowledge sharing platform

@@ -3,6 +3,49 @@ export const dynamic = 'force-dynamic';
 import { supabaseAdmin } from '@/lib/supabase';
 import { requireAdmin } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
+import { z } from 'zod';
+
+const allowedSettingKeys = [
+  'support_email',
+  'admin_email',
+  'site_policy',
+  'allowed_external_emails',
+  'consigli_email',
+] as const;
+
+const settingSchema = z.object({
+  key: z.enum(allowedSettingKeys),
+  value: z.string().max(5000),
+});
+
+function normalizeSettingValue(key: typeof allowedSettingKeys[number], value: string) {
+  if (key === 'support_email' || key === 'admin_email' || key === 'consigli_email') {
+    const trimmed = value.trim().toLowerCase();
+    if (!trimmed) return '';
+
+    if (!z.string().email().safeParse(trimmed).success) {
+      throw new Error('Email non valida');
+    }
+
+    return trimmed;
+  }
+
+  if (key === 'allowed_external_emails') {
+    const emails = value
+      .split(',')
+      .map((item) => item.trim().toLowerCase())
+      .filter(Boolean);
+
+    const invalidEmail = emails.find((item) => !z.string().email().safeParse(item).success);
+    if (invalidEmail) {
+      throw new Error(`Email non valida nella whitelist: ${invalidEmail}`);
+    }
+
+    return Array.from(new Set(emails)).join(',');
+  }
+
+  return value.trim();
+}
 
 export async function GET() {
   const authError = await requireAdmin();
@@ -36,11 +79,22 @@ export async function PUT(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { key, value } = body;
+    const validation = settingSchema.safeParse(body);
 
-    if (!key || value === undefined) {
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Missing key or value' },
+        { error: 'Impostazione non valida', details: validation.error.errors },
+        { status: 400 }
+      );
+    }
+
+    const { key } = validation.data;
+    let value: string;
+    try {
+      value = normalizeSettingValue(key, validation.data.value);
+    } catch (error) {
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : 'Valore impostazione non valido' },
         { status: 400 }
       );
     }

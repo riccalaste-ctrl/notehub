@@ -2,11 +2,29 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createJWT } from '@/lib/jwt';
 import { serialize } from 'cookie';
 import { logAuditEvent } from '@/lib/audit';
+import {
+  checkAdminLoginRateLimit,
+  clearAdminLoginFailures,
+  getAdminEmail,
+  recordAdminLoginFailure,
+  verifyConfiguredAdminPassword,
+} from '@/lib/admin-auth';
 
 const ADMIN_JWT_COOKIE = 'notehub_admin_jwt';
 
 export async function POST(request: NextRequest) {
   try {
+    const rateLimit = checkAdminLoginRateLimit(request);
+    if (rateLimit.limited) {
+      return NextResponse.json(
+        { error: 'Troppi tentativi. Riprova tra poco.' },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) },
+        }
+      );
+    }
+
     const body = await request.json();
     const { password } = body;
 
@@ -14,12 +32,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Password richiesta' }, { status: 400 });
     }
 
-    const adminPassword = process.env.ADMIN_PASSWORD || 'NoteHub2026!';
-    if (!process.env.ADMIN_PASSWORD && process.env.NODE_ENV === 'production') {
-      return NextResponse.json({ error: 'ADMIN_PASSWORD non configurata' }, { status: 500 });
-    }
-
-    if (password !== adminPassword) {
+    if (!(await verifyConfiguredAdminPassword(password))) {
+      recordAdminLoginFailure(request);
       await logAuditEvent({
         actor_email: 'unknown',
         action: 'admin_login_failed',
@@ -28,7 +42,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Password non valida' }, { status: 401 });
     }
 
-    const jwt = await createJWT('admin@notehub.local', 'admin');
+    clearAdminLoginFailures(request);
+    const adminEmail = getAdminEmail();
+    const jwt = await createJWT(adminEmail, 'admin');
 
     const cookie = serialize(ADMIN_JWT_COOKIE, jwt, {
       httpOnly: true,
@@ -47,7 +63,7 @@ export async function POST(request: NextRequest) {
     });
 
     await logAuditEvent({
-      actor_email: 'admin@notehub.local',
+      actor_email: adminEmail,
       action: 'admin_login_success',
       target_type: 'admin_auth',
     });

@@ -27,7 +27,7 @@ create policy site_settings_public_read
 on public.site_settings
 for select
 to anon, authenticated
-using (key in ('support_email', 'admin_email', 'site_policy', 'allowed_external_emails'));
+using (key in ('support_email', 'admin_email', 'site_policy', 'consigli_email'));
 
 -- 2) Audit logs
 create table if not exists public.audit_logs (

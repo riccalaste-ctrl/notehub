@@ -60,7 +60,14 @@ export async function GET(request: NextRequest) {
     }
 
     const uploadsWithDetails = uploads?.map((upload) => {
-      const { owner_id, uploader_name, drive_file_id, drive_folder_id, ...safeUpload } = upload;
+      const {
+        owner_id,
+        uploader_name,
+        drive_file_id,
+        drive_folder_id,
+        drive_connection_id,
+        ...safeUpload
+      } = upload;
       return {
         ...safeUpload,
         subject_name: upload.subject?.name,

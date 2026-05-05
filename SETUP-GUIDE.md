@@ -63,9 +63,9 @@ git push -u origin main
    
    - **Name**: scrivi `notehub` (tutto minuscolo)
    
-   - **Database Password**: scrivi `NoteHub2026!` ( ricordatela! )
+   - **Database Password**: genera una password forte e conservala in modo sicuro
    
-   - **Confirm Database Password**: riscrivi `NoteHub2026!`
+   - **Confirm Database Password**: riscrivi la password forte scelta
    
    - **Region**: clicca e scegli **Frankfurt (eu-central-1)** (è il più vicino all'Italia)
 
@@ -141,7 +141,7 @@ Nella pagina che appare (Project Settings):
 
    **Riga 4:**
    - Name: `ADMIN_PASSWORD`
-   - Value: `NoteHub2026!`
+   - Value: l'hash generato con `npm run generate-password-hash`
    - Clicca **Add**
 
    **Riga 5:**
@@ -276,7 +276,7 @@ Ora devi dire al sito come raggiungere i tuoi bridge e quali materie usare.
 2. Nell'URL, aggiungi `/admin/login` alla fine
    - Esempio: `https://notehub-vercel-app.vercel.app/admin/login`
 3. Vedrai una pagina di login
-4. Password: `NoteHub2026!`
+4. Password: usa la password admin forte scelta da voi
 5. Clicca **"Accedi"**
 
 ### 6.2 Aggiungi le materie

@@ -5,12 +5,10 @@
 import { jwtVerify, SignJWT } from 'jose';
 import { cookies } from 'next/headers';
 import { AuthenticationError, AuthorizationError } from './errors';
+import { getJwtSecret } from '@/lib/env';
+import { verifyConfiguredAdminPassword } from '@/lib/admin-auth';
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'default-secret-key-change-in-production-min-32-chars'
-);
-
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'NoteHub2026!';
+const JWT_SECRET = new TextEncoder().encode(getJwtSecret());
 const COOKIE_NAME = 'admin_session';
 const COOKIE_TTL_MS = 1000 * 60 * 60 * 24; // 24 ore
 
@@ -46,8 +44,8 @@ export async function verifySessionToken(token: string): Promise<AdminSession> {
 /**
  * Verifica password admin
  */
-export function verifyAdminPassword(password: string): boolean {
-  return password === ADMIN_PASSWORD;
+export async function verifyAdminPassword(password: string): Promise<boolean> {
+  return verifyConfiguredAdminPassword(password);
 }
 
 /**

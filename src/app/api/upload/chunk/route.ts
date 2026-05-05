@@ -18,11 +18,21 @@ export async function POST(request: NextRequest) {
     const sessionId = formData.get('sessionId') as string;
     const chunkIndex = parseInt(formData.get('chunkIndex') as string, 10);
     const totalChunks = parseInt(formData.get('totalChunks') as string, 10);
+    const explicitChunkStart = formData.get('chunkStart');
+    const explicitChunkEnd = formData.get('chunkEnd');
     const chunk = formData.get('chunk') as File;
 
-    console.log('[upload/chunk] Received:', { sessionId, chunkIndex, totalChunks, chunkSize: chunk?.size, chunkName: chunk?.name, chunkType: chunk?.type });
+    console.log('[upload/chunk] Received:', { sessionId, chunkIndex, totalChunks, chunkSize: chunk?.size });
 
-    if (!sessionId || isNaN(chunkIndex) || isNaN(totalChunks) || !chunk) {
+    if (
+      !sessionId ||
+      !Number.isInteger(chunkIndex) ||
+      !Number.isInteger(totalChunks) ||
+      chunkIndex < 0 ||
+      totalChunks < 1 ||
+      chunkIndex >= totalChunks ||
+      !chunk
+    ) {
       console.error('[upload/chunk] Invalid parameters:', { sessionId, chunkIndex, totalChunks, hasChunk: !!chunk });
       return NextResponse.json({ error: 'Dati chunk non validi' }, { status: 400 });
     }
@@ -70,11 +80,31 @@ export async function POST(request: NextRequest) {
 
     const totalSize = Number(session.size_bytes);
     const chunkSize = chunk.size;
-    const start = chunkIndex * chunkSize;
-    const end = Math.min(start + chunkSize, totalSize);
+    const hasExplicitRange = explicitChunkStart !== null && explicitChunkEnd !== null;
+    const start = hasExplicitRange
+      ? parseInt(String(explicitChunkStart), 10)
+      : chunkIndex * chunkSize;
+    const end = hasExplicitRange
+      ? parseInt(String(explicitChunkEnd), 10)
+      : Math.min(start + chunkSize, totalSize);
     const isLast = chunkIndex >= totalChunks - 1;
 
-    const rangeHeader = `bytes ${start}-${isLast ? totalSize - 1 : end - 1}/${totalSize}`;
+    if (
+      !Number.isInteger(totalSize) ||
+      totalSize <= 0 ||
+      !Number.isInteger(start) ||
+      !Number.isInteger(end) ||
+      start < 0 ||
+      end <= start ||
+      end > totalSize ||
+      end - start !== chunkSize ||
+      (isLast && end !== totalSize)
+    ) {
+      console.error('[upload/chunk] Invalid chunk range:', { sessionId, chunkIndex, totalChunks, start, end, chunkSize, totalSize });
+      return NextResponse.json({ error: 'Range chunk non valido' }, { status: 400 });
+    }
+
+    const rangeHeader = `bytes ${start}-${end - 1}/${totalSize}`;
     console.log('[upload/chunk] Uploading to Google:', { range: rangeHeader, chunkSize });
 
     const uploadRes = await fetch(uploadUrl, {

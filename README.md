@@ -48,7 +48,7 @@ Copia `.env.example` in `.env.local`:
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-ADMIN_PASSWORD=NoteHub2026!
+ADMIN_PASSWORD_HASH=your_bcrypt_admin_password_hash
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 

@@ -13,11 +13,11 @@ Ho completamente refactorizzato il progetto notehub per renderlo **production-re
 
 ### 2️⃣ Credenziali Supabase Integrate
 Il file `.env.local` contiene:
-- ✅ URL Supabase: `https://kmgbacihnsjgqkdqrzqj.supabase.co`
+- ✅ URL Supabase: `https://<project-ref>.supabase.co`
 - ✅ Anon Key (pubblica): ✓ Configurata
 - ✅ Service Role (privata): ✓ Configurata
 - ✅ Admin email: `admin@notehub.local`
-- ✅ Admin password: `NoteHub2026!`
+- ✅ Admin password: password forte scelta da voi
 
 ### 3️⃣ UI/UX Premium SaaS-Style
 - ✅ Homepage elegante con gradient background
@@ -63,7 +63,7 @@ Poi visita: **http://localhost:3000**
 Visita: **http://localhost:3000/admin/login**
 
 - Email: `admin@notehub.local`
-- Password: `NoteHub2026!`
+- Password: usa la password admin forte scelta da voi
 
 ✅ Dovresti entrare nel dashboard admin
 
@@ -121,10 +121,10 @@ Prima di fare il deploy su Vercel:
 
 ⚠️ **NON CONDIVIDERE PUBBLICAMENTE**
 
-- **Supabase URL**: `https://kmgbacihnsjgqkdqrzqj.supabase.co`
+- **Supabase URL**: `https://<project-ref>.supabase.co`
 - **Anon Key**: Nel `.env.local`
 - **Service Role Key**: Nel `.env.local`
-- **Admin Password**: `NoteHub2026!`
+- **Admin Password**: password forte scelta da voi
 
 ✅ Tutte le credenziali sono nel `.env.local` (gitignored)
 ✅ Non saranno mai commitati su GitHub

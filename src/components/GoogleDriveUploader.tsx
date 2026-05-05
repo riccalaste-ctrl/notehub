@@ -38,12 +38,16 @@ async function uploadChunkToServer(
   sessionId: string,
   chunk: Blob,
   chunkIndex: number,
-  totalChunks: number
+  totalChunks: number,
+  chunkStart: number,
+  chunkEnd: number
 ): Promise<{ success: boolean; driveFileId: string | null; isComplete: boolean }> {
   const formData = new FormData();
   formData.append('sessionId', sessionId);
   formData.append('chunkIndex', String(chunkIndex));
   formData.append('totalChunks', String(totalChunks));
+  formData.append('chunkStart', String(chunkStart));
+  formData.append('chunkEnd', String(chunkEnd));
   formData.append('chunk', chunk);
 
   const response = await fetch('/api/upload/chunk', {
@@ -143,7 +147,7 @@ export default function GoogleDriveUploader({
         const chunk = selectedFile.slice(start, end);
         console.log(`[Upload] Uploading chunk ${i + 1}/${totalChunks} (${start}-${end})`);
 
-        const result = await uploadChunkToServer(sessionId, chunk, i, totalChunks);
+        const result = await uploadChunkToServer(sessionId, chunk, i, totalChunks, start, end);
         console.log(`[Upload] Chunk ${i + 1} result:`, result);
 
         if (result.driveFileId) {

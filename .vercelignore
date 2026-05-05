@@ -15,6 +15,11 @@ node_modules
 .env.local
 .env.development.local
 .env.test.local
+VERCEL-VARS.txt
+apikey.txt
+*.pem
+*.key
+*.secret
 
 # Documentation & scripts
 *.md

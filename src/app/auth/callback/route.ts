@@ -4,11 +4,24 @@ import { isAllowedUserEmail } from '@/lib/user-session';
 
 export const dynamic = 'force-dynamic';
 
+function getSafeRedirectPath(value: string | null) {
+  if (!value || !value.startsWith('/') || value.startsWith('//')) {
+    return '/';
+  }
+
+  try {
+    const parsed = new URL(value, 'https://notehub.local');
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return '/';
+  }
+}
+
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   const error = requestUrl.searchParams.get('error');
-  const next = requestUrl.searchParams.get('next') ?? '/';
+  const next = getSafeRedirectPath(requestUrl.searchParams.get('next'));
 
   if (error) {
     console.log('[AUTH] OAuth error:', error);

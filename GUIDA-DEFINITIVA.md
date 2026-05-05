@@ -91,8 +91,8 @@ Se hai dubbi, rinominala così.
  2. Compila:
     - **Organization**: lascia come sta
     - **Name**: `notehub`
-    - **Database Password**: `NoteHub2026!`
-    - **Confirm**: `NoteHub2026!`
+    - **Database Password**: genera una password forte e conservala in modo sicuro
+    - **Confirm**: ripeti la password forte scelta
     - **Region**: scegli **Frankfurt**
  3. Clicca **Create new project**
  4. **Aspetta 2 minuti**
@@ -169,7 +169,7 @@ Se hai dubbi, rinominala così.
 
 **Quarta variabile:**
 - KEY: `ADMIN_PASSWORD`
-- VALUE: `NoteHub2026!`
+- VALUE: l'hash generato con `npm run generate-password-hash`
 - Clicca **Add**
 
  4. Clicca **Deploy** (pulsante viola in basso)
@@ -193,7 +193,7 @@ Se hai dubbi, rinominala così.
 
  1. Apri l'URL che hai copiato
  2. Prova ad andare su: `TUO_URL/admin/login`
- 3. Password: `NoteHub2026!`
+ 3. Password: usa la password admin forte scelta da voi
 
  Se funziona, il sito è online!
 

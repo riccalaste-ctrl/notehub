@@ -7,7 +7,7 @@ export async function GET() {
   try {
     const { data, error } = await supabaseAdmin
       .from('consigli_files')
-      .select('*')
+      .select('id, consiglio_id, original_filename, mime_type, size_bytes, download_url, view_url, created_at')
       .order('created_at', { ascending: false });
 
     if (error) throw error;

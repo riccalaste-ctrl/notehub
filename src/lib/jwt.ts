@@ -1,8 +1,9 @@
 import { SignJWT, jwtVerify } from 'jose';
+import { getJwtSecret } from '@/lib/env';
 
-const secret = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'development-secret-key-min-32-chars-long'
-);
+function getSigningSecret() {
+  return new TextEncoder().encode(getJwtSecret());
+}
 
 interface JWTPayload {
   sub: string;
@@ -18,14 +19,14 @@ export async function createJWT(email: string, role: 'admin' | 'user' = 'user'):
     .setSubject(email)
     .setIssuedAt()
     .setExpirationTime('24h')
-    .sign(secret);
+    .sign(getSigningSecret());
 
   return jwt;
 }
 
 export async function verifyJWT(token: string): Promise<JWTPayload | null> {
   try {
-    const verified = await jwtVerify(token, secret);
+    const verified = await jwtVerify(token, getSigningSecret());
     return verified.payload as unknown as JWTPayload;
   } catch (error) {
     return null;

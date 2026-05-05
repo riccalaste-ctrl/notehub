@@ -1,4 +1,5 @@
 import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes, timingSafeEqual } from 'crypto';
+import { getJwtSecret } from '@/lib/env';
 
 const ENCRYPTION_PREFIX = 'v1';
 
@@ -66,7 +67,7 @@ export function decryptSecret(payload: string): string {
 
 function getStateSecret(): Buffer {
   return createHash('sha256')
-    .update(process.env.JWT_SECRET || 'development-secret-key-min-32-chars-long')
+    .update(getJwtSecret())
     .digest();
 }
 

@@ -154,7 +154,7 @@ notehub/
 
 ### Password
 - Email: `admin@notehub.local`
-- Password: `NoteHub2026!`
+- Password: usare una password admin forte, non una password condivisa nei documenti
 - Hash: Generato con bcryptjs (10 rounds)
 
 ---
@@ -178,7 +178,7 @@ npm run start
 ### 3. Genera Password Hash
 ```bash
 npm run generate-password-hash
-# Inserisci: NoteHub2026!
+# Inserisci una password admin forte
 # Copia output nel .env.local
 ```
 
@@ -271,14 +271,14 @@ git push origin main
 
 ### Credenziali Supabase
 Tutte le credenziali nel `.env.local`:
-- URL: `https://kmgbacihnsjgqkdqrzqj.supabase.co`
+- URL: `https://<project-ref>.supabase.co`
 - Anon Key: ✅ Configurata
 - Service Role: ✅ Configurata
-- Project ID: `kmgbacihnsjgqkdqrzqj`
+- Project ID: `<project-ref>`
 
 ### Password Admin
 - Email: `admin@notehub.local`
-- Password: `NoteHub2026!`
+- Password: usare una password admin forte, non una password condivisa nei documenti
 - Hash: Generato localmente con bcryptjs
 
 ### Database

@@ -21,6 +21,11 @@ node_modules/
 .env.development.local
 .env.test.local
 .env.production.local
+VERCEL-VARS.txt
+apikey.txt
+*.pem
+*.key
+*.secret
 
 # Editor and IDE
 .vscode/

@@ -3,13 +3,41 @@ import { createServerClient } from '@supabase/ssr';
 import { jwtVerify } from 'jose';
 
 const ADMIN_JWT_COOKIE = 'notehub_admin_jwt';
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'development-secret-key-min-32-chars-long'
-);
+const DEV_JWT_SECRET = 'development-secret-key-min-32-chars-long';
+
+function getJwtSecretBytes() {
+  const secret = process.env.JWT_SECRET?.trim();
+
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') return null;
+    return new TextEncoder().encode(DEV_JWT_SECRET);
+  }
+
+  if (secret.length < 32) return null;
+  return new TextEncoder().encode(secret);
+}
+
+function isUnsafeMethod(method: string) {
+  return !['GET', 'HEAD', 'OPTIONS'].includes(method.toUpperCase());
+}
+
+function hasSameOrigin(request: NextRequest) {
+  const origin = request.headers.get('origin');
+  if (!origin) return true;
+
+  try {
+    return new URL(origin).host === request.nextUrl.host;
+  } catch {
+    return false;
+  }
+}
 
 async function verifyAdminToken(token: string): Promise<boolean> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const jwtSecret = getJwtSecretBytes();
+    if (!jwtSecret) return false;
+
+    const { payload } = await jwtVerify(token, jwtSecret);
     return payload.role === 'admin';
   } catch {
     return false;
@@ -54,6 +82,19 @@ export async function middleware(request: NextRequest) {
   await supabase.auth.getSession();
 
   const isPublicAdminAPI = pathname === '/api/admin/login' || pathname === '/api/admin/verify-password';
+  const isCookieBackedMutation =
+    isUnsafeMethod(request.method) &&
+    (
+      pathname.startsWith('/api/admin') ||
+      pathname.startsWith('/api/upload') ||
+      pathname.startsWith('/api/user') ||
+      pathname === '/api/auth/logout'
+    );
+
+  if (isCookieBackedMutation && !hasSameOrigin(request)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   if (pathname.startsWith('/api/admin') && !isPublicAdminAPI) {
     const adminToken = request.cookies.get(ADMIN_JWT_COOKIE);
 
@@ -68,6 +109,8 @@ export async function middleware(request: NextRequest) {
   const isPublicPath =
     pathname === '/login' ||
     pathname === '/auth/callback' ||
+    pathname === '/privacy-policy' ||
+    pathname === '/cookie-policy' ||
     pathname.startsWith('/api/auth') ||
     pathname.startsWith('/api/public') ||
     pathname.startsWith('/admin') ||
@@ -107,6 +150,7 @@ export const config = {
     '/api/files',
     '/api/upload/:path*',
     '/api/user/:path*',
+    '/api/auth/logout',
     '/api/admin/:path*',
   ],
 };

@@ -70,7 +70,7 @@ B) anon public key
 C) service_role key
 ```
 
-5. La password admin sarà: `NoteHub2026!`
+5. Scegli una password admin forte e genera l'hash con `npm run generate-password-hash`
 
 ---
 
@@ -163,7 +163,7 @@ Il sito è deployato, ma non si connette ancora al database. Devi aggiungere le 
 
 **Variabile 4:**
 - Name: `ADMIN_PASSWORD`
-- Value: `NoteHub2026!`
+- Value: l'hash generato con `npm run generate-password-hash`
 - Click **Add**
 
 3. In basso, clicca **Save**
@@ -182,7 +182,7 @@ Il sito è deployato, ma non si connette ancora al database. Devi aggiungere le 
 1. Apri il tuo URL: `https://notehub-xxxx.vercel.app`
 2. Dovresti vedere la homepage di NoteHub
 3. Prova ad andare su `https://notehub-xxxx.vercel.app/admin/login`
-4. Login con password: `NoteHub2026!`
+4. Login con la password admin forte scelta da voi
 
 ---
 

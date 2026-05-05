@@ -1,8 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
+import { requireServerEnv } from '@/lib/env';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key';
+const supabaseUrl = requireServerEnv('NEXT_PUBLIC_SUPABASE_URL');
+const supabaseAnonKey = requireServerEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY');
+const supabaseServiceKey = requireServerEnv('SUPABASE_SERVICE_ROLE_KEY');
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 

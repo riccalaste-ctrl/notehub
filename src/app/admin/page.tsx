@@ -550,23 +550,24 @@ export default function AdminPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neu-base px-4">
+      <div className="min-h-screen flex items-center justify-center bg-transparent px-4">
         <div className="max-w-md w-full">
-          <div className="neu-modal p-8">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 rounded-neu-xl bg-[#FF8C42]/20 flex items-center justify-center mx-auto mb-4">
+          <div className="glass-panel p-8 border border-white/10 shadow-2xl relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-neon-purple/10 to-transparent pointer-events-none" />
+            <div className="text-center mb-8 relative z-10">
+              <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4 shadow-[0_0_20px_rgba(255,140,66,0.2)]">
                 <Shield className="size-8 text-[#FF8C42]" />
               </div>
-              <h1 className="text-3xl font-semibold text-foreground">SKAKK-UP Admin</h1>
-              <p className="text-foreground-light mt-2 text-sm">Pannello di amministrazione</p>
-              <p className="text-foreground-light mt-2 text-xs">
+              <h1 className="text-3xl font-semibold text-white">SKAKK-UP Admin</h1>
+              <p className="text-foreground-muted mt-2 text-sm">Pannello di amministrazione</p>
+              <p className="text-foreground-muted/50 mt-2 text-xs">
                 {buildInstitutionDisclaimer(settingsForm.support_email)}
               </p>
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-4">
+            <form onSubmit={handleLogin} className="space-y-4 relative z-10">
               <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">Password</label>
+                <label className="block text-sm font-semibold text-white mb-2">Password</label>
                 <input
                   type="password"
                   value={password}
@@ -575,7 +576,7 @@ export default function AdminPage() {
                     setLoginError('');
                   }}
                   placeholder="Inserisci la password admin"
-                  className="w-full px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition"
+                  className="w-full px-4 py-3 bg-black/50 border border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple rounded-xl text-white placeholder-foreground-muted outline-none transition-all"
                   required
                   disabled={loginLoading}
                   autoFocus
@@ -583,7 +584,7 @@ export default function AdminPage() {
               </div>
 
               {loginError && (
-                <div className="px-4 py-3 bg-[#EF4444]/10 border border-[#EF4444]/20 text-[#EF4444] text-sm rounded-neu">
+                <div className="px-4 py-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-xl">
                   {loginError}
                 </div>
               )}
@@ -591,16 +592,16 @@ export default function AdminPage() {
               <button
                 type="submit"
                 disabled={loginLoading || !password}
-                className="w-full py-3 bg-gradient-to-br from-[#FF8C42] to-[#E87000] text-white font-semibold rounded-neu premium-transition disabled:opacity-50"
+                className="w-full py-3 bg-gradient-to-r from-neon-purple to-neon-blue text-white font-semibold rounded-xl transition-all hover:shadow-[0_0_20px_rgba(157,78,221,0.4)] disabled:opacity-50"
               >
                 {loginLoading ? 'Verifica...' : 'Accedi'}
               </button>
             </form>
 
-            <div className="mt-6 pt-6 border-t border-stone-200">
-              <p className="text-center text-sm text-foreground-light">
+            <div className="mt-6 pt-6 border-t border-white/10 relative z-10">
+              <p className="text-center text-sm text-foreground-muted">
                 Torna alla{' '}
-                <Link href="/" className="text-[#6366F1] hover:underline font-medium">
+                <Link href="/" className="text-neon-blue hover:text-white transition-colors font-medium">
                   home
                 </Link>
               </p>
@@ -612,7 +613,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neu-base admin-gray">
+    <div className="min-h-screen bg-transparent">
       {criticalError && (
         <ErrorAlert
           title={criticalError.title}
@@ -620,17 +621,17 @@ export default function AdminPage() {
           onClose={() => setCriticalError(null)}
         />
       )}
-      <header className="neu-header sticky top-0 z-40">
+      <header className="glass-panel sticky top-0 z-40 border-b border-white/10 rounded-none rounded-b-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-neu bg-[#FF8C42]/10 flex items-center justify-center">
-              <Shield className="size-5 text-[#FF8C42]" />
+            <div className="w-10 h-10 rounded-xl bg-neon-purple/20 flex items-center justify-center border border-neon-purple/30">
+              <Shield className="size-5 text-neon-purple" />
             </div>
-            <h1 className="text-xl font-semibold text-foreground">SKAKK-UP Admin</h1>
+            <h1 className="text-xl font-semibold text-white">SKAKK-UP Admin</h1>
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center space-x-2 px-4 py-2 text-foreground-light hover:text-[#EF4444] rounded-neu neu-button premium-transition"
+            className="flex items-center space-x-2 px-4 py-2 text-foreground-muted hover:text-red-400 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-colors"
           >
             <LogOut className="size-5" />
             <span className="text-sm font-semibold">Esci</span>
@@ -638,9 +639,9 @@ export default function AdminPage() {
         </div>
       </header>
 
-      <div className="neu-nav neu-surface rounded-none border-b border-stone-200/50">
+      <div className="glass-panel rounded-none border-b border-white/10 mt-1">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex space-x-6 overflow-x-auto">
+          <nav className="flex space-x-6 overflow-x-auto custom-scrollbar">
             {[
               { id: 'dashboard' as const, label: 'Dashboard', icon: LayoutDashboard },
               { id: 'subjects' as const, label: 'Materie', icon: BookOpen },
@@ -656,10 +657,10 @@ export default function AdminPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition whitespace-nowrap ${
+                  className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-all whitespace-nowrap ${
                     activeTab === tab.id
-                      ? 'border-[#6366F1] text-[#6366F1]'
-                      : 'border-transparent text-foreground-light hover:text-foreground'
+                      ? 'border-neon-blue text-neon-blue'
+                      : 'border-transparent text-foreground-muted hover:text-white hover:border-white/20'
                   }`}
                 >
                   <Icon className="size-4" />
@@ -675,55 +676,59 @@ export default function AdminPage() {
         {activeTab === 'dashboard' && (
           <div>
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 rounded-neu bg-[#6366F1]/10 flex items-center justify-center">
-                <Activity className="size-5 text-[#6366F1]" />
+              <div className="w-10 h-10 rounded-xl bg-neon-blue/20 flex items-center justify-center border border-neon-blue/30">
+                <Activity className="size-5 text-neon-blue" />
               </div>
-              <h2 className="text-3xl font-semibold text-foreground">Panoramica</h2>
+              <h2 className="text-3xl font-semibold text-white">Panoramica</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div className="neu-card p-6">
-                <p className="text-foreground-light text-sm font-medium">Materie</p>
-                <p className="text-3xl font-semibold text-foreground mt-1">{subjects.length}</p>
+              <div className="glass-panel p-6 border border-white/10 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-neon-purple/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <p className="text-foreground-muted text-sm font-medium relative z-10">Materie</p>
+                <p className="text-3xl font-semibold text-white mt-1 relative z-10">{subjects.length}</p>
               </div>
-              <div className="neu-card p-6">
-                <p className="text-foreground-light text-sm font-medium">Professori</p>
-                <p className="text-3xl font-semibold text-foreground mt-1">{professors.length}</p>
+              <div className="glass-panel p-6 border border-white/10 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-neon-blue/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <p className="text-foreground-muted text-sm font-medium relative z-10">Professori</p>
+                <p className="text-3xl font-semibold text-white mt-1 relative z-10">{professors.length}</p>
               </div>
-              <div className="neu-card p-6">
-                <p className="text-foreground-light text-sm font-medium">File Caricati</p>
-                <p className="text-3xl font-semibold text-foreground mt-1">{uploads.length}</p>
+              <div className="glass-panel p-6 border border-white/10 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-neon-green/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <p className="text-foreground-muted text-sm font-medium relative z-10">File Caricati</p>
+                <p className="text-3xl font-semibold text-white mt-1 relative z-10">{uploads.length}</p>
               </div>
-              <div className="neu-card p-6">
-                <p className="text-foreground-light text-sm font-medium">Spazio Utilizzato</p>
-                <p className="text-2xl font-semibold text-foreground mt-1">
+              <div className="glass-panel p-6 border border-white/10 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-neon-pink/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <p className="text-foreground-muted text-sm font-medium relative z-10">Spazio Utilizzato</p>
+                <p className="text-2xl font-semibold text-white mt-1 relative z-10">
                   {formatBytes(uploads.reduce((sum, upload) => sum + upload.size_bytes, 0))}
                 </p>
               </div>
             </div>
 
-            <div className="neu-card p-6">
+            <div className="glass-panel p-6 border border-white/10">
               <div className="flex items-center gap-3 mb-4">
-                <BarChart3 className="size-5 text-[#6366F1]" />
-                <h3 className="text-lg font-semibold text-foreground">Statistiche Rapide</h3>
+                <BarChart3 className="size-5 text-neon-blue" />
+                <h3 className="text-lg font-semibold text-white">Statistiche Rapide</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 rounded-neu neu-surface">
-                  <School className="size-4 text-[#52B788] mb-2" />
-                  <p className="text-sm font-semibold text-foreground">Materie Attive</p>
-                  <p className="text-2xl font-bold text-foreground">{subjects.filter((s) => s.enabled).length}</p>
+                <div className="p-4 rounded-xl bg-black/40 border border-white/5">
+                  <School className="size-4 text-neon-green mb-2" />
+                  <p className="text-sm font-semibold text-white">Materie Attive</p>
+                  <p className="text-2xl font-bold text-white">{subjects.filter((s) => s.enabled).length}</p>
                 </div>
-                <div className="p-4 rounded-neu neu-surface">
-                  <UserCheck className="size-4 text-[#6366F1] mb-2" />
-                  <p className="text-sm font-semibold text-foreground">Drive Collegati</p>
-                  <p className="text-2xl font-bold text-foreground">
+                <div className="p-4 rounded-xl bg-black/40 border border-white/5">
+                  <UserCheck className="size-4 text-neon-blue mb-2" />
+                  <p className="text-sm font-semibold text-white">Drive Collegati</p>
+                  <p className="text-2xl font-bold text-white">
                     {professors.filter((p) => p.drive_connection?.status === 'connected').length}
                   </p>
                 </div>
-                <div className="p-4 rounded-neu neu-surface">
-                  <FileCheck className="size-4 text-[#F59E0B] mb-2" />
-                  <p className="text-sm font-semibold text-foreground">File Totali</p>
-                  <p className="text-2xl font-bold text-foreground">{uploads.length}</p>
+                <div className="p-4 rounded-xl bg-black/40 border border-white/5">
+                  <FileCheck className="size-4 text-neon-pink mb-2" />
+                  <p className="text-sm font-semibold text-white">File Totali</p>
+                  <p className="text-2xl font-bold text-white">{uploads.length}</p>
                 </div>
               </div>
             </div>
@@ -733,35 +738,35 @@ export default function AdminPage() {
         {activeTab === 'subjects' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1">
-              <div className="neu-card p-6">
+              <div className="glass-panel p-6 border border-white/10">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-8 h-8 rounded-neu gradient-mint flex items-center justify-center">
-                    <Plus className="size-4 text-white" />
+                  <div className="w-8 h-8 rounded-xl bg-neon-green/20 flex items-center justify-center border border-neon-green/30">
+                    <Plus className="size-4 text-neon-green" />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground">
+                  <h3 className="text-lg font-semibold text-white">
                     {editingSubjectId ? 'Modifica Materia' : 'Aggiungi Materia'}
                   </h3>
                 </div>
 
                 <form onSubmit={handleSubjectSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold text-foreground mb-2">Nome Materia</label>
+                    <label className="block text-sm font-semibold text-white mb-2">Nome Materia</label>
                     <input
                       type="text"
                       value={subjectForm.name}
                       onChange={(e) => setSubjectForm({ ...subjectForm, name: e.target.value })}
-                      className="w-full px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition"
+                      className="w-full px-4 py-3 bg-black/50 border border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple rounded-xl text-white placeholder-foreground-muted outline-none transition-all"
                       placeholder="Es: Matematica"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-foreground mb-2">Slug</label>
+                    <label className="block text-sm font-semibold text-white mb-2">Slug</label>
                     <input
                       type="text"
                       value={subjectForm.slug}
                       onChange={(e) => setSubjectForm({ ...subjectForm, slug: e.target.value })}
-                      className="w-full px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition"
+                      className="w-full px-4 py-3 bg-black/50 border border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple rounded-xl text-white placeholder-foreground-muted outline-none transition-all"
                       placeholder="Es: matematica"
                       required
                     />
@@ -769,7 +774,7 @@ export default function AdminPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3 bg-[#52B788] text-white font-semibold rounded-neu premium-transition shadow-neu disabled:opacity-50"
+                    className="w-full py-3 bg-neon-green/20 hover:bg-neon-green/30 text-neon-green border border-neon-green/30 font-semibold rounded-xl transition-all disabled:opacity-50"
                   >
                     {loading ? 'Elaborazione...' : editingSubjectId ? 'Aggiorna' : 'Crea'}
                   </button>
@@ -777,7 +782,7 @@ export default function AdminPage() {
                     <button
                       type="button"
                       onClick={resetSubjectForm}
-                      className="w-full py-3 bg-[#FFB5A0] text-white font-semibold rounded-neu premium-transition"
+                      className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold rounded-xl transition-all"
                     >
                       Annulla
                     </button>
@@ -787,17 +792,17 @@ export default function AdminPage() {
             </div>
 
             <div className="lg:col-span-2">
-              <div className="neu-card overflow-hidden">
-                <div className="px-6 py-4 border-b border-stone-200/50 flex items-center gap-3">
-                  <BookOpen className="size-5 text-[#6366F1]" />
-                  <h3 className="text-lg font-semibold text-foreground">Materie ({subjects.length})</h3>
+              <div className="glass-panel overflow-hidden border border-white/10">
+                <div className="px-6 py-4 border-b border-white/10 flex items-center gap-3 bg-black/20">
+                  <BookOpen className="size-5 text-neon-blue" />
+                  <h3 className="text-lg font-semibold text-white">Materie ({subjects.length})</h3>
                 </div>
-                <div className="divide-y divide-stone-200/50">
+                <div className="divide-y divide-white/5">
                   {subjects.map((subject) => (
-                    <div key={subject.id} className="px-6 py-4 flex justify-between items-center hover:bg-neu-base/50 transition">
+                    <div key={subject.id} className="px-6 py-4 flex justify-between items-center hover:bg-white/5 transition-colors">
                       <div>
-                        <p className="font-semibold text-foreground">{subject.name}</p>
-                        <p className="text-sm text-foreground-light">
+                        <p className="font-semibold text-white">{subject.name}</p>
+                        <p className="text-sm text-foreground-muted">
                           {subject.enabled ? 'Attivo' : 'Disattivato'}
                           {subject.slug && <span className="ml-2 font-mono text-xs">{subject.slug}</span>}
                         </p>
@@ -808,14 +813,14 @@ export default function AdminPage() {
                             setSubjectForm(subject);
                             setEditingSubjectId(subject.id);
                           }}
-                          className="px-4 py-2 text-sm bg-[#6366F1]/10 hover:bg-[#6366F1]/20 text-[#6366F1] rounded-neu flex items-center gap-1.5 font-medium premium-transition"
+                          className="px-4 py-2 text-sm bg-neon-blue/10 hover:bg-neon-blue/20 border border-neon-blue/20 text-neon-blue rounded-xl flex items-center gap-1.5 font-medium transition-colors"
                         >
                           <Edit className="size-3.5" />
                           Modifica
                         </button>
                         <button
                           onClick={() => deleteSubject(subject.id)}
-                          className="px-4 py-2 text-sm bg-[#EF4444]/10 hover:bg-[#EF4444]/20 text-[#EF4444] rounded-neu flex items-center gap-1.5 font-medium premium-transition"
+                          className="px-4 py-2 text-sm bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 rounded-xl flex items-center gap-1.5 font-medium transition-colors"
                         >
                           <Trash2 className="size-3.5" />
                           Elimina
@@ -832,38 +837,38 @@ export default function AdminPage() {
         {activeTab === 'professors' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1">
-              <div className="neu-card p-6">
+              <div className="glass-panel p-6 border border-white/10">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-8 h-8 rounded-neu gradient-lavender flex items-center justify-center">
-                    <Plus className="size-4 text-white" />
+                  <div className="w-8 h-8 rounded-xl bg-neon-purple/20 flex items-center justify-center border border-neon-purple/30">
+                    <Plus className="size-4 text-neon-purple" />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground">
+                  <h3 className="text-lg font-semibold text-white">
                     {editingProfessorId ? 'Modifica Professore' : 'Aggiungi Professore'}
                   </h3>
                 </div>
 
                 <form onSubmit={handleProfessorSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold text-foreground mb-2">Nome Professore</label>
+                    <label className="block text-sm font-semibold text-white mb-2">Nome Professore</label>
                     <input
                       type="text"
                       value={professorForm.name}
                       onChange={(e) => setProfessorForm({ name: e.target.value })}
-                      className="w-full px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition"
+                      className="w-full px-4 py-3 bg-black/50 border border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple rounded-xl text-white placeholder-foreground-muted outline-none transition-all"
                       placeholder="Es: Prof. Rossi"
                       required
                     />
                   </div>
-                  <div className="p-3 rounded-neu neu-surface-pressed flex items-start gap-2">
-                    <HardDrive className="size-4 text-lavender mt-0.5 flex-shrink-0" />
-                    <p className="text-xs text-foreground-light">
+                  <div className="p-4 rounded-xl bg-black/40 border border-white/5 flex items-start gap-3">
+                    <HardDrive className="size-4 text-neon-blue mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-foreground-muted leading-relaxed">
                       Le credenziali Google dell&apos;app stanno nelle variabili d&apos;ambiente. Il Drive si collega con OAuth dalla lista professori.
                     </p>
                   </div>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3 bg-[#9B72B0] text-white font-semibold rounded-neu premium-transition shadow-neu disabled:opacity-50"
+                    className="w-full py-3 bg-neon-purple/20 hover:bg-neon-purple/30 text-neon-purple border border-neon-purple/30 font-semibold rounded-xl transition-all disabled:opacity-50"
                   >
                     {loading ? 'Elaborazione...' : editingProfessorId ? 'Aggiorna' : 'Crea'}
                   </button>
@@ -871,7 +876,7 @@ export default function AdminPage() {
                     <button
                       type="button"
                       onClick={resetProfessorForm}
-                      className="w-full py-3 bg-[#FFB5A0] text-white font-semibold rounded-neu premium-transition"
+                      className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold rounded-xl transition-all"
                     >
                       Annulla
                     </button>
@@ -881,31 +886,31 @@ export default function AdminPage() {
             </div>
 
             <div className="lg:col-span-2">
-              <div className="neu-card overflow-hidden">
-                <div className="px-6 py-4 border-b border-stone-200/50 flex items-center gap-3">
-                  <Users className="size-5 text-[#6366F1]" />
-                  <h3 className="text-lg font-semibold text-foreground">Professori ({professors.length})</h3>
+              <div className="glass-panel overflow-hidden border border-white/10">
+                <div className="px-6 py-4 border-b border-white/10 flex items-center gap-3 bg-black/20">
+                  <Users className="size-5 text-neon-purple" />
+                  <h3 className="text-lg font-semibold text-white">Professori ({professors.length})</h3>
                 </div>
-                <div className="divide-y divide-stone-200/50">
+                <div className="divide-y divide-white/5">
                   {professors.map((professor) => {
                     const status = driveStatus(professor);
                     const connected = professor.drive_connection?.status === 'connected';
 
                     return (
-                      <div key={professor.id} className="px-6 py-4 flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center hover:bg-neu-base/50 transition">
+                      <div key={professor.id} className="px-6 py-4 flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center hover:bg-white/5 transition-colors">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-neu bg-stone-200 flex items-center justify-center">
-                            <Users className="size-5 text-foreground-light" />
+                          <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                            <Users className="size-5 text-foreground-muted" />
                           </div>
                           <div>
-                            <p className="font-semibold text-foreground">{professor.name}</p>
-                            <p className={`text-xs font-medium ${status.className}`}>{status.label}</p>
+                            <p className="font-semibold text-white">{professor.name}</p>
+                            <p className={`text-xs font-medium ${status.className.replace('text-[#2D8A60]', 'text-neon-green').replace('text-[#EF4444]', 'text-red-400')}`}>{status.label}</p>
                           </div>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           <button
                             onClick={() => connectDrive(professor.id)}
-                            className="px-4 py-2 text-sm bg-[#52B788]/10 hover:bg-[#52B788]/20 text-[#2D8A60] rounded-neu flex items-center gap-1.5 font-medium premium-transition"
+                            className="px-4 py-2 text-sm bg-neon-green/10 hover:bg-neon-green/20 border border-neon-green/20 text-neon-green rounded-xl flex items-center gap-1.5 font-medium transition-colors"
                           >
                             <HardDrive className="size-3.5" />
                             {connected ? 'Ricollega' : 'Connetti Drive'}
@@ -913,7 +918,7 @@ export default function AdminPage() {
                           {connected && (
                             <button
                               onClick={() => disconnectDrive(professor.id)}
-                              className="px-4 py-2 text-sm bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 text-[#B76B00] rounded-neu font-medium premium-transition"
+                              className="px-4 py-2 text-sm bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 rounded-xl font-medium transition-colors"
                             >
                               Scollega
                             </button>
@@ -923,14 +928,14 @@ export default function AdminPage() {
                               setProfessorForm({ name: professor.name });
                               setEditingProfessorId(professor.id);
                             }}
-                            className="px-4 py-2 text-sm bg-[#6366F1]/10 hover:bg-[#6366F1]/20 text-[#6366F1] rounded-neu flex items-center gap-1.5 font-medium premium-transition"
+                            className="px-4 py-2 text-sm bg-neon-blue/10 hover:bg-neon-blue/20 border border-neon-blue/20 text-neon-blue rounded-xl flex items-center gap-1.5 font-medium transition-colors"
                           >
                             <Edit className="size-3.5" />
                             Modifica
                           </button>
                           <button
                             onClick={() => deleteProfessor(professor.id)}
-                            className="px-4 py-2 text-sm bg-[#EF4444]/10 hover:bg-[#EF4444]/20 text-[#EF4444] rounded-neu flex items-center gap-1.5 font-medium premium-transition"
+                            className="px-4 py-2 text-sm bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 rounded-xl flex items-center gap-1.5 font-medium transition-colors"
                           >
                             <Trash2 className="size-3.5" />
                             Elimina
@@ -948,21 +953,21 @@ export default function AdminPage() {
         {activeTab === 'subject-professors' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1">
-              <div className="neu-card p-6">
+              <div className="glass-panel p-6 border border-white/10">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-8 h-8 rounded-neu gradient-lavender flex items-center justify-center">
-                    <LinkIcon className="size-4 text-white" />
+                  <div className="w-8 h-8 rounded-xl bg-neon-blue/20 flex items-center justify-center border border-neon-blue/30">
+                    <LinkIcon className="size-4 text-neon-blue" />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground">Associa Professore a Materia</h3>
+                  <h3 className="text-lg font-semibold text-white">Associa Professore a Materia</h3>
                 </div>
 
                 <form onSubmit={handleSpSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold text-foreground mb-2">Materia</label>
+                    <label className="block text-sm font-semibold text-white mb-2">Materia</label>
                     <select
                       value={spForm.subject_id}
                       onChange={(e) => setSpForm({ ...spForm, subject_id: e.target.value })}
-                      className="w-full px-4 py-3 neu-input rounded-neu text-foreground outline-none premium-transition [&>option]:bg-neu-surface"
+                      className="w-full px-4 py-3 bg-black/50 border border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple rounded-xl text-white outline-none transition-all [&>option]:bg-[#111]"
                       required
                     >
                       <option value="">Seleziona materia</option>
@@ -972,11 +977,11 @@ export default function AdminPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-foreground mb-2">Professore</label>
+                    <label className="block text-sm font-semibold text-white mb-2">Professore</label>
                     <select
                       value={spForm.professor_id}
                       onChange={(e) => setSpForm({ ...spForm, professor_id: e.target.value })}
-                      className="w-full px-4 py-3 neu-input rounded-neu text-foreground outline-none premium-transition [&>option]:bg-neu-surface"
+                      className="w-full px-4 py-3 bg-black/50 border border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple rounded-xl text-white outline-none transition-all [&>option]:bg-[#111]"
                       required
                     >
                       <option value="">Seleziona professore</option>
@@ -988,7 +993,7 @@ export default function AdminPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3 bg-[#6366F1] text-white font-semibold rounded-neu premium-transition shadow-neu disabled:opacity-50"
+                    className="w-full py-3 bg-neon-blue/20 hover:bg-neon-blue/30 text-neon-blue border border-neon-blue/30 font-semibold rounded-xl transition-all disabled:opacity-50"
                   >
                     {loading ? 'Elaborazione...' : 'Associa'}
                   </button>
@@ -997,26 +1002,26 @@ export default function AdminPage() {
             </div>
 
             <div className="lg:col-span-2">
-              <div className="neu-card overflow-hidden">
-                <div className="px-6 py-4 border-b border-stone-200/50 flex items-center gap-3">
-                  <LinkIcon className="size-5 text-[#6366F1]" />
-                  <h3 className="text-lg font-semibold text-foreground">Associazioni ({subjectProfessors.length})</h3>
+              <div className="glass-panel overflow-hidden border border-white/10">
+                <div className="px-6 py-4 border-b border-white/10 flex items-center gap-3 bg-black/20">
+                  <LinkIcon className="size-5 text-neon-blue" />
+                  <h3 className="text-lg font-semibold text-white">Associazioni ({subjectProfessors.length})</h3>
                 </div>
-                <div className="divide-y divide-stone-200/50">
+                <div className="divide-y divide-white/5">
                   {subjectProfessors.map((sp) => (
-                    <div key={sp.id} className="px-6 py-4 flex justify-between items-center hover:bg-neu-base/50 transition">
+                    <div key={sp.id} className="px-6 py-4 flex justify-between items-center hover:bg-white/5 transition-colors">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-neu bg-[#6366F1]/10 flex items-center justify-center">
-                          <Users className="size-5 text-[#6366F1]" />
+                        <div className="w-10 h-10 rounded-xl bg-neon-blue/10 border border-neon-blue/20 flex items-center justify-center">
+                          <Users className="size-5 text-neon-blue" />
                         </div>
                         <div>
-                          <p className="font-semibold text-foreground">{sp.professor?.name || '-'}</p>
-                          <p className="text-sm text-foreground-light">→ {sp.subject?.name || '-'}</p>
+                          <p className="font-semibold text-white">{sp.professor?.name || '-'}</p>
+                          <p className="text-sm text-foreground-muted">→ {sp.subject?.name || '-'}</p>
                         </div>
                       </div>
                       <button
                         onClick={() => deleteSp(sp.id)}
-                        className="px-4 py-2 text-sm bg-[#EF4444]/10 hover:bg-[#EF4444]/20 text-[#EF4444] rounded-neu flex items-center gap-1.5 font-medium premium-transition"
+                        className="px-4 py-2 text-sm bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 rounded-xl flex items-center gap-1.5 font-medium transition-colors"
                       >
                         <XCircle className="size-3.5" />
                         Rimuovi
@@ -1024,8 +1029,8 @@ export default function AdminPage() {
                     </div>
                   ))}
                   {subjectProfessors.length === 0 && (
-                    <div className="px-6 py-12 text-center text-foreground-light">
-                      <LinkIcon className="size-12 text-stone-300 mx-auto mb-3" />
+                    <div className="px-6 py-12 text-center text-foreground-muted">
+                      <LinkIcon className="size-12 text-white/20 mx-auto mb-3" />
                       <p className="text-sm">Nessuna associazione presente</p>
                     </div>
                   )}
@@ -1038,38 +1043,38 @@ export default function AdminPage() {
         {activeTab === 'uploads' && (
           <div>
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-neu bg-stone-200 flex items-center justify-center">
-                <Database className="size-5 text-foreground" />
+              <div className="w-10 h-10 rounded-xl bg-neon-pink/20 border border-neon-pink/30 flex items-center justify-center">
+                <Database className="size-5 text-neon-pink" />
               </div>
-              <h2 className="text-2xl font-semibold text-foreground">File Caricati ({uploads.length})</h2>
+              <h2 className="text-2xl font-semibold text-white">File Caricati ({uploads.length})</h2>
             </div>
 
-            <div className="neu-card overflow-hidden">
+            <div className="glass-panel overflow-hidden border border-white/10">
               {uploads.length > 0 ? (
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto custom-scrollbar">
                   <table className="w-full">
-                    <thead className="bg-neu-base/50 border-b border-stone-200/50">
+                    <thead className="bg-black/40 border-b border-white/10">
                       <tr>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Nome File</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Materia</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Professore</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Dimensione</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Data</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Azioni</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Nome File</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Materia</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Professore</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Dimensione</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Data</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-white">Azioni</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-stone-200/50">
+                    <tbody className="divide-y divide-white/5">
                       {uploads.map((upload) => (
-                        <tr key={upload.id} className="hover:bg-neu-base/50 transition">
-                          <td className="px-6 py-4 text-sm font-medium text-foreground">{upload.original_filename}</td>
-                          <td className="px-6 py-4 text-sm text-foreground-light">{upload.subject?.name || '-'}</td>
-                          <td className="px-6 py-4 text-sm text-foreground-light">{upload.professor?.name || '-'}</td>
-                          <td className="px-6 py-4 text-sm text-foreground-light">{formatBytes(upload.size_bytes)}</td>
-                          <td className="px-6 py-4 text-sm text-foreground-light">{formatDate(upload.created_at)}</td>
+                        <tr key={upload.id} className="hover:bg-white/5 transition-colors">
+                          <td className="px-6 py-4 text-sm font-medium text-white">{upload.original_filename}</td>
+                          <td className="px-6 py-4 text-sm text-foreground-muted">{upload.subject?.name || '-'}</td>
+                          <td className="px-6 py-4 text-sm text-foreground-muted">{upload.professor?.name || '-'}</td>
+                          <td className="px-6 py-4 text-sm text-foreground-muted">{formatBytes(upload.size_bytes)}</td>
+                          <td className="px-6 py-4 text-sm text-foreground-muted">{formatDate(upload.created_at)}</td>
                           <td className="px-6 py-4 text-sm">
                             <button
                               onClick={() => deleteUpload(upload.id)}
-                              className="px-4 py-2 text-sm bg-[#EF4444]/10 hover:bg-[#EF4444]/20 text-[#EF4444] rounded-neu flex items-center gap-1.5 font-medium premium-transition"
+                              className="px-4 py-2 text-sm bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 rounded-xl flex items-center gap-1.5 font-medium transition-colors"
                             >
                               <Trash2 className="size-4" />
                               Elimina
@@ -1081,8 +1086,8 @@ export default function AdminPage() {
                   </table>
                 </div>
               ) : (
-                <div className="px-6 py-16 text-center text-foreground-light">
-                  <Database className="size-16 text-stone-300 mx-auto mb-4" />
+                <div className="px-6 py-16 text-center text-foreground-muted">
+                  <Database className="size-16 text-white/20 mx-auto mb-4" />
                   <p className="text-lg font-semibold">Nessun file caricato</p>
                 </div>
               )}
@@ -1093,18 +1098,18 @@ export default function AdminPage() {
         {activeTab === 'consigli' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1">
-                <div className="neu-card p-6">
+                <div className="glass-panel p-6 border border-white/10">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-8 h-8 rounded-neu gradient-lavender flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-neon-purple to-neon-blue flex items-center justify-center shadow-[0_0_15px_rgba(157,78,221,0.3)]">
                       <Lightbulb className="size-4 text-white" />
                     </div>
-                    <h3 className="text-lg font-semibold text-foreground">
+                    <h3 className="text-lg font-semibold text-white">
                       {editingConsiglioId ? 'Modifica Consiglio' : 'Aggiungi Consiglio'}
                     </h3>
                   </div>
 
-                  <div className="mb-4 p-3 rounded-neu neu-surface-pressed">
-                    <p className="text-sm font-semibold text-foreground mb-2">1. Collega Drive per i consigli</p>
+                  <div className="mb-4 p-4 rounded-xl bg-black/40 border border-white/5">
+                    <p className="text-sm font-semibold text-white mb-2">1. Collega Drive per i consigli</p>
                     <button
                       onClick={async () => {
                         try {
@@ -1117,7 +1122,7 @@ export default function AdminPage() {
                           showToast('Errore', 'error');
                         }
                       }}
-                      className="w-full py-2 text-sm bg-[#6366F1] text-white font-semibold rounded-neu premium-transition"
+                      className="w-full py-2 text-sm bg-neon-blue/20 hover:bg-neon-blue/30 text-neon-blue border border-neon-blue/30 font-semibold rounded-xl transition-all"
                     >
                       Collega Google Account
                     </button>
@@ -1126,15 +1131,15 @@ export default function AdminPage() {
                     </p>
                   </div>
 
-                  <div className="mb-4 p-3 rounded-neu neu-surface-pressed">
-                    <p className="text-sm font-semibold text-foreground mb-2">2. Email per ricevere consigli dagli studenti</p>
+                  <div className="mb-4 p-4 rounded-xl bg-black/40 border border-white/5">
+                    <p className="text-sm font-semibold text-white mb-2">2. Email per ricevere consigli dagli studenti</p>
                     <div className="flex gap-2">
                       <input
                         type="email"
                         value={settingsForm.consigli_email || ''}
                         onChange={(e) => setSettingsForm({ ...settingsForm, consigli_email: e.target.value })}
                         placeholder="email-consigli@gmail.com"
-                        className="flex-1 px-3 py-2 neu-input rounded-neu text-sm text-foreground placeholder-foreground-muted outline-none premium-transition"
+                        className="flex-1 px-3 py-2 bg-black/50 border border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple rounded-xl text-sm text-white placeholder-foreground-muted outline-none transition-all"
                       />
                       <button
                         onClick={async () => {
@@ -1152,7 +1157,7 @@ export default function AdminPage() {
                             showToast('Errore aggiornamento', 'error');
                           }
                         }}
-                        className="px-4 py-2 text-sm bg-[#6366F1] text-white font-semibold rounded-neu premium-transition"
+                        className="px-4 py-2 text-sm bg-neon-purple/20 hover:bg-neon-purple/30 text-neon-purple border border-neon-purple/30 font-semibold rounded-xl transition-all"
                       >
                         Salva
                       </button>
@@ -1164,33 +1169,33 @@ export default function AdminPage() {
 
                   <form onSubmit={handleConsiglioSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-semibold text-foreground mb-2">Titolo</label>
+                    <label className="block text-sm font-semibold text-white mb-2">Titolo</label>
                     <input
                       type="text"
                       value={consiglioForm.title}
                       onChange={(e) => setConsiglioForm({ ...consiglioForm, title: e.target.value })}
-                      className="w-full px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition"
+                      className="w-full px-4 py-3 bg-black/50 border border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple rounded-xl text-white placeholder-foreground-muted outline-none transition-all"
                       placeholder="Es: Come studiare meglio"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-foreground mb-2">Contenuto</label>
+                    <label className="block text-sm font-semibold text-white mb-2">Contenuto</label>
                     <textarea
                       value={consiglioForm.content}
                       onChange={(e) => setConsiglioForm({ ...consiglioForm, content: e.target.value })}
-                      className="w-full px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition resize-none"
+                      className="w-full px-4 py-3 bg-black/50 border border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple rounded-xl text-white placeholder-foreground-muted outline-none transition-all resize-none"
                       rows={5}
                       placeholder="Scrivi il consiglio..."
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-foreground mb-2">Professore</label>
+                    <label className="block text-sm font-semibold text-white mb-2">Professore</label>
                     <select
                       value={consiglioForm.professor_id}
                       onChange={(e) => setConsiglioForm({ ...consiglioForm, professor_id: e.target.value })}
-                      className="w-full px-4 py-3 neu-input rounded-neu text-foreground outline-none premium-transition [&>option]:bg-neu-surface"
+                      className="w-full px-4 py-3 bg-black/50 border border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple rounded-xl text-white outline-none transition-all [&>option]:bg-[#111]"
                       required
                     >
                       <option value="">Seleziona professore</option>
@@ -1199,20 +1204,20 @@ export default function AdminPage() {
                       ))}
                     </select>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 mt-2">
                     <input
                       type="checkbox"
                       id="consiglio-published"
                       checked={consiglioForm.published}
                       onChange={(e) => setConsiglioForm({ ...consiglioForm, published: e.target.checked })}
-                      className="rounded border-stone-300 text-[#6366F1] focus:ring-[#6366F1]"
+                      className="rounded bg-black/50 border border-white/20 text-neon-purple focus:ring-neon-purple focus:ring-offset-0 focus:ring-1"
                     />
-                    <label htmlFor="consiglio-published" className="text-sm font-medium text-foreground">Pubblica subito</label>
+                    <label htmlFor="consiglio-published" className="text-sm font-medium text-white">Pubblica subito</label>
                   </div>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3 bg-[#9B72B0] text-white font-semibold rounded-neu premium-transition shadow-neu disabled:opacity-50"
+                    className="w-full py-3 mt-4 bg-gradient-to-r from-neon-purple to-neon-blue text-white font-semibold rounded-xl transition-all hover:shadow-[0_0_15px_rgba(157,78,221,0.3)] disabled:opacity-50"
                   >
                     {loading ? 'Elaborazione...' : editingConsiglioId ? 'Aggiorna' : 'Salva come bozza'}
                   </button>
@@ -1220,7 +1225,7 @@ export default function AdminPage() {
                     <button
                       type="button"
                       onClick={resetConsiglioForm}
-                      className="w-full py-3 bg-[#FFB5A0] text-white font-semibold rounded-neu premium-transition"
+                      className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold rounded-xl transition-all"
                     >
                       Annulla
                     </button>
@@ -1230,28 +1235,28 @@ export default function AdminPage() {
             </div>
 
             <div className="lg:col-span-2">
-              <div className="neu-card overflow-hidden">
-                <div className="px-6 py-4 border-b border-stone-200/50 flex items-center gap-3">
-                  <Lightbulb className="size-5 text-[#6366F1]" />
-                  <h3 className="text-lg font-semibold text-foreground">Consigli ({consigli.length})</h3>
+              <div className="glass-panel overflow-hidden border border-white/10">
+                <div className="px-6 py-4 border-b border-white/10 flex items-center gap-3 bg-black/20">
+                  <Lightbulb className="size-5 text-neon-purple" />
+                  <h3 className="text-lg font-semibold text-white">Consigli ({consigli.length})</h3>
                 </div>
-                <div className="divide-y divide-stone-200/50">
+                <div className="divide-y divide-white/5">
                   {consigli.map((consiglio) => (
                     <div key={consiglio.id} className="px-6 py-4">
                       <div className="flex justify-between items-start mb-2">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <p className="font-semibold text-foreground">{consiglio.title}</p>
-                            <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${consiglio.published ? 'bg-[#52B788]/20 text-[#2D8A60]' : 'bg-[#F59E0B]/20 text-[#B76B00]'}`}>
+                            <p className="font-semibold text-white">{consiglio.title}</p>
+                            <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${consiglio.published ? 'bg-neon-green/20 text-neon-green' : 'bg-neon-pink/20 text-neon-pink border border-neon-pink/30'}`}>
                               {consiglio.published ? 'Pubblicato' : 'Bozza'}
                             </span>
                           </div>
-                          <p className="text-xs text-foreground-light line-clamp-2">{consiglio.content}</p>
+                          <p className="text-xs text-foreground-muted line-clamp-2">{consiglio.content}</p>
                         </div>
                         <div className="flex gap-2 ml-4 flex-shrink-0">
                           <button
                             onClick={() => toggleConsiglioPublished(consiglio.id, consiglio.published)}
-                            className={`px-3 py-1.5 text-xs rounded-neu flex items-center gap-1 font-medium premium-transition ${consiglio.published ? 'bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 text-[#B76B00]' : 'bg-[#52B788]/10 hover:bg-[#52B788]/20 text-[#2D8A60]'}`}
+                            className={`px-3 py-1.5 text-xs rounded-xl flex items-center gap-1 font-medium transition-colors ${consiglio.published ? 'bg-neon-pink/10 hover:bg-neon-pink/20 border border-neon-pink/20 text-neon-pink' : 'bg-neon-green/10 hover:bg-neon-green/20 border border-neon-green/20 text-neon-green'}`}
                           >
                             {consiglio.published ? 'Metti in bozza' : 'Pubblica'}
                           </button>
@@ -1265,14 +1270,14 @@ export default function AdminPage() {
                               });
                               setEditingConsiglioId(consiglio.id);
                             }}
-                            className="px-3 py-1.5 text-xs bg-[#6366F1]/10 hover:bg-[#6366F1]/20 text-[#6366F1] rounded-neu flex items-center gap-1 font-medium premium-transition"
+                            className="px-3 py-1.5 text-xs bg-neon-blue/10 hover:bg-neon-blue/20 border border-neon-blue/20 text-neon-blue rounded-xl flex items-center gap-1 font-medium transition-colors"
                           >
                             <Edit className="size-3" />
                             Modifica
                           </button>
                           <button
                             onClick={() => deleteConsiglio(consiglio.id)}
-                            className="px-3 py-1.5 text-xs bg-[#EF4444]/10 hover:bg-[#EF4444]/20 text-[#EF4444] rounded-neu flex items-center gap-1 font-medium premium-transition"
+                            className="px-3 py-1.5 text-xs bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 rounded-xl flex items-center gap-1 font-medium transition-colors"
                           >
                             <Trash2 className="size-3" />
                             Elimina
@@ -1287,18 +1292,18 @@ export default function AdminPage() {
                         <span>{new Date(consiglio.created_at).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                       </div>
 
-                      <div className="mt-3 pt-3 border-t border-stone-200/30">
-                        <p className="text-xs font-semibold text-foreground mb-2">File allegati ({(consigliFiles[consiglio.id] || []).length})</p>
+                      <div className="mt-4 pt-3 border-t border-white/10">
+                        <p className="text-xs font-semibold text-white mb-2">File allegati ({(consigliFiles[consiglio.id] || []).length})</p>
                         {(consigliFiles[consiglio.id] || []).length > 0 && (
                           <div className="space-y-1 mb-3">
                             {(consigliFiles[consiglio.id] || []).map((f: any) => (
-                              <div key={f.id} className="flex items-center justify-between px-3 py-1.5 rounded-neu-sm neu-surface text-xs">
-                                <a href={f.view_url} target="_blank" rel="noopener noreferrer" className="font-medium text-foreground-light hover:text-foreground truncate mr-2">
+                              <div key={f.id} className="flex items-center justify-between px-3 py-2 rounded-xl bg-black/40 border border-white/5 text-xs">
+                                <a href={f.view_url} target="_blank" rel="noopener noreferrer" className="font-medium text-foreground-muted hover:text-white transition-colors truncate mr-2">
                                   {f.original_filename}
                                 </a>
                                 <button
                                   onClick={() => handleConsiglioFileDelete(consiglio.id, f.id)}
-                                  className="text-[#EF4444] hover:text-[#DC2626] flex-shrink-0"
+                                  className="text-red-400 hover:text-red-300 flex-shrink-0 transition-colors"
                                 >
                                   <Trash2 className="size-3" />
                                 </button>
@@ -1306,7 +1311,7 @@ export default function AdminPage() {
                             ))}
                           </div>
                         )}
-                        <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-[#6366F1]/10 hover:bg-[#6366F1]/20 text-[#6366F1] rounded-neu font-medium premium-transition cursor-pointer">
+                        <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-neon-purple/10 hover:bg-neon-purple/20 border border-neon-purple/20 text-neon-purple rounded-xl font-medium transition-colors cursor-pointer">
                           <input
                             type="file"
                             className="hidden"
@@ -1326,8 +1331,8 @@ export default function AdminPage() {
                     </div>
                   ))}
                   {consigli.length === 0 && (
-                    <div className="px-6 py-12 text-center text-foreground-light">
-                      <Lightbulb className="size-12 text-stone-300 mx-auto mb-3" />
+                    <div className="px-6 py-12 text-center text-foreground-muted">
+                      <Lightbulb className="size-12 text-white/20 mx-auto mb-3" />
                       <p className="text-sm">Nessun consiglio</p>
                     </div>
                   )}
@@ -1340,19 +1345,19 @@ export default function AdminPage() {
         {activeTab === 'settings' && (
           <div className="max-w-2xl">
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 rounded-neu bg-stone-200 flex items-center justify-center">
-                <Settings className="size-5 text-foreground" />
+              <div className="w-10 h-10 rounded-xl bg-neon-purple/20 border border-neon-purple/30 flex items-center justify-center">
+                <Settings className="size-5 text-neon-purple" />
               </div>
-              <h2 className="text-2xl font-semibold text-foreground">Impostazioni Sito</h2>
+              <h2 className="text-2xl font-semibold text-white">Impostazioni Sito</h2>
             </div>
 
             <div className="space-y-6">
-              <div className="neu-card p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Mail className="size-5 text-[#6366F1]" />
+              <div className="glass-panel p-6 border border-white/10">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <Mail className="size-5 text-neon-blue" />
                   Email per Consigli Studenti
                 </h3>
-                <p className="text-sm text-foreground-light mb-4">
+                <p className="text-sm text-foreground-muted mb-4">
                   Questa email verrà mostrata nella pagina Consigli per permettere agli studenti di inviare suggerimenti.
                 </p>
                 <div className="flex gap-3">
@@ -1361,7 +1366,7 @@ export default function AdminPage() {
                     value={settingsForm.consigli_email || ''}
                     onChange={(e) => setSettingsForm({ ...settingsForm, consigli_email: e.target.value })}
                     placeholder="consigli@esempio.com"
-                    className="flex-1 px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition"
+                    className="flex-1 px-4 py-3 bg-black/50 border border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple rounded-xl text-white placeholder-foreground-muted outline-none transition-all"
                   />
                   <button
                     onClick={async () => {
@@ -1379,19 +1384,19 @@ export default function AdminPage() {
                         showToast('Errore aggiornamento', 'error');
                       }
                     }}
-                    className="px-6 py-3 bg-[#6366F1] text-white font-semibold rounded-neu premium-transition"
+                    className="px-6 py-3 bg-neon-blue/20 hover:bg-neon-blue/30 text-neon-blue border border-neon-blue/30 font-semibold rounded-xl transition-all"
                   >
                     Salva
                   </button>
                 </div>
               </div>
 
-              <div className="neu-card p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Mail className="size-5 text-[#6366F1]" />
+              <div className="glass-panel p-6 border border-white/10">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <Mail className="size-5 text-neon-purple" />
                   Email di Contatto Admin
                 </h3>
-                <p className="text-sm text-foreground-light mb-4">
+                <p className="text-sm text-foreground-muted mb-4">
                   Questa email verrà visualizzata nel footer del sito per le segnalazioni.
                 </p>
                 <div className="flex gap-3">
@@ -1400,7 +1405,7 @@ export default function AdminPage() {
                     value={settingsForm.support_email}
                     onChange={(e) => setSettingsForm({ ...settingsForm, support_email: e.target.value })}
                     placeholder="admin@esempio.com"
-                    className="flex-1 px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition"
+                    className="flex-1 px-4 py-3 bg-black/50 border border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple rounded-xl text-white placeholder-foreground-muted outline-none transition-all"
                   />
                   <button
                     onClick={async () => {
@@ -1418,23 +1423,23 @@ export default function AdminPage() {
                         showToast('Errore aggiornamento', 'error');
                       }
                     }}
-                    className="px-6 py-3 bg-[#6366F1] text-white font-semibold rounded-neu premium-transition"
+                    className="px-6 py-3 bg-neon-purple/20 hover:bg-neon-purple/30 text-neon-purple border border-neon-purple/30 font-semibold rounded-xl transition-all"
                   >
                     Salva
                   </button>
                 </div>
               </div>
 
-              <div className="neu-card p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-4">Policy & Responsabilità</h3>
-                <p className="text-sm text-foreground-light mb-4">
+              <div className="glass-panel p-6 border border-white/10">
+                <h3 className="text-lg font-semibold text-white mb-4">Policy & Responsabilità</h3>
+                <p className="text-sm text-foreground-muted mb-4">
                   Questo testo apparirà nella finestra della policy accessibile dal footer.
                 </p>
                 <textarea
                   value={settingsForm.site_policy}
                   onChange={(e) => setSettingsForm({ ...settingsForm, site_policy: e.target.value })}
                   rows={6}
-                  className="w-full px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition resize-none"
+                  className="w-full px-4 py-3 bg-black/50 border border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple rounded-xl text-white placeholder-foreground-muted outline-none transition-all resize-none"
                   placeholder="Inserisci la policy del sito..."
                 />
                 <button
@@ -1453,22 +1458,22 @@ export default function AdminPage() {
                       showToast('Errore aggiornamento', 'error');
                     }
                   }}
-                  className="mt-4 px-6 py-3 bg-[#6366F1] text-white font-semibold rounded-neu premium-transition"
+                  className="mt-4 px-6 py-3 bg-neon-blue/20 hover:bg-neon-blue/30 text-neon-blue border border-neon-blue/30 font-semibold rounded-xl transition-all"
                 >
                   Salva Policy
                 </button>
               </div>
 
-              <div className="neu-card p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-4">Email esterne consentite (temporanee)</h3>
-                <p className="text-sm text-foreground-light mb-4">
+              <div className="glass-panel p-6 border border-white/10">
+                <h3 className="text-lg font-semibold text-white mb-4">Email esterne consentite (temporanee)</h3>
+                <p className="text-sm text-foreground-muted mb-4">
                   Inserisci email ospiti separate da virgola. Solo queste, oltre al dominio istituzionale, potranno accedere.
                 </p>
                 <textarea
                   value={settingsForm.allowed_external_emails}
                   onChange={(e) => setSettingsForm({ ...settingsForm, allowed_external_emails: e.target.value })}
                   rows={4}
-                  className="w-full px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition resize-none"
+                  className="w-full px-4 py-3 bg-black/50 border border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple rounded-xl text-white placeholder-foreground-muted outline-none transition-all resize-none"
                   placeholder="ospite1@gmail.com,ospite2@gmail.com"
                 />
                 <button
@@ -1493,30 +1498,30 @@ export default function AdminPage() {
                       showToast('Errore aggiornamento whitelist', 'error');
                     }
                   }}
-                  className="mt-4 px-6 py-3 bg-[#6366F1] text-white font-semibold rounded-neu premium-transition"
+                  className="mt-4 px-6 py-3 bg-neon-purple/20 hover:bg-neon-purple/30 text-neon-purple border border-neon-purple/30 font-semibold rounded-xl transition-all"
                 >
                   Salva whitelist esterni
                 </button>
               </div>
 
-              <div className="neu-card p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-3">Audit Log</h3>
-                <p className="text-sm text-foreground-light mb-4">
+              <div className="glass-panel p-6 border border-white/10">
+                <h3 className="text-lg font-semibold text-white mb-3">Audit Log</h3>
+                <p className="text-sm text-foreground-muted mb-4">
                   Scarica il report PDF con le ultime azioni sensibili registrate.
                 </p>
                 <button
                   onClick={() => window.open('/api/admin/audit-logs/pdf', '_blank')}
-                  className="px-6 py-3 bg-[#6366F1] text-white font-semibold rounded-neu premium-transition"
+                  className="px-6 py-3 bg-neon-blue/20 hover:bg-neon-blue/30 text-neon-blue border border-neon-blue/30 font-semibold rounded-xl transition-all"
                 >
                   Scarica Audit PDF
                 </button>
-                <div className="mt-5 space-y-2 max-h-64 overflow-auto">
+                <div className="mt-5 space-y-2 max-h-64 overflow-auto custom-scrollbar">
                   {auditLogs.length === 0 ? (
-                    <p className="text-sm text-foreground-light">Nessun evento registrato</p>
+                    <p className="text-sm text-foreground-muted">Nessun evento registrato</p>
                   ) : (
                     auditLogs.map((log) => (
-                      <div key={log.id} className="p-3 rounded-neu neu-surface text-xs text-foreground-light">
-                        <p className="font-semibold text-foreground">
+                      <div key={log.id} className="p-3 rounded-xl bg-black/40 border border-white/5 text-xs text-foreground-muted">
+                        <p className="font-semibold text-white">
                           {log.action} · {log.target_type}
                         </p>
                         <p>{new Date(log.created_at).toLocaleString('it-IT')}</p>
@@ -1589,19 +1594,19 @@ function CleanupSection() {
   return (
     <div className="max-w-2xl">
       <div className="flex items-center gap-3 mb-8">
-        <div className="w-10 h-10 rounded-neu bg-stone-200 flex items-center justify-center">
-          <Database className="size-5 text-foreground" />
+        <div className="w-10 h-10 rounded-xl bg-neon-pink/20 border border-neon-pink/30 flex items-center justify-center">
+          <Database className="size-5 text-neon-pink" />
         </div>
-        <h2 className="text-2xl font-semibold text-foreground">Pulizia Database</h2>
+        <h2 className="text-2xl font-semibold text-white">Pulizia Database</h2>
       </div>
 
       {/* Basic cleanup - always safe */}
-      <div className="neu-card p-6 mb-6">
-        <h3 className="text-lg font-semibold text-foreground mb-2">Pulizia Base (sicura)</h3>
-        <p className="text-sm text-foreground-light mb-2">
+      <div className="glass-panel p-6 mb-6 border border-white/10">
+        <h3 className="text-lg font-semibold text-white mb-2">Pulizia Base (sicura)</h3>
+        <p className="text-sm text-foreground-muted mb-2">
           Elimina solo sessioni di upload mai completate o fallite. Non tocca file, connessioni Drive, log audit o info uploader.
         </p>
-        <ul className="text-xs text-foreground-muted space-y-1 mb-4">
+        <ul className="text-xs text-foreground-muted/70 space-y-1 mb-4">
           <li>• Sessioni scadute pendenti (&gt;24 ore)</li>
           <li>• Sessioni fallite/scadute (&gt;48 ore)</li>
         </ul>
@@ -1609,14 +1614,14 @@ function CleanupSection() {
           <button
             onClick={() => runCleanup(true, false)}
             disabled={dryRunLoading || loading || dryRunDeepLoading || loadingDeep}
-            className="px-5 py-2.5 bg-stone-300 text-foreground font-semibold rounded-neu premium-transition disabled:opacity-60 text-sm"
+            className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold rounded-xl transition-all disabled:opacity-60 text-sm"
           >
             {dryRunLoading ? 'Analisi...' : 'Analizza'}
           </button>
           <button
             onClick={() => runCleanup(false, false)}
             disabled={dryRunLoading || loading || dryRunDeepLoading || loadingDeep}
-            className="px-5 py-2.5 bg-[#6366F1] text-white font-semibold rounded-neu premium-transition disabled:opacity-60 text-sm"
+            className="px-5 py-2.5 bg-neon-blue/20 hover:bg-neon-blue/30 text-neon-blue border border-neon-blue/30 font-semibold rounded-xl transition-all disabled:opacity-60 text-sm"
           >
             {loading ? 'Pulizia...' : 'Esegui'}
           </button>
@@ -1624,21 +1629,22 @@ function CleanupSection() {
       </div>
 
       {/* Deep cleanup - admin choice */}
-      <div className="neu-card p-6 mb-6 border-2 border-[#EF4444]/20">
-        <h3 className="text-lg font-semibold text-foreground mb-2">Pulizia Completa (avanzata)</h3>
-        <p className="text-sm text-foreground-light mb-2">
+      <div className="glass-panel p-6 mb-6 border border-red-500/30 relative overflow-hidden">
+        <div className="absolute inset-0 bg-red-500/5 pointer-events-none" />
+        <h3 className="text-lg font-semibold text-white mb-2 relative z-10">Pulizia Completa (avanzata)</h3>
+        <p className="text-sm text-foreground-muted mb-2 relative z-10">
           Include la pulizia base + elimina log audit e sessioni completate vecchie. I file caricati e le connessioni Drive NON vengono toccati.
         </p>
-        <ul className="text-xs text-foreground-muted space-y-1 mb-4">
+        <ul className="text-xs text-foreground-muted/70 space-y-1 mb-4 relative z-10">
           <li>• Tutto della pulizia base</li>
           <li>• Log audit più vecchi di 30 giorni</li>
           <li>• Sessioni completate più vecchie di 7 giorni (solo metadati, non i file)</li>
         </ul>
-        <div className="flex gap-3">
+        <div className="flex gap-3 relative z-10">
           <button
             onClick={() => runCleanup(true, true)}
             disabled={dryRunLoading || loading || dryRunDeepLoading || loadingDeep}
-            className="px-5 py-2.5 bg-stone-300 text-foreground font-semibold rounded-neu premium-transition disabled:opacity-60 text-sm"
+            className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold rounded-xl transition-all disabled:opacity-60 text-sm"
           >
             {dryRunDeepLoading ? 'Analisi...' : 'Analizza'}
           </button>
@@ -1649,7 +1655,7 @@ function CleanupSection() {
               }
             }}
             disabled={dryRunLoading || loading || dryRunDeepLoading || loadingDeep}
-            className="px-5 py-2.5 bg-[#EF4444] text-white font-semibold rounded-neu premium-transition disabled:opacity-60 text-sm"
+            className="px-5 py-2.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 font-semibold rounded-xl transition-all disabled:opacity-60 text-sm"
           >
             {loadingDeep ? 'Pulizia...' : 'Esegui Pulizia Completa'}
           </button>
@@ -1657,20 +1663,20 @@ function CleanupSection() {
       </div>
 
       {cleanupResults && (
-        <div className="neu-card p-6">
-          <h3 className="text-lg font-semibold text-foreground mb-4">Risultati</h3>
+        <div className="glass-panel p-6 border border-white/10">
+          <h3 className="text-lg font-semibold text-white mb-4">Risultati</h3>
           <div className="space-y-2">
             {Object.entries(cleanupResults).map(([key, result]) => (
               <div key={key} className="flex justify-between items-center text-sm">
-                <span className="text-foreground-light">{key.replace(/_/g, ' ')}</span>
-                <span className="font-semibold text-foreground">
+                <span className="text-foreground-muted">{key.replace(/_/g, ' ')}</span>
+                <span className="font-semibold text-white">
                   {result.error ? `Errore: ${result.error}` : `${result.deleted} elementi`}
                 </span>
               </div>
             ))}
-            <div className="flex justify-between items-center text-sm font-bold pt-2 border-t border-stone-200">
-              <span className="text-foreground">Totale</span>
-              <span className="text-foreground">{Object.values(cleanupResults).reduce((sum, r) => sum + r.deleted, 0)} elementi</span>
+            <div className="flex justify-between items-center text-sm font-bold pt-3 mt-2 border-t border-white/10">
+              <span className="text-white">Totale</span>
+              <span className="text-white">{Object.values(cleanupResults).reduce((sum, r) => sum + r.deleted, 0)} elementi</span>
             </div>
           </div>
         </div>

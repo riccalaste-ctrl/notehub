@@ -155,7 +155,7 @@ export default function MateriePage() {
   };
 
   return (
-    <div className="min-h-screen bg-neu-base gray-cards">
+    <div className="min-h-screen bg-transparent">
       <Header
         breadcrumbs={getBreadcrumbs().map(crumb => ({
           label: crumb.label,
@@ -168,34 +168,36 @@ export default function MateriePage() {
           {/* Step 1: Subject Cards */}
           {!selectedSubject && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <h1 className="text-3xl font-semibold text-foreground mb-2 mt-6">
+              <h1 className="text-3xl font-semibold text-white mb-2 mt-6">
                 Materie
               </h1>
-              <p className="text-foreground-light mb-8">
+              <p className="text-foreground-muted mb-8">
                 Seleziona una materia per visualizzare i professori
               </p>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                 {subjects.filter(s => s.enabled).map((subject) => {
                   const profs = getProfessorsForSubject(subject.id);
                   const icon = getSubjectIcon(subject.slug);
                   const gradient = getSubjectGradient(subject.slug);
                   return (
-                    <button
-                      key={subject.id}
-                      onClick={() => handleSubjectClick(subject)}
-                      className="neu-card p-5 text-left block w-full"
-                    >
-                      <div className={`size-12 rounded-neu bg-gradient-to-br ${gradient} flex items-center justify-center text-white text-xl font-bold mb-3 shadow-lg`}>
-                        {icon}
-                      </div>
-                      <h3 className="font-semibold text-foreground text-sm mb-1">
-                        {subject.name}
-                      </h3>
-                      <p className="text-xs text-foreground-light">
-                        {profs.length} {profs.length === 1 ? 'professore' : 'professori'}
-                      </p>
-                    </button>
+                    <motion.div key={subject.id} whileHover={{ scale: 1.03, y: -5 }}>
+                      <button
+                        onClick={() => handleSubjectClick(subject)}
+                        className="glass-panel p-6 text-left block w-full relative overflow-hidden group"
+                      >
+                        <div className="absolute -right-6 -top-6 size-24 bg-white/5 rounded-full blur-xl group-hover:bg-white/10 transition-colors duration-500" />
+                        <div className={`size-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white text-2xl font-bold mb-4 shadow-lg group-hover:scale-110 group-hover:bg-white/10 transition-all duration-300`}>
+                          {icon}
+                        </div>
+                        <h3 className="font-semibold text-white text-base mb-1">
+                          {subject.name}
+                        </h3>
+                        <p className="text-sm text-foreground-muted">
+                          {profs.length} {profs.length === 1 ? 'professore' : 'professori'}
+                        </p>
+                      </button>
+                    </motion.div>
                   );
                 })}
               </div>
@@ -208,43 +210,45 @@ export default function MateriePage() {
               <div className="flex items-center gap-4 mb-8 mt-6">
                 <button
                   onClick={handleBackToRoot}
-                  className="p-2 rounded-neu neu-button premium-transition"
+                  className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
                 >
-                  <ChevronRight className="size-5 text-foreground-light rotate-180" />
+                  <ChevronRight className="size-5 text-foreground-muted rotate-180" />
                 </button>
-                <div className={`size-14 rounded-neu bg-gradient-to-br ${getSubjectGradient(selectedSubject.slug)} flex items-center justify-center text-white text-2xl font-bold`}>
+                <div className={`size-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white text-2xl font-bold shadow-lg`}>
                   {getSubjectIcon(selectedSubject.slug)}
                 </div>
                 <div>
-                  <h1 className="text-2xl font-semibold text-foreground">
+                  <h1 className="text-2xl font-semibold text-white">
                     {selectedSubject.name}
                   </h1>
-                  <p className="text-sm text-foreground-light">
+                  <p className="text-sm text-foreground-muted">
                     Seleziona un professore per visualizzare i file
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {getProfessorsForSubject(selectedSubject.id).map((professor) => (
-                  <button
-                    key={professor.id}
-                    onClick={() => handleProfessorClick(professor)}
-                    className="neu-card p-6 text-left block w-full"
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="size-12 rounded-neu gradient-mint flex items-center justify-center">
-                        <GraduationCap className="size-6 text-white" />
+                  <motion.div key={professor.id} whileHover={{ scale: 1.02, y: -5 }}>
+                    <button
+                      onClick={() => handleProfessorClick(professor)}
+                      className="glass-panel p-6 text-left block w-full group relative overflow-hidden"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-br from-neon-blue/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      <div className="flex items-center justify-between mb-4 relative z-10">
+                        <div className="size-12 rounded-xl bg-neon-blue/20 border border-neon-blue/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <GraduationCap className="size-6 text-neon-blue" />
+                        </div>
+                        <ChevronRight className="size-5 text-foreground-muted group-hover:text-neon-blue group-hover:translate-x-1 transition-all" />
                       </div>
-                      <ChevronRight className="size-5 text-foreground-muted" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-1">
-                      {professor.name}
-                    </h3>
-                    <p className="text-sm text-foreground-light">
-                      Clicca per visualizzare i file
-                    </p>
-                  </button>
+                      <h3 className="text-lg font-semibold text-white mb-1 relative z-10">
+                        {professor.name}
+                      </h3>
+                      <p className="text-sm text-foreground-muted relative z-10">
+                        Clicca per visualizzare i file
+                      </p>
+                    </button>
+                  </motion.div>
                 ))}
               </div>
             </motion.div>
@@ -256,18 +260,18 @@ export default function MateriePage() {
               <div className="flex items-center gap-4 mb-8 mt-6">
                 <button
                   onClick={handleBackToSubjects}
-                  className="p-2 rounded-neu neu-button premium-transition"
+                  className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
                 >
-                  <ChevronRight className="size-5 text-foreground-light rotate-180" />
+                  <ChevronRight className="size-5 text-foreground-muted rotate-180" />
                 </button>
-                <div className="size-14 rounded-neu gradient-mint flex items-center justify-center">
-                  <GraduationCap className="size-7 text-white" />
+                <div className="size-14 rounded-2xl bg-neon-blue/20 border border-neon-blue/30 flex items-center justify-center shadow-[0_0_15px_rgba(67,97,238,0.2)]">
+                  <GraduationCap className="size-7 text-neon-blue" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-semibold text-foreground">
+                  <h1 className="text-2xl font-semibold text-white">
                     {selectedProfessor.name}
                   </h1>
-                  <p className="text-sm text-foreground-light">
+                  <p className="text-sm text-foreground-muted">
                     {selectedSubject.name} · {uploads.length} {uploads.length === 1 ? 'file' : 'file'}
                   </p>
                 </div>
@@ -280,7 +284,7 @@ export default function MateriePage() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Cerca file..."
-                  className="w-full max-w-md px-4 py-3 neu-input rounded-neu text-foreground placeholder-foreground-muted outline-none premium-transition"
+                  className="w-full max-w-md px-4 py-3 bg-black/50 border border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple rounded-xl text-white placeholder-foreground-muted outline-none transition-all"
                 />
               </div>
 
@@ -295,18 +299,18 @@ export default function MateriePage() {
                 </div>
               ) : (
                 <div className="text-center py-16">
-                  <div className="w-16 h-16 rounded-neu-lg neu-surface flex items-center justify-center mx-auto mb-4">
-                    <FileText className="size-8 text-foreground-muted" />
+                  <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6">
+                    <FileText className="size-10 text-foreground-muted" />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">Nessun file</h3>
-                  <p className="text-sm text-foreground-light mb-6">
+                  <h3 className="text-xl font-semibold text-white mb-2">Nessun file</h3>
+                  <p className="text-sm text-foreground-muted mb-8">
                     Non ci sono file per questo professore
                   </p>
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(157, 78, 221, 0.5)" }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setUploadModalOpen(true)}
-                    className="inline-flex items-center px-5 py-2.5 bg-gradient-to-br from-[#FF8C42] to-[#E87000] text-white rounded-neu text-sm font-medium premium-transition"
+                    className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-neon-purple to-neon-blue border border-white/20 shadow-lg text-white rounded-full text-sm font-semibold transition-all"
                   >
                     <Plus className="size-4 mr-1.5" />
                     Carica un file
@@ -323,13 +327,13 @@ export default function MateriePage() {
       {/* Floating Upload Button */}
       <div className="fixed right-6 bottom-6 z-30">
         <motion.button
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(157, 78, 221, 0.5)" }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setUploadModalOpen(true)}
-            className="flex items-center px-5 font-semibold rounded-neu-lg text-white h-14 bg-gradient-to-br from-[#FF8C42] to-[#E87000] premium-transition"
+          className="flex items-center px-6 font-semibold rounded-full text-white h-14 bg-gradient-to-r from-neon-purple to-neon-blue border border-white/20 shadow-lg"
         >
           <Plus className="size-5 mr-2" />
-          Carica
+          Carica Risorsa
         </motion.button>
       </div>
 

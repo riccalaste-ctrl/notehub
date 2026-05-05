@@ -108,13 +108,13 @@ export default function SubjectPage() {
 
   if (!subject) {
     return (
-      <div className="min-h-screen bg-neu-base flex items-center justify-center">
+      <div className="min-h-screen bg-transparent flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 rounded-neu-xl neu-surface flex items-center justify-center mx-auto mb-4">
-            <BookOpen className="size-8 text-foreground-muted" />
+          <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6 shadow-2xl">
+            <BookOpen className="size-10 text-foreground-muted" />
           </div>
-          <h1 className="text-2xl font-semibold text-foreground mb-2">Materia non trovata</h1>
-          <button onClick={() => router.push('/materie')} className="text-lavender-dark hover:underline font-medium">
+          <h1 className="text-2xl font-semibold text-white mb-2">Materia non trovata</h1>
+          <button onClick={() => router.push('/materie')} className="text-neon-purple hover:underline font-medium">
             Torna alle materie
           </button>
         </div>
@@ -145,7 +145,7 @@ export default function SubjectPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neu-base">
+    <div className="min-h-screen bg-transparent">
       <Header breadcrumbs={getBreadcrumbs()} />
 
       <main className="lg:pl-56 pt-16">
@@ -154,18 +154,18 @@ export default function SubjectPage() {
           <div className="flex items-center gap-4 mb-8 mt-6">
             <button
               onClick={() => router.push('/materie')}
-              className="p-2 rounded-neu neu-button premium-transition"
+              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
             >
-              <ArrowLeft className="size-5 text-foreground-light" />
+              <ArrowLeft className="size-5 text-foreground-muted" />
             </button>
-            <div className={`size-14 rounded-neu bg-gradient-to-br ${gradient} flex items-center justify-center shadow-neu text-white text-2xl font-bold`}>
+            <div className={`size-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white text-2xl font-bold shadow-lg`}>
               {icon}
             </div>
             <div>
-              <h1 className="text-3xl font-semibold text-foreground">
+              <h1 className="text-3xl font-semibold text-white">
                 {subject.name}
               </h1>
-              <p className="text-sm text-foreground-light flex items-center gap-2">
+              <p className="text-sm text-foreground-muted flex items-center gap-2 mt-1">
                 <Files className="size-4" />
                 {filteredProfs.length} {filteredProfs.length === 1 ? 'professore' : 'professori'}
               </p>
@@ -175,33 +175,35 @@ export default function SubjectPage() {
           {/* Professor Selection */}
           {!selectedProfessor && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <h2 className="text-xl font-semibold text-foreground mb-4">Professori</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <h2 className="text-xl font-semibold text-white mb-4">Professori</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {filteredProfs.map((prof) => (
-                  <button
-                    key={prof.id}
-                    onClick={() => setSelectedProfessor(prof)}
-                    className="neu-card p-6 text-left block w-full"
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="size-12 rounded-neu gradient-mint flex items-center justify-center">
-                        <GraduationCap className="size-6 text-white" />
+                  <motion.div key={prof.id} whileHover={{ scale: 1.02, y: -5 }}>
+                    <button
+                      onClick={() => setSelectedProfessor(prof)}
+                      className="glass-panel p-6 text-left block w-full group relative overflow-hidden"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-br from-neon-blue/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      <div className="flex items-center justify-between mb-4 relative z-10">
+                        <div className="size-12 rounded-xl bg-neon-blue/20 border border-neon-blue/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <GraduationCap className="size-6 text-neon-blue" />
+                        </div>
+                        <ChevronRight className="size-5 text-foreground-muted group-hover:text-neon-blue group-hover:translate-x-1 transition-all" />
                       </div>
-                      <ChevronRight className="size-5 text-foreground-muted" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-1">
-                      {prof.name}
-                    </h3>
-                    <p className="text-sm text-foreground-light">
-                      Clicca per visualizzare i file
-                    </p>
-                  </button>
+                      <h3 className="text-lg font-semibold text-white mb-1 relative z-10">
+                        {prof.name}
+                      </h3>
+                      <p className="text-sm text-foreground-muted relative z-10">
+                        Clicca per visualizzare i file
+                      </p>
+                    </button>
+                  </motion.div>
                 ))}
               </div>
 
               {/* All files for this subject */}
-              <div className="mt-10">
-                <h2 className="text-xl font-semibold text-foreground mb-4">Tutti i file della materia</h2>
+              <div className="mt-12">
+                <h2 className="text-xl font-semibold text-white mb-6">Tutti i file della materia</h2>
                 <SubjectAllFiles subject={subject} />
               </div>
             </motion.div>
@@ -213,18 +215,18 @@ export default function SubjectPage() {
               <div className="flex items-center gap-4 mb-6">
                 <button
                   onClick={() => { setSelectedProfessor(null); setUploads([]); setSearch(''); }}
-                  className="p-2 rounded-neu neu-button premium-transition"
+                  className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
                 >
-                  <ChevronRight className="size-5 text-foreground-light rotate-180" />
+                  <ChevronRight className="size-5 text-foreground-muted rotate-180" />
                 </button>
-                <div className="size-10 rounded-neu gradient-mint flex items-center justify-center">
-                  <GraduationCap className="size-5 text-white" />
+                <div className="size-12 rounded-2xl bg-neon-blue/20 border border-neon-blue/30 flex items-center justify-center shadow-[0_0_15px_rgba(67,97,238,0.2)]">
+                  <GraduationCap className="size-6 text-neon-blue" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-foreground">
+                  <h2 className="text-xl font-semibold text-white">
                     {selectedProfessor.name}
                   </h2>
-                  <p className="text-sm text-foreground-light">
+                  <p className="text-sm text-foreground-muted mt-1">
                     {uploads.length} {uploads.length === 1 ? 'file' : 'file'}
                   </p>
                 </div>
@@ -239,7 +241,7 @@ export default function SubjectPage() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Cerca file..."
-                    className="w-full text-sm pl-12 pr-4 py-3 rounded-neu neu-input text-foreground placeholder-foreground-muted outline-none premium-transition"
+                    className="w-full text-sm pl-12 pr-4 py-3 bg-black/50 border border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple rounded-xl text-white placeholder-foreground-muted outline-none transition-all"
                   />
                 </div>
               </div>
@@ -255,18 +257,18 @@ export default function SubjectPage() {
                 </div>
               ) : (
                 <div className="text-center py-16">
-                  <div className="w-20 h-20 rounded-neu-xl neu-surface flex items-center justify-center mx-auto mb-6">
+                  <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6">
                     <FileText className="size-10 text-foreground-muted" />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">Nessun file</h3>
-                  <p className="text-sm text-foreground-light mb-6">
+                  <h3 className="text-xl font-semibold text-white mb-2">Nessun file</h3>
+                  <p className="text-sm text-foreground-muted mb-8">
                     Non ci sono file per questo professore
                   </p>
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(157, 78, 221, 0.5)" }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setUploadModalOpen(true)}
-                    className="inline-flex items-center px-5 py-2.5 bg-gradient-to-br from-[#FF8C42] to-[#E87000] text-white rounded-neu text-sm font-medium premium-transition"
+                    className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-neon-purple to-neon-blue border border-white/20 shadow-lg text-white rounded-full text-sm font-semibold transition-all"
                   >
                     <Plus className="size-4 mr-1.5" />
                     Carica un file
@@ -282,13 +284,13 @@ export default function SubjectPage() {
 
       <div className="fixed right-6 bottom-6 z-30">
         <motion.button
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(157, 78, 221, 0.5)" }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setUploadModalOpen(true)}
-            className="flex items-center px-5 font-semibold rounded-neu-lg text-white h-14 bg-gradient-to-br from-[#FF8C42] to-[#E87000] premium-transition"
+          className="flex items-center px-6 font-semibold rounded-full text-white h-14 bg-gradient-to-r from-neon-purple to-neon-blue border border-white/20 shadow-lg"
         >
           <Plus className="size-5 mr-2" />
-          Carica
+          Carica Risorsa
         </motion.button>
       </div>
 
@@ -326,7 +328,7 @@ function SubjectAllFiles({ subject }: { subject: Subject }) {
 
   if (loading) return <FileListSkeleton />;
   if (uploads.length === 0) {
-    return <p className="text-sm text-foreground-light">Nessun file disponibile</p>;
+    return <p className="text-sm text-foreground-muted">Nessun file disponibile</p>;
   }
 
   return (

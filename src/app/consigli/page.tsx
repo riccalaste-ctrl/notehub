@@ -70,7 +70,7 @@ export default function ConsigliPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-neu-base gray-cards">
+    <div className="min-h-screen bg-transparent">
       <Header breadcrumbs={[{ label: 'Consigli' }]} />
 
       <main className="lg:pl-56 pt-16">
@@ -81,26 +81,26 @@ export default function ConsigliPage() {
             className="mb-10 mt-6"
           >
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-neu gradient-lavender flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-neon-purple to-neon-blue flex items-center justify-center shadow-[0_0_20px_rgba(157,78,221,0.4)]">
                 <Lightbulb className="size-6 text-white" />
               </div>
-              <h1 className="text-3xl font-semibold text-foreground tracking-tight">
+              <h1 className="text-3xl font-semibold text-white tracking-tight">
                 Consigli & Suggerimenti
               </h1>
             </div>
-            <p className="text-base text-foreground-light">
+            <p className="text-base text-foreground-muted">
               Trucchi per lo studio, info sui professori e consigli per organizzarti al meglio
             </p>
             {consigliEmail ? (
-              <div className="mt-4 p-4 rounded-neu gray-card flex items-center gap-3">
-                <div className="w-10 h-10 rounded-neu flex items-center justify-center flex-shrink-0 bg-[#6366F1]/10">
-                  <Mail className="size-5 text-[#6366F1]" />
+              <div className="mt-6 p-5 rounded-2xl bg-black/40 border border-white/5 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-neon-blue/10 border border-neon-blue/20">
+                  <Mail className="size-5 text-neon-blue" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-foreground">Hai un consiglio da condividere?</p>
-                  <p className="text-sm text-foreground-light">
+                  <p className="text-sm font-semibold text-white">Hai un consiglio da condividere?</p>
+                  <p className="text-sm text-foreground-muted mt-1">
                     Scrivici a:{' '}
-                    <a href={`mailto:${consigliEmail}`} className="text-[#6366F1] hover:underline font-semibold">
+                    <a href={`mailto:${consigliEmail}`} className="text-neon-blue hover:text-white transition-colors font-medium">
                       {consigliEmail}
                     </a>
                   </p>
@@ -112,10 +112,10 @@ export default function ConsigliPage() {
           {loading ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="neu-card p-6 animate-pulse">
-                  <div className="h-4 bg-neu-base rounded w-1/3 mb-3" />
-                  <div className="h-3 bg-neu-base rounded w-2/3 mb-2" />
-                  <div className="h-3 bg-neu-base rounded w-full" />
+                <div key={i} className="glass-panel p-6 animate-pulse border border-white/5">
+                  <div className="h-4 bg-white/10 rounded-lg w-1/3 mb-4" />
+                  <div className="h-3 bg-white/10 rounded-lg w-2/3 mb-2" />
+                  <div className="h-3 bg-white/10 rounded-lg w-full" />
                 </div>
               ))}
             </div>
@@ -129,33 +129,34 @@ export default function ConsigliPage() {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="neu-card p-6"
+                    className="glass-panel p-6 relative overflow-hidden group"
                   >
-                    <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-neu gradient-lavender flex items-center justify-center flex-shrink-0">
-                        <Lightbulb className="size-5 text-white" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-neon-purple/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="flex items-start gap-4 relative z-10">
+                      <div className="w-12 h-12 rounded-xl bg-neon-purple/20 border border-neon-purple/30 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                        <Lightbulb className="size-6 text-neon-purple" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-foreground mb-2">
+                        <h3 className="text-lg font-semibold text-white mb-2">
                           {consiglio.title}
                         </h3>
-                        <p className="text-sm text-foreground-light leading-relaxed whitespace-pre-line">
+                        <p className="text-sm text-foreground-muted leading-relaxed whitespace-pre-line">
                           {consiglio.content}
                         </p>
                         {files.length > 0 && (
-                          <div className="mt-4 pt-3 border-t border-stone-200/30">
-                            <p className="text-xs font-semibold text-foreground mb-2">File allegati</p>
-                            <div className="space-y-1">
+                          <div className="mt-5 pt-4 border-t border-white/10">
+                            <p className="text-xs font-medium text-foreground-muted uppercase tracking-wider mb-3">File allegati</p>
+                            <div className="space-y-2">
                               {files.map((file) => (
                                 <a
                                   key={file.id}
                                   href={file.view_url || file.download_url || '#'}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="flex items-center gap-2 px-3 py-1.5 rounded-neu-sm neu-surface text-xs hover:bg-[#6366F1]/10 transition"
+                                  className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-neon-blue/30 transition-all group/file"
                                 >
-                                  <FileText className="size-3 text-[#6366F1]" />
-                                  <span className="font-medium text-foreground-light hover:text-foreground truncate">
+                                  <FileText className="size-4 text-neon-blue group-hover/file:scale-110 transition-transform" />
+                                  <span className="font-medium text-foreground-muted group-hover/file:text-white transition-colors truncate">
                                     {file.original_filename}
                                   </span>
                                 </a>
@@ -189,15 +190,15 @@ export default function ConsigliPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="neu-card p-10 text-center"
+              className="glass-panel p-10 text-center border border-white/10"
             >
-              <div className="w-16 h-16 rounded-neu-xl gradient-lavender flex items-center justify-center mx-auto mb-4 shadow-neu-lg">
-                <Lightbulb className="size-8 text-white" />
+              <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                <Lightbulb className="size-10 text-foreground-muted" />
               </div>
-              <h2 className="text-xl font-semibold text-foreground mb-2">
+              <h2 className="text-xl font-semibold text-white mb-2">
                 Nessun consiglio disponibile
               </h2>
-              <p className="text-sm text-foreground-light max-w-md mx-auto leading-relaxed">
+              <p className="text-sm text-foreground-muted max-w-md mx-auto leading-relaxed">
                 I consigli verranno aggiunti gradualmente dall&apos;amministrazione.
                 Torna a visitare questa pagina per scoprire nuovi suggerimenti!
               </p>

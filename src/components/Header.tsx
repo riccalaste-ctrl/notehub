@@ -34,7 +34,7 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 z-40 flex-col items-center gap-8 w-56 h-full p-6 neu-sidebar border-r border-stone-200/50">
+      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 z-40 flex-col items-center gap-8 w-56 h-full p-6 bg-surface/40 backdrop-blur-3xl border-r border-white/5 shadow-2xl">
         <Link href="/" className="flex items-center gap-2 w-full">
           <div className="size-9 rounded-neu flex justify-center items-center p-1">
             <Image src="/logo.svg" alt="SKAKK-UP" width={36} height={36} className="w-full h-full" />
@@ -51,10 +51,10 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
               <Link
                 key={label}
                 href={href}
-                className={`flex items-center gap-2 w-full px-3 py-2.5 rounded-neu transition-all duration-300 ease-out text-sm font-semibold ${
+                className={`flex items-center gap-2 w-full px-3 py-2.5 rounded-xl transition-all duration-300 ease-out text-sm font-semibold relative overflow-hidden group ${
                   isActive
-                    ? 'shadow-neu-pressed text-lavender-dark'
-                    : 'text-foreground-light hover:text-foreground hover:shadow-neu-badge'
+                    ? 'text-white bg-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]'
+                    : 'text-foreground-muted hover:text-white hover:bg-white/5'
                 }`}
               >
                 <Icon className="size-4" />
@@ -66,11 +66,11 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
       </aside>
 
       {/* Top Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 neu-header lg:left-56">
+      <header className="fixed top-0 left-0 right-0 z-40 bg-background/60 backdrop-blur-2xl border-b border-white/5 lg:left-56 transition-all duration-500">
         <div className="flex justify-between items-center h-16 px-4 lg:px-8">
           {/* Mobile hamburger */}
           <div className="flex lg:hidden items-center gap-2">
-            <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-neu neu-button">
+            <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
               <Menu className="size-5 text-foreground" />
             </button>
             <Link href="/" className="size-8 rounded-neu flex justify-center items-center p-0.5">
@@ -109,16 +109,16 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
                   await fetch('/api/auth/logout', { method: 'POST' });
                   window.location.href = '/login';
                 }}
-                className="px-3 py-2 text-sm font-semibold text-foreground hover:shadow-neu-badge rounded-neu premium-transition"
+                className="px-3 py-2 text-sm font-semibold text-foreground-light hover:text-white hover:bg-white/10 rounded-xl transition-all duration-300"
               >
                 Esci
               </button>
             ) : (
-              <Link href="/login" className="px-3 py-2 text-sm font-semibold text-foreground hover:shadow-neu-badge rounded-neu premium-transition">
+              <Link href="/login" className="px-3 py-2 text-sm font-semibold text-foreground-light hover:text-white hover:bg-white/10 rounded-xl transition-all duration-300">
                 Login
               </Link>
             )}
-            <Link href="/admin" className="px-3 py-2 text-sm font-semibold text-foreground hover:shadow-neu-badge rounded-neu premium-transition">
+            <Link href="/admin" className="px-3 py-2 text-sm font-semibold text-foreground-light hover:text-white hover:bg-white/10 rounded-xl transition-all duration-300">
               Admin
             </Link>
           </div>
@@ -141,7 +141,7 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
               animate={{ x: 0 }}
               exit={{ x: -300 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed left-0 top-0 bottom-0 z-50 w-64 neu-sidebar border-r border-stone-200/50 p-6 lg:hidden"
+              className="fixed left-0 top-0 bottom-0 z-50 w-64 bg-surface/80 backdrop-blur-3xl border-r border-white/5 p-6 lg:hidden shadow-2xl"
             >
                 <div className="flex justify-between items-center mb-8">
                   <div className="flex items-center gap-2">
@@ -150,7 +150,7 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
                     </div>
                     <span className="font-semibold text-lg text-foreground">SKAKK-UP</span>
                   </div>
-                <button onClick={() => setSidebarOpen(false)} className="p-2 rounded-neu neu-button">
+                <button onClick={() => setSidebarOpen(false)} className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
                   <X className="size-5 text-foreground" />
                 </button>
               </div>
@@ -163,10 +163,10 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
                       key={label}
                       href={href}
                       onClick={() => setSidebarOpen(false)}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-neu text-sm font-semibold premium-transition ${
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
                         isActive
-                          ? 'shadow-neu-pressed text-lavender-dark'
-                          : 'text-foreground-light hover:text-foreground hover:shadow-neu-badge'
+                          ? 'text-white bg-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]'
+                          : 'text-foreground-muted hover:text-white hover:bg-white/5'
                       }`}
                     >
                       <Icon className="size-4" />

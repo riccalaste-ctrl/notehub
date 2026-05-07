@@ -12,7 +12,11 @@ export default function ThemeToggle() {
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={toggleTheme}
-      className="relative w-14 h-7 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm overflow-hidden transition-colors duration-300"
+      className={`relative w-14 h-7 rounded-full backdrop-blur-sm overflow-hidden transition-colors duration-300 border ${
+        theme === 'dark'
+          ? 'bg-white/10 border-white/10'
+          : 'bg-black/10 border-black/10'
+      }`}
       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
     >
       <motion.div
@@ -23,7 +27,9 @@ export default function ThemeToggle() {
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       />
       <motion.div
-        className="absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg"
+        className={`absolute top-0.5 left-0.5 w-6 h-6 rounded-full backdrop-blur-sm flex items-center justify-center shadow-lg ${
+          theme === 'dark' ? 'bg-white/20' : 'bg-black/15'
+        }`}
         animate={{
           x: theme === 'dark' ? 0 : 28,
         }}

@@ -140,6 +140,12 @@ export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
+
+  useEffect(() => {
+    if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('notehub_admin_logged_in')) {
+      setIsAuthenticated(true);
+    }
+  }, []);
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [professors, setProfessors] = useState<Professor[]>([]);
@@ -238,14 +244,6 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    fetch('/api/admin/subjects', { method: 'HEAD' })
-      .then((res) => {
-        if (res.ok) setIsAuthenticated(true);
-      })
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => {
     if (isAuthenticated) fetchData();
   }, [isAuthenticated, fetchData]);
 
@@ -281,6 +279,7 @@ export default function AdminPage() {
       });
 
       if (res.ok) {
+        sessionStorage.setItem('notehub_admin_logged_in', '1');
         setIsAuthenticated(true);
       } else {
         const data = await res.json();
@@ -294,6 +293,7 @@ export default function AdminPage() {
   };
 
   const handleLogout = async () => {
+    sessionStorage.removeItem('notehub_admin_logged_in');
     await fetch('/api/admin/logout', { method: 'POST' });
     window.location.href = '/';
   };

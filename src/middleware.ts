@@ -106,6 +106,16 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  if (pathname === '/admin') {
+    const adminToken = request.cookies.get(ADMIN_JWT_COOKIE);
+
+    if (!adminToken || !(await verifyAdminToken(adminToken.value))) {
+      const loginUrl = new URL('/admin', request.url);
+      loginUrl.searchParams.set('auth_required', '1');
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
   const isPublicPath =
     pathname === '/login' ||
     pathname === '/auth/callback' ||
@@ -113,7 +123,6 @@ export async function middleware(request: NextRequest) {
     pathname === '/cookie-policy' ||
     pathname.startsWith('/api/auth') ||
     pathname.startsWith('/api/public') ||
-    pathname.startsWith('/admin') ||
     pathname === '/api/admin/login' ||
     pathname === '/api/admin/verify-password';
   const needsUserAuth =
@@ -152,5 +161,6 @@ export const config = {
     '/api/user/:path*',
     '/api/auth/logout',
     '/api/admin/:path*',
+    '/admin',
   ],
 };

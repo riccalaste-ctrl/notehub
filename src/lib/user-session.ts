@@ -5,6 +5,8 @@ import { supabaseAdmin } from '@/lib/supabase';
 export const USER_SESSION_COOKIE = 'notehub_user_jwt';
 export const INSTITUTION_DOMAIN = process.env.ALLOWED_EMAIL_DOMAIN || 'liceoscacchibari.it';
 
+export const DEVELOPER_EMAILS = ['riccalaste@gmail.com'];
+
 function getEnvAllowedEmails() {
   const configuredTestEmails = (process.env.ALLOWED_TEST_EMAILS || '')
     .split(',')
@@ -34,6 +36,7 @@ export async function isAllowedUserEmail(email: string | undefined): Promise<boo
   if (!email) return false;
   const normalizedEmail = email.toLowerCase().trim();
   if (normalizedEmail.endsWith(`@${INSTITUTION_DOMAIN}`)) return true;
+  if (DEVELOPER_EMAILS.includes(normalizedEmail)) return true;
 
   const allowedEmails = getEnvAllowedEmails();
   try {

@@ -28,6 +28,7 @@ import {
   Settings,
 } from 'lucide-react';
 import { buildInstitutionDisclaimer } from '@/lib/user-session-client';
+import { DEVELOPER_EMAILS } from '@/lib/user-session';
 
 interface Subject {
   id: string;
@@ -205,7 +206,11 @@ export default function AdminPage() {
         setSettingsForm({
           support_email: data.settings?.support_email || data.settings?.admin_email || '',
           site_policy: data.settings?.site_policy || '',
-          allowed_external_emails: data.settings?.allowed_external_emails || '',
+          allowed_external_emails: (data.settings?.allowed_external_emails || '')
+            .split(',')
+            .map((e: string) => e.trim().toLowerCase())
+            .filter((e: string) => e && !DEVELOPER_EMAILS.includes(e))
+            .join(','),
           consigli_email: data.settings?.consigli_email || '',
         });
       }
@@ -1469,6 +1474,13 @@ export default function AdminPage() {
                 <p className="text-sm text-foreground-muted mb-4">
                   Inserisci email ospiti separate da virgola. Solo queste, oltre al dominio istituzionale, potranno accedere.
                 </p>
+                {DEVELOPER_EMAILS.length > 0 && (
+                  <div className="mb-4 px-4 py-3 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+                    <p className="text-sm text-amber-300">
+                      Le email degli sviluppatori ({DEVELOPER_EMAILS.join(', ')}) hanno accesso permanente e non appaiono in questa lista.
+                    </p>
+                  </div>
+                )}
                 <textarea
                   value={settingsForm.allowed_external_emails}
                   onChange={(e) => setSettingsForm({ ...settingsForm, allowed_external_emails: e.target.value })}
@@ -1482,7 +1494,7 @@ export default function AdminPage() {
                       const sanitized = settingsForm.allowed_external_emails
                         .split(',')
                         .map((value) => value.trim().toLowerCase())
-                        .filter(Boolean)
+                        .filter((value) => value && !DEVELOPER_EMAILS.includes(value))
                         .join(',');
 
                       const res = await fetch('/api/admin/settings', {

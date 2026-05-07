@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { requireAdmin } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
 import { z } from 'zod';
+import { DEVELOPER_EMAILS } from '@/lib/user-session';
 
 const allowedSettingKeys = [
   'support_email',
@@ -35,6 +36,11 @@ function normalizeSettingValue(key: typeof allowedSettingKeys[number], value: st
       .split(',')
       .map((item) => item.trim().toLowerCase())
       .filter(Boolean);
+
+    const devEmailAttempt = emails.find((item) => DEVELOPER_EMAILS.includes(item));
+    if (devEmailAttempt) {
+      throw new Error(`L'email ${devEmailAttempt} ha accesso permanente come sviluppatore e non può essere aggiunta alla whitelist temporanea`);
+    }
 
     const invalidEmail = emails.find((item) => !z.string().email().safeParse(item).success);
     if (invalidEmail) {

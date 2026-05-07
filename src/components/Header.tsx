@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GraduationCap, LayoutGrid, BookOpen, Lightbulb, Plus, Menu, X, Search, Compass, ChevronRight, FileText } from 'lucide-react';
+import { GraduationCap, LayoutGrid, BookOpen, Lightbulb, Plus, Menu, X, Search, Compass, ChevronRight, FileText, LogOut } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import ThemeToggle from './ThemeToggle';
 
@@ -111,8 +111,9 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
                   await fetch('/api/auth/logout', { method: 'POST' });
                   window.location.href = '/login';
                 }}
-                className="px-3 py-2 text-sm font-semibold text-foreground-light hover:text-white hover:bg-white/10 rounded-xl transition-all duration-300"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20 rounded-xl transition-all duration-300"
               >
+                <LogOut className="size-4" />
                 Esci
               </button>
             ) : (
@@ -176,6 +177,18 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
                     </Link>
                   );
                 })}
+                {isAuthenticated && (
+                  <button
+                    onClick={async () => {
+                      await fetch('/api/auth/logout', { method: 'POST' });
+                      window.location.href = '/login';
+                    }}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20 transition-all duration-300 mt-2"
+                  >
+                    <LogOut className="size-4" />
+                    Esci
+                  </button>
+                )}
               </nav>
             </motion.div>
           </>

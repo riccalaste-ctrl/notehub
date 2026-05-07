@@ -9,11 +9,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: '#050505',
-        surface: '#111111',
+        background: 'var(--background)',
+        surface: 'var(--surface)',
         surfaceHover: '#1a1a1a',
         foreground: {
-          DEFAULT: '#f8f9fa',
+          DEFAULT: 'var(--foreground)',
           light: '#adb5bd',
           muted: '#6c757d',
         },
@@ -25,7 +25,6 @@ module.exports = {
           orange: '#ff7900',
           green: '#06d6a0',
         },
-        // Keep these for backward compatibility if missed during find/replace
         neu: {
           base: '#050505',
           surface: '#111111',

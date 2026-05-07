@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GraduationCap, LayoutGrid, BookOpen, Lightbulb, Plus, Menu, X, Search, Compass, ChevronRight, FileText } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import ThemeToggle from './ThemeToggle';
 
 interface HeaderProps {
   onOpenUpload?: () => void;
@@ -103,6 +104,7 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
 
           {/* Right side */}
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             {isAuthenticated ? (
               <button
                 onClick={async () => {

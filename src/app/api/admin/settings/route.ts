@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { requireAdmin } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
 import { z } from 'zod';
-import { DEVELOPER_EMAILS } from '@/lib/user-session';
+import { DEVELOPER_EMAILS } from '@/lib/constants';
 
 const allowedSettingKeys = [
   'support_email',

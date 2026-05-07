@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { supabaseAdmin } from '@/lib/supabase';
+import { DEVELOPER_EMAILS } from '@/lib/constants';
 
 export const USER_SESSION_COOKIE = 'notehub_user_jwt';
 export const INSTITUTION_DOMAIN = process.env.ALLOWED_EMAIL_DOMAIN || 'liceoscacchibari.it';
-
-export const DEVELOPER_EMAILS = ['riccalaste@gmail.com'];
 
 function getEnvAllowedEmails() {
   const configuredTestEmails = (process.env.ALLOWED_TEST_EMAILS || '')

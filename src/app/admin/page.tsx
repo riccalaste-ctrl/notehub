@@ -28,7 +28,7 @@ import {
   Settings,
 } from 'lucide-react';
 import { buildInstitutionDisclaimer } from '@/lib/user-session-client';
-import { DEVELOPER_EMAILS } from '@/lib/user-session';
+import { DEVELOPER_EMAILS } from '@/lib/constants';
 
 interface Subject {
   id: string;

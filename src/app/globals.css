@@ -283,11 +283,13 @@ body {
 
 /* LIGHT THEME BACKGROUND & BORDER OVERRIDES */
 .light .bg-white\/5,
-.light .bg-black\/50 {
+.light .bg-black\/50,
+.light .bg-black\/40 {
   background-color: rgba(0, 0, 0, 0.03) !important;
 }
 
-.light .bg-white\/10 {
+.light .bg-white\/10,
+.light .bg-black\/20 {
   background-color: rgba(0, 0, 0, 0.06) !important;
 }
 

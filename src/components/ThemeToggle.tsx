@@ -1,46 +1,34 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
-import { Sun, Moon } from 'lucide-react';
-import { useTheme } from '@/lib/ThemeContext';
+import * as React from "react";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 
-export default function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme();
+export function ThemeToggle() {
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  // Avoid Hydration Mismatch
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="w-10 h-10 rounded-xl bg-white/5 dark:bg-black/20 border border-black/10 dark:border-white/10 flex items-center justify-center animate-pulse" />
+    );
+  }
 
   return (
-    <motion.button
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      onClick={toggleTheme}
-      className={`relative w-14 h-7 rounded-full backdrop-blur-sm overflow-hidden transition-colors duration-300 border ${
-        theme === 'dark'
-          ? 'bg-white/10 border-white/10'
-          : 'bg-black/10 border-black/10'
-      }`}
-      aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+    <button
+      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+      className="relative w-10 h-10 rounded-xl bg-white/40 dark:bg-black/40 hover:bg-white/60 dark:hover:bg-black/60 border border-black/10 dark:border-white/10 flex items-center justify-center transition-all overflow-hidden group"
+      aria-label="Toggle theme"
     >
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-neon-purple/20 to-neon-blue/20"
-        animate={{
-          x: theme === 'dark' ? 0 : '100%',
-        }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      />
-      <motion.div
-        className={`absolute top-0.5 left-0.5 w-6 h-6 rounded-full backdrop-blur-sm flex items-center justify-center shadow-lg ${
-          theme === 'dark' ? 'bg-white/20' : 'bg-black/15'
-        }`}
-        animate={{
-          x: theme === 'dark' ? 0 : 28,
-        }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      >
-        {theme === 'dark' ? (
-          <Moon className="size-3.5 text-white" />
-        ) : (
-          <Sun className="size-3.5 text-white" />
-        )}
-      </motion.div>
-    </motion.button>
+      <div className="relative w-full h-full flex items-center justify-center">
+        <Sun className="absolute size-5 text-amber-500 transition-all duration-500 scale-100 rotate-0 dark:scale-0 dark:-rotate-90 group-hover:text-amber-600" />
+        <Moon className="absolute size-5 text-neon-blue transition-all duration-500 scale-0 rotate-90 dark:scale-100 dark:rotate-0 group-hover:text-blue-400" />
+      </div>
+    </button>
   );
 }

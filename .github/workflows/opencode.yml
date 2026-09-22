@@ -1,0 +1,27 @@
+name: OpenCode Agent
+on:
+  issue_comment:
+    types: [created]
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  opencode:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run OpenCode
+        uses: anomalyco/opencode@main
+        with:
+          model: "anthropic/claude-3-5-sonnet-20241022" # Sostituisci con il modello che usi di solito

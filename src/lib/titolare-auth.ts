@@ -1,12 +1,16 @@
-import { createHash, timingSafeEqual } from 'crypto';
+import { createHash, randomBytes, scrypt as nodeScrypt, timingSafeEqual } from 'crypto';
+import { promisify } from 'util';
 import { SignJWT, jwtVerify } from 'jose';
 import { NextRequest } from 'next/server';
 import { getJwtSecret } from '@/lib/env';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export const TITOLARE_COOKIE = 'notehub_titolare_session';
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_ATTEMPTS = Number(process.env.TITOLARE_LOGIN_MAX_ATTEMPTS || '5');
 const attempts = new Map<string, { count: number; resetAt: number }>();
+const scrypt = promisify(nodeScrypt);
+let previewPassword = process.env.TITOLARE_PASSWORD?.trim() || '';
 
 const previewOwner = {
   id: 'owner-preview',
@@ -58,10 +62,24 @@ function safeEqual(a: string, b: string) {
   const right = createHash('sha256').update(b).digest();
   return timingSafeEqual(left, right);
 }
-function configuredPassword() {
-  const value = process.env.TITOLARE_PASSWORD?.trim();
-  if (!value) throw new Error('TITOLARE_PASSWORD must be configured server-side');
-  return value;
+async function hashPassword(password: string) {
+  const salt = randomBytes(16);
+  const derived = await scrypt(password, salt, 64) as Buffer;
+  return `scrypt$${salt.toString('hex')}$${derived.toString('hex')}`;
+}
+async function verifyHash(password: string, encoded: string) {
+  const [, saltHex, hashHex] = encoded.split('$');
+  if (!saltHex || !hashHex) return false;
+  const derived = await scrypt(password, Buffer.from(saltHex, 'hex'), 64) as Buffer;
+  return timingSafeEqual(derived, Buffer.from(hashHex, 'hex'));
+}
+async function configuredPasswordHash() {
+  const { data } = await supabaseAdmin
+    .from('site_settings')
+    .select('value')
+    .eq('key', 'titolare_password_hash')
+    .maybeSingle();
+  return data?.value?.startsWith('scrypt$') ? data.value : null;
 }
 export function checkTitolarRateLimit(request: NextRequest) {
   const now = Date.now();
@@ -81,7 +99,25 @@ export function recordTitolarFailure(request: NextRequest) {
   else item.count += 1;
 }
 export function clearTitolarFailures(request: NextRequest) { attempts.delete(key(request)); }
-export function verifyTitolarPassword(password: string) { return safeEqual(password, configuredPassword()); }
+export async function verifyTitolarPassword(password: string) {
+  const storedHash = await configuredPasswordHash();
+  if (storedHash) return verifyHash(password, storedHash);
+  if (!previewPassword) throw new Error('TITOLARE_PASSWORD must be configured server-side');
+  return safeEqual(password, previewPassword);
+}
+export async function changeTitolarPassword(currentPassword: string, nextPassword: string) {
+  if (!(await verifyTitolarPassword(currentPassword))) return false;
+  const nextHash = await hashPassword(nextPassword);
+  if (previewEnabled()) {
+    previewPassword = nextPassword;
+    return true;
+  }
+  const { error } = await supabaseAdmin
+    .from('site_settings')
+    .upsert({ key: 'titolare_password_hash', value: nextHash, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+  if (error) throw error;
+  return true;
+}
 export async function createTitolarToken(actorEmail: string) {
   return new SignJWT({ email: actorEmail, role: 'titolare' })
     .setProtectedHeader({ alg: 'HS256' }).setSubject(actorEmail).setIssuedAt().setExpirationTime('30m').sign(new TextEncoder().encode(getJwtSecret()));

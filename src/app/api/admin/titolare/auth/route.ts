@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   const preview = process.env.PREVIEW_BYPASS_AUTH === 'true' && process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1';
   if ((!actor || actor.role !== 'admin') && !preview) return NextResponse.json({ error: 'Password admin richiesta' }, { status: 401 });
   const body = await request.json().catch(() => ({}));
-  if (typeof body.password !== 'string' || !verifyTitolarPassword(body.password)) {
+  if (typeof body.password !== 'string' || !(await verifyTitolarPassword(body.password))) {
     recordTitolarFailure(request);
     return NextResponse.json({ error: 'Credenziali titolare non valide' }, { status: 401 });
   }

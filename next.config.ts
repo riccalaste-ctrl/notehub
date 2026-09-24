@@ -66,18 +66,6 @@ const nextConfig: NextConfig = {
     return [];
   },
 
-  // Rewrites for API versioning (if needed in future)
-  async rewrites() {
-    return {
-      beforeFiles: [
-        {
-          source: '/api/v1/:path*',
-          destination: '/api/:path*',
-        },
-      ],
-    };
-  },
-
   // Environment variables
   env: {
     NEXT_PUBLIC_APP_NAME: 'NoteHub',

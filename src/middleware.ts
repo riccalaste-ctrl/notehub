@@ -174,6 +174,7 @@ export const config = {
     '/consigli',
     '/i-miei-appunti',
     '/api/files',
+    '/api/v1/:path*',
     '/api/upload/:path*',
     '/api/user/:path*',
     '/api/auth/logout',

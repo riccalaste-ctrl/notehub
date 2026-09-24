@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     const cookie = serialize(ADMIN_JWT_COOKIE, jwt, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.NODE_ENV === 'production' || Boolean(process.env.APP_URL?.startsWith('https://')),
       sameSite: 'lax',
       maxAge: 60 * 60, // 1 hour
       path: '/',

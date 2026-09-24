@@ -9,7 +9,7 @@ export const INSTITUTION_DOMAIN = process.env.ALLOWED_EMAIL_DOMAIN || 'liceoscac
 export const isPreviewAuthBypassEnabled =
   process.env.PREVIEW_BYPASS_AUTH === 'true' &&
   process.env.NODE_ENV !== 'production' &&
-  process.env.VERCEL !== '1';
+  process.env.VERCEL !== '1' && process.env.NETLIFY !== 'true';
 
 const PREVIEW_USER = {
   id: 'preview-user',

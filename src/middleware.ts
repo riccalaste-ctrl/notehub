@@ -3,17 +3,10 @@ import { createServerClient } from '@supabase/ssr';
 import { jwtVerify } from 'jose';
 
 const ADMIN_JWT_COOKIE = 'notehub_admin_jwt';
-const DEV_JWT_SECRET = 'development-secret-key-min-32-chars-long';
-
 function getJwtSecretBytes() {
   const secret = process.env.JWT_SECRET?.trim();
 
-  if (!secret) {
-    if (process.env.NODE_ENV === 'production') return null;
-    return new TextEncoder().encode(DEV_JWT_SECRET);
-  }
-
-  if (secret.length < 32) return null;
+  if (!secret || secret.length < 32) return null;
   return new TextEncoder().encode(secret);
 }
 
@@ -58,7 +51,8 @@ export async function middleware(request: NextRequest) {
   const isPreviewAuthBypass =
     process.env.PREVIEW_BYPASS_AUTH === 'true' &&
     process.env.NODE_ENV !== 'production' &&
-    process.env.VERCEL !== '1';
+    process.env.VERCEL !== '1' &&
+    process.env.NETLIFY !== 'true';
   const isPreviewUserPath =
     pathname === '/' ||
     pathname === '/materie' ||

@@ -6,7 +6,7 @@ import { changeTitolarPassword, verifyTitolarToken, TITOLARE_COOKIE } from '@/li
 export async function POST(request: NextRequest) {
   const actor = await getUserFromToken();
   const titular = await verifyTitolarToken((await cookies()).get(TITOLARE_COOKIE)?.value);
-  const preview = process.env.PREVIEW_BYPASS_AUTH === 'true' && process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1';
+  const preview = process.env.PREVIEW_BYPASS_AUTH === 'true' && process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1' && process.env.NETLIFY !== 'true';
   if ((!actor || actor.role !== 'admin') && !preview) return NextResponse.json({ error: 'Password admin richiesta' }, { status: 401 });
   if (!titular) return NextResponse.json({ error: 'Autenticazione Titolare richiesta' }, { status: 401 });
 
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Password corrente non valida' }, { status: 401 });
     }
     const response = NextResponse.json({ success: true });
-    response.cookies.set(TITOLARE_COOKIE, '', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', path: '/', maxAge: 0 });
+    response.cookies.set(TITOLARE_COOKIE, '', { httpOnly: true, secure: process.env.NODE_ENV === 'production' || Boolean(process.env.APP_URL?.startsWith('https://')), sameSite: 'strict', path: '/', maxAge: 0 });
     return response;
   } catch (error) {
     console.error('Unable to change titular password:', error);

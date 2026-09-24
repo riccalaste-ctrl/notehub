@@ -1,9 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { createHash, timingSafeEqual } from 'crypto';
 import { NextRequest } from 'next/server';
-import { isProduction } from '@/lib/env';
-
-const DEFAULT_DEV_ADMIN_PASSWORD = 'NoteHub2026!';
+import { isLocalPreview } from '@/lib/env';
 const DEFAULT_ADMIN_EMAIL = 'admin@notehub.local';
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const MAX_LOGIN_ATTEMPTS = Number(process.env.ADMIN_LOGIN_MAX_ATTEMPTS || '8');
@@ -24,9 +22,9 @@ function timingSafeStringEqual(left: string, right: string) {
 }
 
 function getClientKey(request: NextRequest) {
-  const forwardedFor = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
-  const realIp = request.headers.get('x-real-ip')?.trim();
-  return forwardedFor || realIp || 'local';
+  // Next/Vercel exposes the trusted client address; forwarded headers are
+  // attacker-controlled unless rewritten by the platform.
+  return (request as NextRequest & { ip?: string }).ip || 'unknown';
 }
 
 export function getAdminEmail() {
@@ -40,16 +38,11 @@ export async function verifyConfiguredAdminPassword(password: string) {
     return bcrypt.compare(password, passwordHash);
   }
 
-  const plainPassword = process.env.ADMIN_PASSWORD?.trim();
-  if (plainPassword) {
-    return timingSafeStringEqual(password, plainPassword);
+  if (!isLocalPreview()) {
+    throw new Error('ADMIN_PASSWORD_HASH must be configured');
   }
-
-  if (isProduction()) {
-    throw new Error('ADMIN_PASSWORD_HASH or ADMIN_PASSWORD must be configured');
-  }
-
-  return timingSafeStringEqual(password, DEFAULT_DEV_ADMIN_PASSWORD);
+  const previewPassword = process.env.ADMIN_PASSWORD?.trim();
+  return previewPassword ? timingSafeStringEqual(password, previewPassword) : false;
 }
 
 export function checkAdminLoginRateLimit(request: NextRequest) {

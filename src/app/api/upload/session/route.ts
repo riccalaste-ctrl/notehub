@@ -183,18 +183,11 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     if (error instanceof DriveNotConnectedError) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return NextResponse.json({ error: 'Servizio di archiviazione temporaneamente non disponibile' }, { status: 400 });
     }
 
     const message = error instanceof Error ? error.message : String(error);
     console.error('Create upload session error:', { message });
-
-    if (message.includes('not found') || message.includes('404')) {
-      return NextResponse.json(
-        { error: 'Cartella Drive non trovata. Ricollega Google Drive dal pannello admin.' },
-        { status: 400 }
-      );
-    }
 
     return NextResponse.json(
       { error: 'Impossibile creare la sessione di upload Drive' },

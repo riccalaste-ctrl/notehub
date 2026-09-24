@@ -41,8 +41,12 @@ CREATE TABLE uploads (
   mime_type TEXT NOT NULL,
   size_bytes BIGINT NOT NULL,
   uploader_name TEXT,
+  owner_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  drive_folder_id TEXT,
+  drive_connection_id UUID,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+CREATE INDEX idx_uploads_owner_id ON uploads(owner_id);
 
 -- Indici per migliorare le performance
 CREATE INDEX idx_uploads_subject ON uploads(subject_id);

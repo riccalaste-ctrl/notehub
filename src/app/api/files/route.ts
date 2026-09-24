@@ -43,7 +43,8 @@ export async function GET(request: NextRequest) {
     let query = supabaseAdmin
       .from('uploads')
       .select(`
-        *,
+        id, subject_id, professor_id, original_filename, download_url, view_url,
+        mime_type, size_bytes, created_at,
         subject:subjects(name, slug),
         professor:professors(name)
       `)
@@ -81,19 +82,11 @@ export async function GET(request: NextRequest) {
     }
 
     const uploadsWithDetails = uploads?.map((upload) => {
-      const {
-        owner_id,
-        uploader_name,
-        drive_file_id,
-        drive_folder_id,
-        drive_connection_id,
-        ...safeUpload
-      } = upload;
       return {
-        ...safeUpload,
-        subject_name: upload.subject?.name,
-        subject_slug: upload.subject?.slug,
-        professor_name: upload.professor?.name,
+        ...upload,
+        subject_name: upload.subject?.[0]?.name,
+        subject_slug: upload.subject?.[0]?.slug,
+        professor_name: upload.professor?.[0]?.name,
       };
     }) || [];
 

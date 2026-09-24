@@ -20,7 +20,9 @@ export async function GET(request: NextRequest) {
     let query = supabaseAdmin
       .from('uploads')
       .select(`
-        *,
+        id, subject_id, professor_id, owner_id, original_filename, drive_file_id,
+        drive_folder_id, drive_connection_id, download_url, view_url, mime_type,
+        size_bytes, uploader_name, created_at,
         subject:subjects(name, slug),
         professor:professors(name)
       `)

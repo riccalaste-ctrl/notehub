@@ -2,7 +2,5 @@
   command = "npm run build"
   publish = ".next"
 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# Next.js routing is handled by the Netlify Next runtime. Do not rewrite
+# every route to a static index, which bypasses API/auth handlers.

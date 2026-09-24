@@ -40,7 +40,7 @@ export async function setAdminCookie(jwt: string): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.set(ADMIN_JWT_COOKIE, jwt, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.NODE_ENV === 'production' || Boolean(process.env.APP_URL?.startsWith('https://')),
     sameSite: 'lax',
     maxAge: 60 * 60, // 1 hour
     path: '/',
@@ -49,8 +49,8 @@ export async function setAdminCookie(jwt: string): Promise<void> {
 
 export async function clearAuthCookies(): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.delete(ADMIN_JWT_COOKIE);
-  cookieStore.delete(USER_JWT_COOKIE);
+  cookieStore.set(ADMIN_JWT_COOKIE, '', { httpOnly: true, secure: true, sameSite: 'lax', maxAge: 0, path: '/' });
+  cookieStore.set(USER_JWT_COOKIE, '', { httpOnly: true, secure: true, sameSite: 'lax', maxAge: 0, path: '/' });
 }
 
 export async function requireAdmin(): Promise<NextResponse | undefined> {

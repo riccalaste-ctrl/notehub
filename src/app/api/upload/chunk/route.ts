@@ -182,9 +182,21 @@ export async function POST(request: NextRequest) {
       } catch {
         // empty body
       }
+      const completedFileId = data?.id || null;
+      if (completedFileId) {
+        await supabaseAdmin
+          .from('drive_upload_sessions')
+          .update({
+            drive_file_id: completedFileId,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', sessionId)
+          .eq('owner_id', user.id)
+          .eq('status', 'pending');
+      }
       return NextResponse.json({
         success: true,
-        driveFileId: data?.id || null,
+        driveFileId: completedFileId,
         isComplete: true,
       });
     }
@@ -206,14 +218,14 @@ export async function POST(request: NextRequest) {
       error: errorText.slice(0, 500),
     });
     return NextResponse.json(
-      { error: `Upload fallito su Google (${uploadRes.status}): ${errorText.slice(0, 200)}` },
+      { error: 'Upload fallito sul servizio di archiviazione' },
       { status: 500 }
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error('[upload/chunk] Unhandled error:', { message, stack: error instanceof Error ? error.stack : undefined });
     return NextResponse.json(
-      { error: `Errore interno: ${message}` },
+      { error: 'Errore interno durante il caricamento' },
       { status: 500 }
     );
   }

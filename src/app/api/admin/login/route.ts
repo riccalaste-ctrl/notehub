@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       await logSecurityEvent('ADMIN_LOGIN_FAILED', {
         email,
         reason: 'invalid_credentials',
-        ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip'),
+        ip: (request as NextRequest & { ip?: string }).ip || 'unknown',
       }, email);
       return NextResponse.json(
         { error: 'Invalid email or password' },

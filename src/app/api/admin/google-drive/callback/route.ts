@@ -25,11 +25,8 @@ export async function GET(request: NextRequest) {
   const errorDescription = request.nextUrl.searchParams.get('error_description');
 
   if (oauthError) {
-    let message = `Google OAuth Error: ${oauthError}`;
-    if (errorDescription) {
-      message = decodeURIComponent(errorDescription);
-    }
-    return redirectToAdmin(request, 'error', message);
+    console.warn('[Google Drive Callback] OAuth error', { oauthError, errorDescription });
+    return redirectToAdmin(request, 'error', 'oauth_failed');
   }
 
   if (!code || !state) {
@@ -57,10 +54,6 @@ export async function GET(request: NextRequest) {
       fullError: error,
     });
 
-    const message = error instanceof Error 
-      ? error.message 
-      : 'Errore sconosciuto durante il collegamento di Google Drive. Controlla i log del server per dettagli.';
-    
-    return redirectToAdmin(request, 'error', message);
+    return redirectToAdmin(request, 'error', 'oauth_callback_failed');
   }
 }

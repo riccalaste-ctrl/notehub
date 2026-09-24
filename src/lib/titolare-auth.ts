@@ -52,10 +52,10 @@ const previewAudit: TitolarAudit[] = [
 ];
 
 function previewEnabled() {
-  return process.env.PREVIEW_BYPASS_AUTH === 'true' && process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1';
+  return process.env.PREVIEW_BYPASS_AUTH === 'true' && process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1' && process.env.NETLIFY !== 'true';
 }
 function key(request: NextRequest) {
-  return request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'local';
+  return (request as NextRequest & { ip?: string }).ip || 'unknown';
 }
 function safeEqual(a: string, b: string) {
   const left = createHash('sha256').update(a).digest();

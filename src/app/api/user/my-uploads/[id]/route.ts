@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getAuthenticatedUserFromRequest } from '@/lib/user-session';
 import { deleteFileFromDrive } from '@/lib/google-drive';
+import { isAdminAuthenticated } from '@/lib/auth';
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -26,7 +27,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
   if (!upload) {
     return NextResponse.json({ error: 'File not found' }, { status: 404 });
   }
-  if (upload.owner_id !== user.id) {
+  if (upload.owner_id !== user.id && !(await isAdminAuthenticated())) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

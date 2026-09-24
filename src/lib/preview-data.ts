@@ -89,11 +89,20 @@ export const previewUploads = [
   },
 ];
 
-export const previewSettings = {
+export const previewSettings: Record<string, string> = {
   admin_email: 'admin@notehub.local',
   support_email: 'support@notehub.local',
   consigli_email: 'consigli@notehub.local',
   site_policy: 'NoteHub è un progetto indipendente creato per condividere materiale scolastico.',
+  legal_project_name: 'NoteHub',
+  legal_controller_name: '',
+  legal_controller_email: '',
+  legal_controller_address: '',
+  legal_dpo_email: '',
+  legal_hosting_provider: 'Hosting da configurare',
+  legal_data_retention: 'Da definire dal gestore',
+  legal_minimum_age: '14',
+  legal_policy_updated_at: '2026-09-24',
 };
 
 export const previewConsigliFiles = [

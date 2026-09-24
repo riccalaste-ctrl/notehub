@@ -12,7 +12,21 @@ export async function GET() {
     const { data, error } = await supabaseAdmin
       .from('site_settings')
       .select('key, value')
-      .in('key', ['admin_email', 'support_email', 'site_policy', 'consigli_email']);
+      .in('key', [
+        'admin_email',
+        'support_email',
+        'site_policy',
+        'consigli_email',
+        'legal_project_name',
+        'legal_controller_name',
+        'legal_controller_email',
+        'legal_controller_address',
+        'legal_dpo_email',
+        'legal_hosting_provider',
+        'legal_data_retention',
+        'legal_minimum_age',
+        'legal_policy_updated_at',
+      ]);
 
     if (error) throw error;
 
@@ -25,7 +39,23 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching public settings:', error);
     return NextResponse.json(
-      { settings: { admin_email: '', support_email: '', site_policy: '', consigli_email: '' } }
+      {
+        settings: {
+          admin_email: '',
+          support_email: '',
+          site_policy: '',
+          consigli_email: '',
+          legal_project_name: 'NoteHub',
+          legal_controller_name: '',
+          legal_controller_email: '',
+          legal_controller_address: '',
+          legal_dpo_email: '',
+          legal_hosting_provider: '',
+          legal_data_retention: '',
+          legal_minimum_age: '14',
+          legal_policy_updated_at: '',
+        },
+      }
     );
   }
 }

@@ -168,6 +168,17 @@ export default function AdminPage() {
   const { toast, showToast, hideToast } = useToast();
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [settingsForm, setSettingsForm] = useState({ support_email: '', site_policy: '', allowed_external_emails: '', consigli_email: '' });
+  const [legalForm, setLegalForm] = useState({
+    legal_project_name: 'NoteHub',
+    legal_controller_name: '',
+    legal_controller_email: '',
+    legal_controller_address: '',
+    legal_dpo_email: '',
+    legal_hosting_provider: '',
+    legal_data_retention: '',
+    legal_minimum_age: '14',
+    legal_policy_updated_at: '',
+  });
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [consigliFiles, setConsigliFiles] = useState<Record<string, any[]>>({});
   const [consigliDriveConnected, setConsigliDriveConnected] = useState(false);
@@ -189,6 +200,17 @@ export default function AdminPage() {
         site_policy: previewSettings.site_policy,
         allowed_external_emails: '',
         consigli_email: previewSettings.consigli_email,
+      });
+      setLegalForm({
+        legal_project_name: previewSettings.legal_project_name || 'NoteHub',
+        legal_controller_name: previewSettings.legal_controller_name || '',
+        legal_controller_email: previewSettings.legal_controller_email || '',
+        legal_controller_address: previewSettings.legal_controller_address || '',
+        legal_dpo_email: previewSettings.legal_dpo_email || '',
+        legal_hosting_provider: previewSettings.legal_hosting_provider || '',
+        legal_data_retention: previewSettings.legal_data_retention || '',
+        legal_minimum_age: previewSettings.legal_minimum_age || '14',
+        legal_policy_updated_at: previewSettings.legal_policy_updated_at || '',
       });
       setAuditLogs([]);
       setLoading(false);
@@ -242,6 +264,17 @@ export default function AdminPage() {
             .filter((e: string) => e && !DEVELOPER_EMAILS.includes(e))
             .join(','),
           consigli_email: data.settings?.consigli_email || '',
+        });
+        setLegalForm({
+          legal_project_name: data.settings?.legal_project_name || 'NoteHub',
+          legal_controller_name: data.settings?.legal_controller_name || '',
+          legal_controller_email: data.settings?.legal_controller_email || '',
+          legal_controller_address: data.settings?.legal_controller_address || '',
+          legal_dpo_email: data.settings?.legal_dpo_email || '',
+          legal_hosting_provider: data.settings?.legal_hosting_provider || '',
+          legal_data_retention: data.settings?.legal_data_retention || '',
+          legal_minimum_age: data.settings?.legal_minimum_age || '14',
+          legal_policy_updated_at: data.settings?.legal_policy_updated_at || '',
         });
       }
 
@@ -575,6 +608,22 @@ export default function AdminPage() {
     await fetch(`/api/admin/subject-professors?id=${id}`, { method: 'DELETE' });
     showToast('Associazione rimossa', 'success');
     await fetchData();
+  };
+
+  const saveLegalSetting = async (key: keyof typeof legalForm) => {
+    try {
+      const response = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, value: legalForm[key] }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Errore aggiornamento');
+      showToast('Informazione legale aggiornata', 'success');
+      await fetchData();
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Errore aggiornamento', 'error');
+    }
   };
 
   if (!isAuthenticated) {
@@ -1459,6 +1508,46 @@ export default function AdminPage() {
                   >
                     Salva
                   </button>
+                </div>
+              </div>
+
+              <div className="glass-panel p-6 border border-white/10">
+                <h3 className="text-lg font-semibold text-white mb-2">Informazioni legali pubbliche</h3>
+                <p className="text-sm text-foreground-muted mb-5">
+                  Questi valori alimentano automaticamente Privacy Policy e Cookie Policy. Completa i campi con dati verificati prima di rendere il sito pubblico.
+                </p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {([
+                    ['legal_project_name', 'Nome progetto'],
+                    ['legal_controller_name', 'Titolare del trattamento'],
+                    ['legal_controller_email', 'Email privacy'],
+                    ['legal_controller_address', 'Recapito del titolare'],
+                    ['legal_dpo_email', 'Email DPO (se applicabile)'],
+                    ['legal_hosting_provider', 'Hosting e area geografica'],
+                    ['legal_data_retention', 'Tempi di conservazione'],
+                    ['legal_minimum_age', 'Età minima scelta dal servizio'],
+                    ['legal_policy_updated_at', 'Data aggiornamento (YYYY-MM-DD)'],
+                  ] as const).map(([key, label]) => (
+                    <div key={key} className={key === 'legal_controller_address' || key === 'legal_data_retention' ? 'sm:col-span-2' : ''}>
+                      <label className="block text-sm font-medium text-foreground-muted mb-2">{label}</label>
+                      <div className="flex gap-2">
+                        <input
+                          type={key.includes('email') ? 'email' : key === 'legal_minimum_age' ? 'number' : 'text'}
+                          min={key === 'legal_minimum_age' ? 0 : undefined}
+                          value={legalForm[key]}
+                          onChange={(event) => setLegalForm({ ...legalForm, [key]: event.target.value })}
+                          className="min-w-0 flex-1 px-4 py-3 bg-black/50 border border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple rounded-xl text-white placeholder-foreground-muted outline-none transition-all"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => saveLegalSetting(key)}
+                          className="px-4 py-3 bg-neon-purple/20 hover:bg-neon-purple/30 text-neon-purple border border-neon-purple/30 font-semibold rounded-xl transition-all"
+                        >
+                          Salva
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 

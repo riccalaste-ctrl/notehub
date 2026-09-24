@@ -17,7 +17,16 @@ values
   ('support_email', 'support@liceoscacchibari.it', 'Email usata per segnalazioni e disclaimer'),
   ('admin_email', 'admin@notehub.local', 'Compatibilita legacy'),
   ('allowed_external_emails', '', 'Whitelist email esterne temporanee separate da virgola'),
-  ('site_policy', 'Gli amministratori non sono responsabili dei file caricati ma si impegnano a rimuovere contenuti vietati segnalati alla mail support@liceoscacchibari.it.', 'Policy/disclaimer sito')
+  ('site_policy', 'NoteHub è un progetto indipendente creato per condividere materiale scolastico.', 'Policy/disclaimer sito'),
+  ('legal_project_name', 'NoteHub', 'Nome pubblico del progetto'),
+  ('legal_controller_name', '', 'Nome del titolare del trattamento: configurazione obbligatoria prima dell’uso pubblico'),
+  ('legal_controller_email', '', 'Email privacy del titolare del trattamento'),
+  ('legal_controller_address', '', 'Recapito del titolare del trattamento'),
+  ('legal_dpo_email', '', 'Email DPO, se applicabile'),
+  ('legal_hosting_provider', '', 'Fornitore hosting e area geografica, se necessario'),
+  ('legal_data_retention', '', 'Periodo di conservazione effettivo'),
+  ('legal_minimum_age', '14', 'Età minima scelta dal servizio'),
+  ('legal_policy_updated_at', '', 'Data ultimo aggiornamento delle informazioni legali')
 on conflict (key) do nothing;
 
 alter table public.site_settings enable row level security;
@@ -27,7 +36,12 @@ create policy site_settings_public_read
 on public.site_settings
 for select
 to anon, authenticated
-using (key in ('support_email', 'admin_email', 'site_policy', 'consigli_email'));
+using (key in (
+  'support_email', 'admin_email', 'site_policy', 'consigli_email',
+  'legal_project_name', 'legal_controller_name', 'legal_controller_email',
+  'legal_controller_address', 'legal_dpo_email', 'legal_hosting_provider',
+  'legal_data_retention', 'legal_minimum_age', 'legal_policy_updated_at'
+));
 
 -- 2) Audit logs
 create table if not exists public.audit_logs (

@@ -5,6 +5,7 @@ import { requireAdmin } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
 import { z } from 'zod';
 import { DEVELOPER_EMAILS } from '@/lib/constants';
+import { isPreviewMode, previewSettings } from '@/lib/preview-data';
 
 const allowedSettingKeys = [
   'support_email',
@@ -12,6 +13,15 @@ const allowedSettingKeys = [
   'site_policy',
   'allowed_external_emails',
   'consigli_email',
+  'legal_project_name',
+  'legal_controller_name',
+  'legal_controller_email',
+  'legal_controller_address',
+  'legal_dpo_email',
+  'legal_hosting_provider',
+  'legal_data_retention',
+  'legal_minimum_age',
+  'legal_policy_updated_at',
 ] as const;
 
 const settingSchema = z.object({
@@ -20,7 +30,13 @@ const settingSchema = z.object({
 });
 
 function normalizeSettingValue(key: typeof allowedSettingKeys[number], value: string) {
-  if (key === 'support_email' || key === 'admin_email' || key === 'consigli_email') {
+  if (
+    key === 'support_email' ||
+    key === 'admin_email' ||
+    key === 'consigli_email' ||
+    key === 'legal_controller_email' ||
+    key === 'legal_dpo_email'
+  ) {
     const trimmed = value.trim().toLowerCase();
     if (!trimmed) return '';
 
@@ -50,12 +66,24 @@ function normalizeSettingValue(key: typeof allowedSettingKeys[number], value: st
     return Array.from(new Set(emails)).join(',');
   }
 
+  if (key === 'legal_minimum_age') {
+    const age = Number(value.trim());
+    if (!Number.isInteger(age) || age < 0 || age > 120) {
+      throw new Error('Età minima non valida');
+    }
+    return String(age);
+  }
+
   return value.trim();
 }
 
 export async function GET() {
   const authError = await requireAdmin();
   if (authError) return authError;
+
+  if (isPreviewMode) {
+    return NextResponse.json({ settings: previewSettings });
+  }
 
   try {
     const { data, error } = await supabaseAdmin
@@ -103,6 +131,11 @@ export async function PUT(request: NextRequest) {
         { error: error instanceof Error ? error.message : 'Valore impostazione non valido' },
         { status: 400 }
       );
+    }
+
+    if (isPreviewMode) {
+      previewSettings[key] = value;
+      return NextResponse.json({ setting: { key, value } });
     }
 
     const { data, error } = await supabaseAdmin

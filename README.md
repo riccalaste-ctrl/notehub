@@ -97,6 +97,14 @@ Le pagine `/privacy-policy`, `/cookie-policy`, `/service-rules` e
 footer. Prima di un eventuale uso pubblico sostituisci i recapiti demo e fai
 una revisione legale/manuale.
 
+Le policy pubbliche leggono dinamicamente le impostazioni `site_settings`.
+Dall'area Admin > Impostazioni è possibile aggiornare nome del progetto,
+titolare del trattamento, email privacy, recapito, hosting, conservazione ed
+età minima: le pagine Privacy e Cookie riflettono il valore corrente senza
+una nuova build. I campi non compilati mostrano `VERIFICA UMANA NECESSARIA`;
+non pubblicare il servizio finché il titolare non ha completato e verificato
+queste informazioni.
+
 ## Deploy su Vercel
 
 ### 1. Push su GitHub

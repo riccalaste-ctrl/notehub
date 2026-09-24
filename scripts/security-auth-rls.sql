@@ -27,6 +27,7 @@ values
   ('legal_data_retention', '', 'Periodo di conservazione effettivo'),
   ('legal_minimum_age', '14', 'Età minima scelta dal servizio'),
   ('legal_policy_updated_at', '', 'Data ultimo aggiornamento delle informazioni legali')
+  ,('titolare_password_hash', '', 'Hash server-side della password Titolare; mai esposto pubblicamente')
 on conflict (key) do nothing;
 
 alter table public.site_settings enable row level security;

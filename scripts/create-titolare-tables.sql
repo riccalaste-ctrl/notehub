@@ -12,6 +12,9 @@ create unique index if not exists one_current_titular on public.titular_records 
 create table if not exists public.titular_history (like public.titular_records including all);
 alter table public.titular_history add column if not exists valid_to timestamptz;
 alter table public.titular_history add column if not exists changed_at timestamptz not null default now();
+alter table public.titular_records enable row level security;
+alter table public.titular_history enable row level security;
+revoke all on table public.titular_records, public.titular_history from anon, authenticated;
 create table if not exists public.titular_audit_logs (
   id uuid primary key default gen_random_uuid(),
   action text not null,

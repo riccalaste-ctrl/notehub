@@ -18,7 +18,7 @@ export default function CookiePolicyPage() {
       <article className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8 md:p-12 text-foreground">
         <p className="text-sm text-stone-500 mb-2">Informativa aggiornata: {settings.legal_policy_updated_at || 'VERIFICA UMANA NECESSARIA'}</p>
         <h1 className="text-4xl font-bold mb-8">Cookie Policy di {settings.legal_project_name || 'NoteHub'}</h1>
-        <div className="prose prose-sm max-w-none text-foreground-light">
+        <div className="prose prose-sm prose-headings:text-black prose-p:text-black prose-li:text-black max-w-none text-black">
           <h2>1. Cookie e strumenti utilizzati</h2>
           <p>Il sito utilizza cookie e storage strettamente necessari per autenticazione Google/Supabase, sessione, sicurezza e accesso amministrativo. Non risultano configurati cookie di profilazione, advertising o analytics non necessari.</p>
           <ul>

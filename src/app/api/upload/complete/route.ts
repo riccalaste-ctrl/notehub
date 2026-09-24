@@ -8,12 +8,14 @@ import {
 } from '@/lib/google-drive';
 import { getAuthenticatedUserFromRequest } from '@/lib/user-session';
 import { logFileUpload } from '@/lib/audit-logger';
+import { isPreviewMode } from '@/lib/preview-data';
 
 export const dynamic = 'force-dynamic';
 
 const completeUploadSchema = z.object({
   sessionId: z.string().uuid(),
   driveFileId: z.string().min(1).max(256),
+  serviceRulesAccepted: z.literal(true),
 });
 
 function getPublicDownloadUrl(fileId: string): string {
@@ -42,6 +44,19 @@ export async function POST(request: NextRequest) {
     }
 
     const { sessionId, driveFileId } = validation.data;
+
+    if (isPreviewMode) {
+      return NextResponse.json({
+        success: true,
+        preview: true,
+        upload: {
+          id: `preview-upload-${Date.now()}`,
+          original_filename: 'Risorsa demo caricata.pdf',
+          drive_file_id: driveFileId,
+          created_at: new Date().toISOString(),
+        },
+      });
+    }
 
     const { data: session, error: sessionError } = await supabaseAdmin
       .from('drive_upload_sessions')

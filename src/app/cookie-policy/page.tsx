@@ -18,7 +18,7 @@ export default function CookiePolicyPage() {
           <div className="prose prose-sm max-w-none text-foreground-light">
             <h2 className="text-2xl font-semibold text-foreground mt-6 mb-4">1. Cosa sono i Cookie</h2>
             <p className="mb-4">
-              I cookie sono piccoli file di testo memorizzati sul vostro dispositivo quando visitate un sito web. 
+              I cookie sono piccoli file di testo memorizzati sul vostro dispositivo quando visitate un sito web.
               Consentono al sito di ricordare informazioni su di voi durante la sessione e tra le visite successive.
             </p>
 
@@ -46,8 +46,7 @@ export default function CookiePolicyPage() {
             <h2 className="text-2xl font-semibold text-foreground mt-6 mb-4">3. Cookie di Terze Parti</h2>
             <p className="mb-4">
               NoteHub non utilizza cookie di terze parti per tracciamento, analytics o advertising.
-              Tuttavia, servizi integrati (Google OAuth, Supabase) possono impostare propri cookie.
-              Consultate le loro politiche:
+              La preview locale non contatta Google OAuth o Supabase e usa solo lo stato tecnico necessario all&apos;interfaccia.
             </p>
             <ul className="list-disc list-inside mb-4 space-y-2">
               <li><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">Google Privacy Policy</a></li>

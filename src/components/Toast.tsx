@@ -36,10 +36,10 @@ export default function Toast({ message, type = 'info', onClose }: ToastProps) {
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
       className="fixed bottom-4 right-4 z-50"
     >
-       <div className={`${bgClass} backdrop-blur-md px-5 py-3 rounded-neu-lg shadow-neu-lg flex items-center space-x-3 border`}>
+       <div role="status" aria-live="polite" className={`${bgClass} backdrop-blur-xl px-5 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 border border-white/10`}>
         {icon}
         <span className="text-sm font-medium">{message}</span>
-        <button onClick={onClose} className="ml-2 hover:opacity-80 premium-transition">
+        <button aria-label="Chiudi notifica" onClick={onClose} className="ml-2 hover:opacity-80 premium-transition">
           <X className="size-4" />
         </button>
       </div>

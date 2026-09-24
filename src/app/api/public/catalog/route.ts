@@ -1,9 +1,18 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { isPreviewMode, previewProfessors, previewSubjectProfessors, previewSubjects } from '@/lib/preview-data';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  if (isPreviewMode) {
+    return NextResponse.json({
+      subjects: previewSubjects,
+      professors: previewProfessors,
+      subjectProfessors: previewSubjectProfessors,
+    });
+  }
+
   try {
     const [subjectsResult, professorsResult, associationsResult] = await Promise.all([
       supabaseAdmin

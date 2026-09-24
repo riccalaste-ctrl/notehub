@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const redirectTo = `${request.nextUrl.origin}/api/auth/callback`;
+  const redirectTo = `${request.nextUrl.origin}/auth/callback`;
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',

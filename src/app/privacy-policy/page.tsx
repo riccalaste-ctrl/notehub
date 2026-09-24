@@ -18,14 +18,13 @@ export default function PrivacyPolicyPage() {
           <div className="prose prose-sm max-w-none text-foreground-light">
             <h2 className="text-2xl font-semibold text-foreground mt-6 mb-4">1. Introduzione</h2>
             <p className="mb-4">
-              NoteHub (&quot;Piattaforma&quot;) è impegnata nella protezione della privacy dei suoi utenti. 
-              Questa Privacy Policy descrive come raccogliamo, utilizziamo e proteggiamo i vostri dati personali.
+              NoteHub è un progetto indipendente (&quot;Piattaforma&quot;), non un servizio ufficiale dell&apos;istituto scolastico.
+              Questa preview usa dati dimostrativi locali; non raccoglie né invia dati a Supabase o Google Drive.
             </p>
 
             <h2 className="text-2xl font-semibold text-foreground mt-6 mb-4">2. Titolare del Trattamento</h2>
             <p className="mb-4">
-              Il titolare del trattamento dei dati è l&apos;istituzione scolastica che gestisce questa installazione di NoteHub.
-              Per informazioni specifiche, contattate gli amministratori tramite i recapiti forniti nell&apos;app.
+              Il titolare e i recapiti devono essere definiti dal gestore indipendente del progetto prima di qualsiasi uso reale.
             </p>
 
             <h2 className="text-2xl font-semibold text-foreground mt-6 mb-4">3. Dati Raccolti</h2>
@@ -78,8 +77,7 @@ export default function PrivacyPolicyPage() {
 
             <h2 className="text-2xl font-semibold text-foreground mt-6 mb-4">8. Trasferimenti Internazionali</h2>
             <p className="mb-4">
-              I dati possono essere trasferiti a fornitori situati fuori dell&apos;UE/SEE 
-              (ad es. Google, Supabase) che garantiscono adeguati livelli di protezione.
+              Nella preview locale non vengono effettuati trasferimenti verso fornitori esterni.
             </p>
 
             <h2 className="text-2xl font-semibold text-foreground mt-6 mb-4">9. Minori</h2>

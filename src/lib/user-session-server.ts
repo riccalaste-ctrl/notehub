@@ -2,9 +2,16 @@
 
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
-import { isAllowedUserEmail } from '@/lib/user-session';
+import { isAllowedUserEmail, isPreviewAuthBypassEnabled } from '@/lib/user-session';
 
 export async function getAuthenticatedUserFromCookies() {
+  if (isPreviewAuthBypassEnabled) {
+    return {
+      id: 'preview-user',
+      email: 'preview@liceoscacchibari.it',
+    };
+  }
+
   const cookieStore = await cookies();
 
   const supabase = createServerClient(

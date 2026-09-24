@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Plus, Shield } from 'lucide-react';
+import Link from 'next/link';
 import GoogleDriveUploader from './GoogleDriveUploader';
 
 interface Subject {
@@ -39,6 +40,7 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
   const [selectedSubject, setSelectedSubject] = useState('');
   const [uploaderName, setUploaderName] = useState('');
   const [step, setStep] = useState(1);
+  const [rulesAccepted, setRulesAccepted] = useState(false);
 
   useEffect(() => {
     if (!isOpen) {
@@ -48,6 +50,7 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
       setError('');
       setSuccess(false);
       setStep(1);
+      setRulesAccepted(false);
     }
   }, [isOpen]);
 
@@ -98,7 +101,7 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-[#03040a]/75 backdrop-blur-md z-50"
             onClick={onClose}
           />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -107,14 +110,18 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-              className="glass-panel w-full max-w-lg p-6 shadow-2xl max-h-[90vh] overflow-y-auto border border-white/10"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="upload-modal-title"
+              className="surface-card w-full max-w-lg p-6 shadow-2xl max-h-[90vh] overflow-y-auto border border-white/10"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-white">
+                <h2 id="upload-modal-title" className="text-xl font-semibold text-white">
                   Carica Appunti
                 </h2>
                 <button
+                aria-label="Chiudi finestra caricamento"
                   onClick={onClose}
                   className="p-2 text-foreground-muted hover:text-white rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-colors"
                 >
@@ -221,13 +228,33 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                   )}
 
                   {step === 3 && selectedSubject && (
-                    <GoogleDriveUploader
-                      subjectId={selectedSubject}
-                      professorId={selectedProfessor}
-                      uploaderName={uploaderName}
-                      onSuccess={handleSuccess}
-                      onError={handleError}
-                    />
+                    <>
+                      <label className="flex items-start gap-3 text-sm text-foreground-muted">
+                        <input
+                          type="checkbox"
+                          checked={rulesAccepted}
+                          onChange={(event) => setRulesAccepted(event.target.checked)}
+                          className="mt-1 size-4 accent-purple-500"
+                        />
+                        <span>
+                          Dichiaro di aver letto e accettato le{' '}
+                          <Link href="/service-rules" className="text-neon-blue underline" target="_blank">
+                            regole del servizio
+                          </Link>
+                          . Carico solo materiale che posso condividere.
+                        </span>
+                      </label>
+                      {rulesAccepted && (
+                        <GoogleDriveUploader
+                          subjectId={selectedSubject}
+                          professorId={selectedProfessor}
+                          uploaderName={uploaderName}
+                          serviceRulesAccepted={rulesAccepted}
+                          onSuccess={handleSuccess}
+                          onError={handleError}
+                        />
+                      )}
+                    </>
                   )}
 
                   {error && (

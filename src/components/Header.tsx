@@ -4,9 +4,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GraduationCap, LayoutGrid, BookOpen, Lightbulb, Plus, Menu, X, Search, Compass, ChevronRight, FileText, LogOut } from 'lucide-react';
+import { GraduationCap, LayoutGrid, BookOpen, Lightbulb, Plus, Menu, X, Search, Compass, ChevronRight, FileText, LogOut, ShieldCheck } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import ThemeToggle from './ThemeToggle';
+import { ThemeToggle } from './ThemeToggle';
 
 interface HeaderProps {
   onOpenUpload?: () => void;
@@ -24,6 +24,7 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
     { label: 'Materie', href: '/materie', icon: BookOpen },
     { label: 'Consigli', href: '/consigli', icon: Lightbulb },
     { label: 'I miei appunti', href: '/i-miei-appunti', icon: FileText },
+    { label: 'Area admin', href: '/admin', icon: ShieldCheck },
   ];
 
   useEffect(() => {
@@ -35,12 +36,12 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 z-40 flex-col items-center gap-8 w-56 h-full p-6 bg-surface/40 backdrop-blur-3xl border-r border-white/5 shadow-2xl">
+      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 z-40 flex-col items-center gap-8 w-56 h-full p-5 bg-[#0d0f16]/90 backdrop-blur-3xl border-r border-white/10 shadow-2xl">
         <Link href="/" className="flex items-center gap-2 w-full">
-          <div className="size-9 rounded-neu flex justify-center items-center p-1">
+          <div className="size-9 rounded-xl flex justify-center items-center p-1 bg-gradient-to-br from-violet-300 to-cyan-300 shadow-lg shadow-cyan-500/10">
             <Image src="/logo.svg" alt="SKAKK-UP" width={36} height={36} className="w-full h-full" />
           </div>
-          <span className="font-semibold text-lg leading-7 tracking-tight text-foreground">
+          <span className="font-bold text-lg leading-7 tracking-tight text-gradient">
             SKAKK-UP
           </span>
         </Link>
@@ -52,9 +53,10 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
               <Link
                 key={label}
                 href={href}
-                className={`flex items-center gap-2 w-full px-3 py-2.5 rounded-xl transition-all duration-300 ease-out text-sm font-semibold relative overflow-hidden group ${
+                aria-current={isActive ? 'page' : undefined}
+                className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all duration-300 ease-out text-sm font-semibold relative overflow-hidden group ${
                   isActive
-                    ? 'text-white bg-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]'
+                    ? 'text-white bg-gradient-to-r from-violet-400/20 to-cyan-300/10 border border-violet-300/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]'
                     : 'text-foreground-muted hover:text-white hover:bg-white/5'
                 }`}
               >
@@ -67,11 +69,11 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
       </aside>
 
       {/* Top Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 bg-background/60 backdrop-blur-2xl border-b border-white/5 lg:left-56 transition-all duration-500">
+      <header className="fixed top-0 left-0 right-0 z-40 bg-[#08090d]/80 backdrop-blur-2xl border-b border-white/10 lg:left-56 transition-all duration-500">
         <div className="flex justify-between items-center h-16 px-4 lg:px-8">
           {/* Mobile hamburger */}
           <div className="flex lg:hidden items-center gap-2">
-            <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+            <button aria-label="Apri navigazione" onClick={() => setSidebarOpen(true)} className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
               <Menu className="size-5 text-foreground" />
             </button>
             <Link href="/" className="size-8 rounded-neu flex justify-center items-center p-0.5">
@@ -153,7 +155,7 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
                     </div>
                     <span className="font-semibold text-lg text-foreground">SKAKK-UP</span>
                   </div>
-                <button onClick={() => setSidebarOpen(false)} className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                <button aria-label="Chiudi navigazione" onClick={() => setSidebarOpen(false)} className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
                   <X className="size-5 text-foreground" />
                 </button>
               </div>
@@ -194,6 +196,15 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
           </>
         )}
       </AnimatePresence>
+
+      <nav aria-label="Navigazione principale mobile" className="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-40 hidden items-center justify-around border-t border-white/10 bg-[#0d0f16]/95 px-2 pb-[env(safe-area-inset-bottom)] pt-2 backdrop-blur-2xl lg:hidden">
+        {navItems.slice(0, 4).map(({ label, href, icon: Icon }) => {
+          const active = pathname === href || (href !== '/' && pathname?.startsWith(href));
+          return <Link key={href} href={href} aria-label={label} aria-current={active ? 'page' : undefined} className={`flex min-w-0 flex-1 flex-col items-center gap-1 rounded-lg py-1.5 text-[10px] font-semibold transition-colors ${active ? 'text-cyan-300' : 'text-foreground-muted'}`}>
+            <Icon className="size-4" /> <span className="truncate">{label === 'I miei appunti' ? 'Appunti' : label}</span>
+          </Link>;
+        })}
+      </nav>
     </>
   );
 }

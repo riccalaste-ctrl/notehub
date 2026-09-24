@@ -67,6 +67,36 @@ npm run dev
 
 L'app sarà disponibile su [http://localhost:3000](http://localhost:3000)
 
+### Preview isolata del redesign
+
+Questa worktree contiene una preview locale separata dalla versione principale.
+Per avviarla:
+
+```bash
+npm run preview
+```
+
+La preview usa `PREVIEW_BYPASS_AUTH=true` e dati demo locali quando questa
+variabile è attiva in `.env.local`. Non usa il database Supabase reale e non
+modifica dati, account o file di produzione. L'URL è
+[http://localhost:3000](http://localhost:3000).
+
+> **Policy no-production:** `PREVIEW_BYPASS_AUTH` è valido solo in ambiente
+> locale non-Vercel (`NODE_ENV !== production`). Non impostarlo su hosting o
+> su un ambiente con credenziali reali. Le route preview usano fixture locali e
+> le operazioni di upload sono simulate senza Google Drive.
+
+Per verificare isolamento, protezioni server-side e compilazione:
+
+```bash
+npm run verify:preview
+```
+
+Le pagine `/privacy-policy`, `/cookie-policy`, `/service-rules` e
+`/contact-reporting` descrivono il progetto indipendente e sono collegate dal
+footer. Prima di un eventuale uso pubblico sostituisci i recapiti demo e fai
+una revisione legale/manuale.
+
 ## Deploy su Vercel
 
 ### 1. Push su GitHub

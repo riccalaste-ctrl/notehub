@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "preview": "next dev -p 3000",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "verify:preview": "node scripts/verify-preview.mjs",
     "generate-password-hash": "node scripts/generate-password-hash.js"
   },
   "dependencies": {

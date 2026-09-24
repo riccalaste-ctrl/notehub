@@ -64,18 +64,19 @@ export default function FileCard({ file, index = 0 }: FileCardProps) {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.08, duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-      className="neu-bento-card p-5 relative overflow-hidden"
+      className="surface-card group p-5 relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-cyan-300/30 hover:shadow-cyan-950/30"
     >
       <div className="relative">
         <div className="flex justify-between items-start">
-          <div className={`size-10 rounded-neu flex justify-center items-center text-white ${getFileGradient(file.mime_type)}`}>
+          <div className={`size-10 rounded-xl flex justify-center items-center text-white ${getFileGradient(file.mime_type)} shadow-lg`}>
             <FileText className="size-5" />
           </div>
           <div className="flex gap-1.5">
             {file.view_url && (
               <button
                 onClick={handleView}
-                className="size-8 rounded-neu-sm neu-button flex justify-center items-center premium-transition"
+                aria-label={`Visualizza ${file.original_filename}`}
+                className="size-8 rounded-lg bg-white/5 border border-white/10 flex justify-center items-center premium-transition hover:bg-cyan-300/10"
                 title="Visualizza"
               >
                 <Eye className="size-3.5 text-lavender" />
@@ -84,7 +85,8 @@ export default function FileCard({ file, index = 0 }: FileCardProps) {
             {file.download_url && (
               <button
                 onClick={handleDownload}
-                className="size-8 rounded-neu-sm neu-button flex justify-center items-center premium-transition"
+                aria-label={`Scarica ${file.original_filename}`}
+                className="size-8 rounded-lg bg-white/5 border border-white/10 flex justify-center items-center premium-transition hover:bg-violet-300/10"
                 title="Scarica"
               >
                 <Download className="size-3.5 text-mint-dark" />

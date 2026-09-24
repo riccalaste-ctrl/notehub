@@ -29,6 +29,8 @@ import {
 } from 'lucide-react';
 import { buildInstitutionDisclaimer } from '@/lib/user-session-client';
 import { DEVELOPER_EMAILS } from '@/lib/constants';
+import { previewProfessors, previewSubjects, previewUploads, previewSubjectProfessors, previewSettings } from '@/lib/preview-data';
+import TitolareSection from '@/components/TitolareSection';
 
 interface Subject {
   id: string;
@@ -93,7 +95,7 @@ interface AuditLog {
   created_at: string;
 }
 
-type Tab = 'dashboard' | 'subjects' | 'professors' | 'uploads' | 'consigli' | 'subject-professors' | 'settings' | 'cleanup';
+type Tab = 'dashboard' | 'subjects' | 'professors' | 'uploads' | 'consigli' | 'subject-professors' | 'settings' | 'cleanup' | 'titolare';
 
 function formatBytes(bytes: number) {
   if (!bytes) return '0 B';
@@ -136,6 +138,8 @@ function driveStatus(professor: Professor) {
 }
 
 export default function AdminPage() {
+  const preview = process.env.NEXT_PUBLIC_PREVIEW_BYPASS_AUTH === 'true' &&
+    process.env.NODE_ENV !== 'production';
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -170,6 +174,26 @@ export default function AdminPage() {
   const [consigliDriveEmail, setConsigliDriveEmail] = useState('');
 
   const fetchData = useCallback(async () => {
+    if (preview) {
+      setSubjects(previewSubjects);
+      setProfessors(previewProfessors);
+      setUploads(previewUploads.map((upload) => ({
+        ...upload,
+        subject: { name: upload.subject_name },
+        professor: { name: upload.professor_name },
+      })));
+      setSubjectProfessors(previewSubjectProfessors);
+      setSettings(previewSettings);
+      setSettingsForm({
+        support_email: previewSettings.support_email,
+        site_policy: previewSettings.site_policy,
+        allowed_external_emails: '',
+        consigli_email: previewSettings.consigli_email,
+      });
+      setAuditLogs([]);
+      setLoading(false);
+      return;
+    }
     try {
       const [subjectsRes, professorsRes, uploadsRes, consigliRes, spRes, settingsRes, auditRes] = await Promise.all([
         fetch('/api/admin/subjects'),
@@ -241,7 +265,7 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Fetch error:', error);
     }
-  }, []);
+  }, [preview]);
 
   useEffect(() => {
     if (isAuthenticated) fetchData();
@@ -618,7 +642,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div className="page-shell min-h-screen">
       {criticalError && (
         <ErrorAlert
           title={criticalError.title}
@@ -626,7 +650,7 @@ export default function AdminPage() {
           onClose={() => setCriticalError(null)}
         />
       )}
-      <header className="glass-panel sticky top-0 z-40 border-b border-white/10 rounded-none rounded-b-xl">
+      <header className="surface-card sticky top-0 z-40 border-b border-white/10 rounded-none rounded-b-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-xl bg-neon-purple/20 flex items-center justify-center border border-neon-purple/30">
@@ -644,9 +668,9 @@ export default function AdminPage() {
         </div>
       </header>
 
-      <div className="glass-panel rounded-none border-b border-white/10 mt-1">
+      <div className="surface-card rounded-none border-b border-white/10 mt-1">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex space-x-6 overflow-x-auto custom-scrollbar">
+          <nav aria-label="Navigazione amministrazione" className="flex gap-5 overflow-x-auto custom-scrollbar">
             {[
               { id: 'dashboard' as const, label: 'Dashboard', icon: LayoutDashboard },
               { id: 'subjects' as const, label: 'Materie', icon: BookOpen },
@@ -656,15 +680,17 @@ export default function AdminPage() {
               { id: 'consigli' as const, label: 'Consigli', icon: Lightbulb },
               { id: 'settings' as const, label: 'Impostazioni', icon: Settings },
               { id: 'cleanup' as const, label: 'Pulizia DB', icon: Database },
+              { id: 'titolare' as const, label: 'Titolare', icon: Shield },
             ].map((tab) => {
               const Icon = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
+                  aria-current={activeTab === tab.id ? 'page' : undefined}
                   className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-all whitespace-nowrap ${
                     activeTab === tab.id
-                      ? 'border-neon-blue text-neon-blue'
+                      ? 'border-cyan-300 text-cyan-300'
                       : 'border-transparent text-foreground-muted hover:text-white hover:border-white/20'
                   }`}
                 >
@@ -678,6 +704,7 @@ export default function AdminPage() {
       </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {activeTab === 'titolare' && <TitolareSection />}
         {activeTab === 'dashboard' && (
           <div>
             <div className="flex items-center gap-3 mb-8">

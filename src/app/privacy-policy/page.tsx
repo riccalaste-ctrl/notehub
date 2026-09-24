@@ -42,7 +42,7 @@ export default function PrivacyPolicyPage() {
       <article className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8 md:p-12 text-foreground">
         <p className="text-sm text-stone-500 mb-2">Informativa aggiornata: {settings.legal_policy_updated_at || missing}</p>
         <h1 className="text-4xl font-bold mb-8">Privacy Policy di {project}</h1>
-        <div className="prose prose-sm max-w-none text-foreground-light">
+        <div className="prose prose-sm prose-headings:text-black prose-p:text-black prose-li:text-black max-w-none text-black">
           <h2>1. Natura del progetto e titolare</h2>
           <p>{project} è un progetto indipendente e non è gestito, posseduto o approvato dall&apos;istituto scolastico usato come contesto della comunità.</p>
           <p><strong>Titolare del trattamento:</strong> {controller}<br />

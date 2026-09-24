@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import PolicyConsentGate from "@/components/PolicyConsentGate";
 import "./globals.css";
 
 const inter = Inter({
@@ -31,7 +32,7 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange={false}
         >
-          {children}
+          <PolicyConsentGate>{children}</PolicyConsentGate>
         </ThemeProvider>
       </body>
     </html>

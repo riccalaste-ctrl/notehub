@@ -34,6 +34,8 @@ export default function LoginPage() {
           ? 'La tua email non è autorizzata all\'accesso.'
           : errorParam === 'oauth_exchange_failed'
             ? 'Errore durante il login. Riprova.'
+            : errorParam === 'policy_required'
+              ? 'Per utilizzare il sito devi leggere e accettare la Privacy Policy e le Regole del servizio.'
             : 'Errore di autenticazione. Riprova.'
       );
     }

@@ -61,7 +61,7 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
                     : 'text-foreground-muted hover:text-white hover:bg-white/5'
                 }`}
               >
-                <Icon className="size-7 shrink-0" />
+                <Icon className="size-6 shrink-0" />
                 <span className="sidebar-label">{label}</span>
               </Link>
             );

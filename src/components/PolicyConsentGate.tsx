@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 type Settings = {
   legal_project_name?: string;
@@ -13,6 +14,8 @@ type Settings = {
 };
 
 export default function PolicyConsentGate({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isPolicyPage = pathname === '/privacy-policy' || pathname === '/cookie-policy' || pathname === '/service-rules';
   const [state, setState] = useState<'loading' | 'allowed' | 'required'>('loading');
   const [settings, setSettings] = useState<Settings>({});
   const [version, setVersion] = useState('');
@@ -21,6 +24,10 @@ export default function PolicyConsentGate({ children }: { children: React.ReactN
   const [cookiesAccepted, setCookiesAccepted] = useState(false);
 
   useEffect(() => {
+    if (isPolicyPage) {
+      setState('allowed');
+      return;
+    }
     let active = true;
     Promise.all([
       fetch('/api/auth/me', { cache: 'no-store' }),
@@ -47,7 +54,7 @@ export default function PolicyConsentGate({ children }: { children: React.ReactN
     return () => {
       active = false;
     };
-  }, []);
+  }, [isPolicyPage]);
 
   async function accept() {
     setSaving(true);
@@ -66,7 +73,7 @@ export default function PolicyConsentGate({ children }: { children: React.ReactN
     window.location.href = '/login?error=policy_required';
   }
 
-  if (state !== 'required') return <>{children}</>;
+  if (isPolicyPage || state !== 'required') return <>{children}</>;
 
   return (
     <>

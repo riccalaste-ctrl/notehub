@@ -32,7 +32,7 @@ export default function MyNotesPage() {
   return (
     <div className="min-h-screen bg-neu-base gray-cards">
       <Header breadcrumbs={[{ label: 'I miei appunti' }]} />
-      <main className="lg:pl-56 pt-16">
+      <main className="lg:pl-[4.5rem] pt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <h1 className="text-3xl font-semibold text-foreground mb-2 mt-6">I miei Appunti</h1>
           <p className="text-base text-foreground-light mb-8">

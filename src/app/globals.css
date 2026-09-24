@@ -502,3 +502,30 @@ body {
 .light .text-gradient-orange {
   /* These use -webkit-text-fill-color: transparent, so color override doesn't affect them */
 }
+
+/* Compact desktop navigation: icons remain visible, labels expand on hover. */
+@media (min-width: 1024px) {
+  .desktop-sidebar .sidebar-label {
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: max-width 300ms ease, opacity 200ms ease;
+  }
+
+  .desktop-sidebar:hover .sidebar-label,
+  .desktop-sidebar:focus-within .sidebar-label {
+    max-width: 10rem;
+    opacity: 1;
+  }
+
+  .desktop-sidebar:hover ~ header,
+  .desktop-sidebar:focus-within ~ header {
+    left: 14rem;
+  }
+
+  .desktop-sidebar:hover ~ main,
+  .desktop-sidebar:focus-within ~ main {
+    padding-left: 14rem;
+  }
+}

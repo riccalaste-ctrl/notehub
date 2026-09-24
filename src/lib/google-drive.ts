@@ -2,6 +2,7 @@ import { google } from 'googleapis';
 import { randomBytes } from 'crypto';
 import { supabaseAdmin } from '@/lib/supabase';
 import { createSignedState, decryptSecret, encryptSecret, verifySignedState } from '@/lib/secure-tokens';
+import { isLocalPreview } from '@/lib/env';
 
 export const DRIVE_ROOT_FOLDER_NAME = 'SKAKK-UP';
 
@@ -101,17 +102,16 @@ export function getDriveViewUrl(fileId: string): string {
 }
 
 export function getAppUrl(request?: Request): string {
-  const configured = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL;
-  if (configured) return configured.replace(/\/$/, '');
-
-  const forwardedHost = request?.headers.get('x-forwarded-host');
-  const host = forwardedHost || request?.headers.get('host');
-  if (host) {
-    const proto = request?.headers.get('x-forwarded-proto') || 'https';
-    return `${proto}://${host}`;
+  const configured = process.env.APP_URL?.trim();
+  if (configured) {
+    const url = new URL(configured);
+    if (url.protocol !== 'https:' && !isLocalPreview()) {
+      throw new GoogleDriveConfigError('APP_URL must use HTTPS');
+    }
+    return configured.replace(/\/$/, '');
   }
-
-  return 'http://localhost:3000';
+  if (isLocalPreview()) return 'http://localhost:3000';
+  throw new GoogleDriveConfigError('APP_URL must be configured for deployed OAuth');
 }
 
 export function getGoogleOAuthRedirectUri(request?: Request): string {
@@ -545,16 +545,6 @@ export async function verifyAndShareDriveFile(
   if (file.data.size && Number(file.data.size) !== expectedSizeBytes) {
     throw new Error('La dimensione del file Drive non coincide con la sessione');
   }
-
-  await drive.permissions.create({
-    fileId,
-    requestBody: {
-      type: 'anyone',
-      role: 'reader',
-      allowFileDiscovery: false,
-    },
-    fields: 'id',
-  });
 
   const sharedFile = await drive.files.get({
     fileId,

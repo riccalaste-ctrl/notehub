@@ -73,6 +73,8 @@ alter table public.uploads
 
 alter table public.drive_upload_sessions
   add column if not exists owner_id uuid references auth.users(id) on delete set null;
+alter table public.drive_upload_sessions
+  add column if not exists drive_file_id text;
 
 create index if not exists idx_uploads_owner_id on public.uploads (owner_id);
 create index if not exists idx_drive_upload_sessions_owner_id on public.drive_upload_sessions (owner_id);
@@ -81,11 +83,13 @@ create index if not exists idx_drive_upload_sessions_owner_id on public.drive_up
 alter table public.uploads enable row level security;
 
 drop policy if exists uploads_read_authenticated on public.uploads;
+-- Public catalog reads go through the server API, which explicitly projects
+-- non-sensitive fields. Never expose owner/Drive metadata through PostgREST.
 create policy uploads_read_authenticated
 on public.uploads
 for select
 to authenticated
-using (true);
+using (owner_id = auth.uid());
 
 drop policy if exists uploads_insert_owner on public.uploads;
 create policy uploads_insert_owner

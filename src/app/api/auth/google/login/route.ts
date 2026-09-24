@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { isLocalPreview } from '@/lib/env';
 
 export async function GET(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -12,7 +13,12 @@ export async function GET(request: NextRequest) {
   const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const redirectTo = `${request.nextUrl.origin}/auth/callback`;
+  const appUrl = process.env.APP_URL?.replace(/\/$/, '') ||
+    (isLocalPreview() ? request.nextUrl.origin : null);
+  if (!appUrl) {
+    return NextResponse.json({ error: 'OAuth non configurato' }, { status: 503 });
+  }
+  const redirectTo = `${appUrl}/auth/callback`;
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',

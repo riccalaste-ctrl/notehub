@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
 export async function POST(request: NextRequest) {
-  let response = NextResponse.json({ success: true });
+  const response = NextResponse.json({ success: true });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,6 +23,13 @@ export async function POST(request: NextRequest) {
   );
 
   await supabase.auth.signOut();
+  response.cookies.set('notehub_privacy_consent', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production' || Boolean(process.env.APP_URL?.startsWith('https://')),
+    sameSite: 'strict',
+    path: '/',
+    maxAge: 0,
+  });
 
   return response;
 }

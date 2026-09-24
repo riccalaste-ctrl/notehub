@@ -128,6 +128,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL('/admin?tab=consigli&drive_connected=true', requestUrl.origin));
   } catch (error) {
     console.error('Consigli Drive callback error:', error);
-    return NextResponse.redirect(new URL(`/admin?tab=consigli&error=${encodeURIComponent(error instanceof Error ? error.message : 'unknown')}`, requestUrl.origin));
+    return NextResponse.redirect(new URL('/admin?tab=consigli&error=oauth_callback_failed', requestUrl.origin));
   }
 }

@@ -2,26 +2,23 @@ name: OpenCode Agent
 on:
   issue_comment:
     types: [created]
-  issues:
-    types: [opened]
-  pull_request:
-    types: [opened, synchronize]
+  workflow_dispatch:
 
 jobs:
   opencode:
     runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'COLLABORATOR'
     permissions:
-      id-token: write
-      contents: write
+      contents: read
       pull-requests: write
       issues: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
 
       - name: Run OpenCode
-        uses: anomalyco/opencode@main
+        uses: anomalyco/opencode@0f549842ee746e400b1f72516b0b2e292e267e2c # reviewed commit
         with:
           model: "anthropic/claude-3-5-sonnet-20241022" # Sostituisci con il modello che usi di solito

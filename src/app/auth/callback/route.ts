@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
 
   if (error) {
     console.log('[AUTH] OAuth error:', error);
-    return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(error)}`, requestUrl.origin));
+    return NextResponse.redirect(new URL('/login?error=oauth_failed', requestUrl.origin));
   }
 
   if (code) {

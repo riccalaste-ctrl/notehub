@@ -1,7 +1,7 @@
 export const isPreviewMode =
   process.env.PREVIEW_BYPASS_AUTH === 'true' &&
   process.env.NODE_ENV !== 'production' &&
-  process.env.VERCEL !== '1';
+  process.env.VERCEL !== '1' && process.env.NETLIFY !== 'true';
 
 /** Preview is deliberately a local-only fixture mode. Never use it in a deployed build. */
 export const PREVIEW_NOTICE =

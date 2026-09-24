@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 
     const { data: session, error: sessionError } = await supabaseAdmin
       .from('drive_upload_sessions')
-      .select('*')
+      .select('id, subject_id, professor_id, owner_id, original_filename, drive_file_id, drive_folder_id, drive_connection_id, mime_type, size_bytes, uploader_name, created_at, expires_at')
       .eq('id', sessionId)
       .eq('status', 'pending')
       .maybeSingle();
@@ -71,6 +71,9 @@ export async function POST(request: NextRequest) {
     }
     if (session.owner_id && session.owner_id !== user.id) {
       return NextResponse.json({ error: 'Sessione upload non valida per questo utente' }, { status: 403 });
+    }
+    if (!session.drive_file_id || session.drive_file_id !== driveFileId) {
+      return NextResponse.json({ error: 'File upload non valido per questa sessione' }, { status: 400 });
     }
 
     if (new Date(session.expires_at).getTime() < Date.now()) {
@@ -135,7 +138,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, upload });
   } catch (error) {
     if (error instanceof DriveNotConnectedError) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return NextResponse.json({ error: 'Servizio di archiviazione temporaneamente non disponibile' }, { status: 400 });
     }
 
     console.error('Complete upload error:', error);

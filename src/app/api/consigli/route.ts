@@ -8,7 +8,7 @@ export async function GET() {
     const { data, error } = await supabaseAdmin
       .from('consigli')
       .select(`
-        *,
+        id, title, content, published, created_at, updated_at,
         professor:professors(id, name)
       `)
       .eq('published', true)

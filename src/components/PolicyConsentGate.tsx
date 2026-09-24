@@ -17,6 +17,8 @@ export default function PolicyConsentGate({ children }: { children: React.ReactN
   const [settings, setSettings] = useState<Settings>({});
   const [version, setVersion] = useState('');
   const [saving, setSaving] = useState(false);
+  const [policyAccepted, setPolicyAccepted] = useState(false);
+  const [cookiesAccepted, setCookiesAccepted] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -40,7 +42,7 @@ export default function PolicyConsentGate({ children }: { children: React.ReactN
         setState(consent.accepted ? 'allowed' : 'required');
       })
       .catch(() => {
-        if (active) setState('allowed');
+        if (active) setState('required');
       });
     return () => {
       active = false;
@@ -52,7 +54,7 @@ export default function PolicyConsentGate({ children }: { children: React.ReactN
     const response = await fetch('/api/legal/consent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accepted: true, version }),
+      body: JSON.stringify({ accepted: policyAccepted && cookiesAccepted, policyAccepted, cookiesAccepted, version }),
     });
     if (response.ok) setState('allowed');
     setSaving(false);
@@ -81,15 +83,23 @@ export default function PolicyConsentGate({ children }: { children: React.ReactN
             Leggi e accetta le policy di {settings.legal_project_name || 'NoteHub'}
           </h1>
           <div className="mt-5 space-y-3 text-sm leading-6 text-slate-200">
-            <p>{settings.site_policy || 'Prima di continuare devi leggere le informazioni sulla privacy e sui cookie.'}</p>
-            <p>
-              Il servizio tratta i dati necessari all&apos;autenticazione Google, alla gestione degli appunti e alla sicurezza.
-              Il nome dell&apos;autore può essere mostrato agli utenti autenticati. Età minima scelta dal servizio: {settings.legal_minimum_age || '14'} anni.
-            </p>
-            <p>
-              Titolare del trattamento: {settings.legal_controller_name || 'VERIFICA UMANA NECESSARIA'}.
-              Contatto: {settings.legal_controller_email || 'VERIFICA UMANA NECESSARIA'}.
-            </p>
+            <p>{settings.site_policy || 'Prima di continuare devi leggere il riepilogo sulla privacy e sui cookie.'}</p>
+            <details className="rounded-xl border border-white/10 bg-white/5 p-4">
+              <summary className="cursor-pointer font-semibold text-white">Riepilogo Privacy Policy</summary>
+              <p className="mt-3">
+                Il servizio tratta i dati necessari all&apos;autenticazione Google, alla gestione degli appunti e alla sicurezza.
+                Il nome dell&apos;autore può essere mostrato agli utenti autenticati. Età minima: {settings.legal_minimum_age || '14'} anni.
+                Titolare: {settings.legal_controller_name || 'VERIFICA UMANA NECESSARIA'}.
+                Contatto: {settings.legal_controller_email || 'VERIFICA UMANA NECESSARIA'}.
+              </p>
+            </details>
+            <details className="rounded-xl border border-white/10 bg-white/5 p-4">
+              <summary className="cursor-pointer font-semibold text-white">Riepilogo Cookie Policy</summary>
+              <p className="mt-3">
+                Sono utilizzati cookie tecnici necessari per autenticazione, sessione, sicurezza e accesso amministrativo.
+                Non sono configurati cookie di profilazione o advertising non necessari.
+              </p>
+            </details>
           </div>
           <div className="mt-5 flex flex-wrap gap-3 text-sm">
             <Link href="/privacy-policy" target="_blank" className="text-cyan-300 underline">Leggi Privacy Policy</Link>
@@ -97,13 +107,17 @@ export default function PolicyConsentGate({ children }: { children: React.ReactN
             <Link href="/service-rules" target="_blank" className="text-cyan-300 underline">Leggi Regole del servizio</Link>
           </div>
           <p className="mt-5 text-xs text-slate-400">
-            Accettando confermi di aver letto le policy e le regole del servizio. L&apos;accettazione delle regole non equivale automaticamente al consenso GDPR.
+            Devi confermare separatamente di aver letto Privacy Policy e Cookie Policy. Le pagine collegate contengono il testo completo e aggiornato.
           </p>
+          <div className="mt-5 space-y-3 text-sm">
+            <label className="flex gap-3"><input type="checkbox" checked={policyAccepted} onChange={(event) => setPolicyAccepted(event.target.checked)} /> <span>Ho letto e accetto l&apos;informativa Privacy.</span></label>
+            <label className="flex gap-3"><input type="checkbox" checked={cookiesAccepted} onChange={(event) => setCookiesAccepted(event.target.checked)} /> <span>Ho letto e accetto la Cookie Policy.</span></label>
+          </div>
           <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <button type="button" onClick={reject} disabled={saving} className="rounded-xl border border-red-400/40 px-5 py-3 font-semibold text-red-300 hover:bg-red-500/10 disabled:opacity-50">
               Rifiuta ed esci
             </button>
-            <button type="button" onClick={accept} disabled={saving} className="rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-300 disabled:opacity-50">
+            <button type="button" onClick={accept} disabled={saving || !policyAccepted || !cookiesAccepted} className="rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-300 disabled:opacity-50">
               {saving ? 'Salvataggio...' : 'Accetto e continuo'}
             </button>
           </div>

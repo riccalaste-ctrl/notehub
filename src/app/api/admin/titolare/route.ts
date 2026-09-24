@@ -6,7 +6,7 @@ import { getPreviewTitolarData, recordPreviewTitolarAccess, updatePreviewTitolar
 async function authorized() {
   const actor = await getUserFromToken();
   const titular = await verifyTitolarToken((await cookies()).get(TITOLARE_COOKIE)?.value);
-  const preview = process.env.PREVIEW_BYPASS_AUTH === 'true' && process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1';
+  const preview = process.env.PREVIEW_BYPASS_AUTH === 'true' && process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1' && process.env.NETLIFY !== 'true';
   return titular && ((actor?.role === 'admin') || preview)
     ? { actor: actor || { email: titular.email, role: 'admin' }, titular }
     : null;
@@ -14,7 +14,7 @@ async function authorized() {
 export async function GET(request: NextRequest) {
   const auth = await authorized();
   if (!auth) return NextResponse.json({ error: 'Password admin e password titolare richieste' }, { status: 401 });
-  if (process.env.PREVIEW_BYPASS_AUTH === 'true' && process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1') {
+  if (process.env.PREVIEW_BYPASS_AUTH === 'true' && process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1' && process.env.NETLIFY !== 'true') {
     recordPreviewTitolarAccess(auth.actor.email);
     const data = getPreviewTitolarData();
     if (request.nextUrl.searchParams.get('export') === 'json') return NextResponse.json({ ...data, exported_at: new Date().toISOString() });
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Inserisci un indirizzo email valido' }, { status: 400 });
   }
 
-  if (process.env.PREVIEW_BYPASS_AUTH === 'true' && process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1') {
+  if (process.env.PREVIEW_BYPASS_AUTH === 'true' && process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1' && process.env.NETLIFY !== 'true') {
     return NextResponse.json(updatePreviewTitolar(displayName, email, auth.actor.email));
   }
 

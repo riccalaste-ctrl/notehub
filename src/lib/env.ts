@@ -1,7 +1,12 @@
-const DEV_JWT_SECRET = 'development-secret-key-min-32-chars-long';
-
 export function isProduction() {
   return process.env.NODE_ENV === 'production';
+}
+
+export function isLocalPreview() {
+  return process.env.PREVIEW_BYPASS_AUTH === 'true' &&
+    process.env.NODE_ENV !== 'production' &&
+    process.env.VERCEL !== '1' &&
+    process.env.NETLIFY !== 'true';
 }
 
 export function requireServerEnv(name: string): string {
@@ -18,10 +23,7 @@ export function getJwtSecret(): string {
   const value = process.env.JWT_SECRET?.trim();
 
   if (!value) {
-    if (isProduction()) {
-      throw new Error('Missing required environment variable: JWT_SECRET');
-    }
-    return DEV_JWT_SECRET;
+    throw new Error('Missing required environment variable: JWT_SECRET');
   }
 
   if (value.length < 32) {

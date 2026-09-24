@@ -11,6 +11,7 @@ import {
   sanitizeDriveFileName,
 } from '@/lib/google-drive';
 import { getAuthenticatedUserFromRequest } from '@/lib/user-session';
+import { isPreviewMode } from '@/lib/preview-data';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,6 +22,7 @@ const schema = z.object({
   originalFilename: z.string().min(1).max(255),
   mimeType: z.string().min(1).max(160),
   sizeBytes: z.number().int().positive().max(MAX_UPLOAD_SIZE_BYTES),
+  serviceRulesAccepted: z.literal(true),
 });
 
 export async function POST(request: NextRequest) {
@@ -50,6 +52,14 @@ export async function POST(request: NextRequest) {
         { error: 'Tipo file non consentito. Permessi: PDF, DOC, DOCX, JPG, PNG' },
         { status: 400 }
       );
+    }
+
+    if (isPreviewMode) {
+      return NextResponse.json({
+        sessionId: `00000000-0000-4000-8000-${Date.now().toString().padStart(12, '0').slice(-12)}`,
+        expiresAt: new Date(Date.now() + 3600000).toISOString(),
+        preview: true,
+      });
     }
 
     console.log('[upload/session] Checking subject...');

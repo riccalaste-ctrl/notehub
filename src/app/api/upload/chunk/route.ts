@@ -4,6 +4,7 @@ import { decryptSecret } from '@/lib/secure-tokens';
 import { getAuthenticatedUserFromRequest } from '@/lib/user-session';
 import { validateFileMagicBytes } from '@/lib/magic-bytes-validator';
 import { logSecurityEvent } from '@/lib/audit-logger';
+import { isPreviewMode } from '@/lib/preview-data';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -37,6 +38,15 @@ export async function POST(request: NextRequest) {
     ) {
       console.error('[upload/chunk] Invalid parameters:', { sessionId, chunkIndex, totalChunks, hasChunk: !!chunk });
       return NextResponse.json({ error: 'Dati chunk non validi' }, { status: 400 });
+    }
+
+    if (isPreviewMode) {
+      return NextResponse.json({
+        success: true,
+        preview: true,
+        driveFileId: `preview-drive-${sessionId}`,
+        isComplete: true,
+      });
     }
 
     console.log('[upload/chunk] Fetching session from Supabase...');

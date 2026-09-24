@@ -2,9 +2,31 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { supabaseAdmin } from '@/lib/supabase';
 import { DEVELOPER_EMAILS } from '@/lib/constants';
+import type { User } from '@supabase/supabase-js';
 
 export const USER_SESSION_COOKIE = 'notehub_user_jwt';
 export const INSTITUTION_DOMAIN = process.env.ALLOWED_EMAIL_DOMAIN || 'liceoscacchibari.it';
+export const isPreviewAuthBypassEnabled =
+  process.env.PREVIEW_BYPASS_AUTH === 'true' &&
+  process.env.NODE_ENV !== 'production' &&
+  process.env.VERCEL !== '1';
+
+const PREVIEW_USER = {
+  id: 'preview-user',
+  aud: 'authenticated',
+  role: 'authenticated',
+  email: 'preview@liceoscacchibari.it',
+  email_confirmed_at: new Date(0).toISOString(),
+  phone: '',
+  confirmed_at: new Date(0).toISOString(),
+  last_sign_in_at: new Date(0).toISOString(),
+  app_metadata: { provider: 'preview', providers: ['preview'] },
+  user_metadata: { full_name: 'Utente preview' },
+  identities: [],
+  created_at: new Date(0).toISOString(),
+  updated_at: new Date(0).toISOString(),
+  is_anonymous: false,
+} as User;
 
 function getEnvAllowedEmails() {
   const configuredTestEmails = (process.env.ALLOWED_TEST_EMAILS || '')
@@ -49,6 +71,8 @@ export async function isAllowedUserEmail(email: string | undefined): Promise<boo
 }
 
 export async function getUserFromRequest(request: NextRequest) {
+  if (isPreviewAuthBypassEnabled) return PREVIEW_USER;
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

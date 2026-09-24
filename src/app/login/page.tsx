@@ -40,7 +40,7 @@ export default function LoginPage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neu-base px-4">
+    <div className="page-shell min-h-screen flex items-center justify-center px-4 py-10">
       <div className="max-w-md w-full neu-modal p-8">
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-neu-xl bg-[#6366F1]/10 flex items-center justify-center mx-auto mb-4">
@@ -71,10 +71,19 @@ export default function LoginPage() {
             }
           }}
           disabled={loading}
-          className="w-full py-3 bg-gradient-to-br from-[#6366F1] to-[#4F46E5] text-white font-semibold rounded-neu premium-transition disabled:opacity-60"
+          className="btn-primary w-full disabled:opacity-60"
         >
           {loading ? 'Reindirizzamento...' : 'Accedi con Google'}
         </button>
+
+        {process.env.NEXT_PUBLIC_PREVIEW_BYPASS_AUTH === 'true' && (
+          <Link
+            href="/"
+            className="mt-3 block w-full py-3 text-center border border-[#6366F1]/30 text-[#6366F1] font-semibold rounded-neu premium-transition"
+          >
+            Entra nella preview
+          </Link>
+        )}
 
         <p className="mt-6 text-xs text-foreground-light text-center leading-relaxed">
           {buildInstitutionDisclaimer(supportEmail)}

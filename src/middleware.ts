@@ -55,6 +55,26 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  const isPreviewAuthBypass =
+    process.env.PREVIEW_BYPASS_AUTH === 'true' &&
+    process.env.NODE_ENV !== 'production' &&
+    process.env.VERCEL !== '1';
+  const isPreviewUserPath =
+    pathname === '/' ||
+    pathname === '/materie' ||
+    pathname.startsWith('/materie/') ||
+    pathname === '/consigli' ||
+    pathname === '/i-miei-appunti' ||
+    pathname === '/api/files' ||
+    pathname.startsWith('/api/upload') ||
+    pathname.startsWith('/api/user/');
+
+  // Preview pages are local fixtures. Do not create a Supabase client (or attempt
+  // auth refresh) for them; admin APIs remain protected below.
+  if (isPreviewAuthBypass && isPreviewUserPath) {
+    return NextResponse.next();
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -81,7 +101,11 @@ export async function middleware(request: NextRequest) {
 
   await supabase.auth.getSession();
 
-  const isPublicAdminAPI = pathname === '/api/admin/login' || pathname === '/api/admin/verify-password';
+  const isPublicAdminAPI =
+    pathname === '/api/admin/login' ||
+    pathname === '/api/admin/verify-password' ||
+    pathname === '/api/admin/titolare/auth' ||
+    pathname === '/api/admin/titolare';
   const isCookieBackedMutation =
     isUnsafeMethod(request.method) &&
     (
@@ -95,7 +119,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  if (pathname.startsWith('/api/admin') && !isPublicAdminAPI) {
+  // Titolare endpoints perform the admin + second-factor check themselves.
+  // Keeping them out of the generic admin gate lets the short-lived titular
+  // cookie be the second factor without ever exposing it to client code.
+  if (pathname.startsWith('/api/admin') && !isPublicAdminAPI && !pathname.startsWith('/api/admin/titolare')) {
     const adminToken = request.cookies.get(ADMIN_JWT_COOKIE);
 
     if (!adminToken || !(await verifyAdminToken(adminToken.value))) {

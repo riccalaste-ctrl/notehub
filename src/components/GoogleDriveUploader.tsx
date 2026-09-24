@@ -22,6 +22,7 @@ interface GoogleDriveUploaderProps {
   subjectId: string;
   professorId: string;
   uploaderName: string;
+  serviceRulesAccepted: boolean;
   onSuccess: () => void;
   onError: (error: string) => void;
 }
@@ -68,6 +69,7 @@ export default function GoogleDriveUploader({
   subjectId,
   professorId,
   uploaderName,
+  serviceRulesAccepted,
   onSuccess,
   onError,
 }: GoogleDriveUploaderProps) {
@@ -120,6 +122,7 @@ export default function GoogleDriveUploader({
           subjectId,
           professorId,
           uploaderName,
+          serviceRulesAccepted,
           originalFilename: selectedFile.name,
           mimeType: selectedFile.type,
           sizeBytes: selectedFile.size,
@@ -170,6 +173,7 @@ export default function GoogleDriveUploader({
         body: JSON.stringify({
           sessionId,
           driveFileId,
+          serviceRulesAccepted,
         }),
       });
 
@@ -187,7 +191,7 @@ export default function GoogleDriveUploader({
       onError(message);
       setUploading(false);
     }
-  }, [selectedFile, subjectId, professorId, uploaderName, onSuccess, onError]);
+  }, [selectedFile, subjectId, professorId, uploaderName, serviceRulesAccepted, onSuccess, onError]);
 
   return (
     <div className="space-y-4">

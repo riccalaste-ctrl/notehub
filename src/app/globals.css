@@ -3,11 +3,17 @@
 @tailwind utilities;
 
 :root {
-  --background: #050505;
-  --foreground: #f8f9fa;
-  --surface: rgba(17, 17, 17, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-highlight: rgba(255, 255, 255, 0.05);
+  --background: #08090d;
+  --foreground: #f6f7fb;
+  --surface: rgba(18, 20, 29, 0.78);
+  --surface-solid: #12141d;
+  --surface-raised: #181b27;
+  --glass-border: rgba(255, 255, 255, 0.09);
+  --glass-highlight: rgba(255, 255, 255, 0.07);
+  --muted: #9ba3b7;
+  --muted-strong: #c4cad8;
+  --accent: #a78bfa;
+  --accent-blue: #67e8f9;
 }
 
 .light {
@@ -28,12 +34,28 @@ html {
   background-color: var(--background);
 }
 
+*:focus-visible {
+  outline: 2px solid #4cc9f0;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: 'Inter', 'Geist', 'SF Pro Display', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-width: 320px;
 }
 
 .dark body {
@@ -57,6 +79,44 @@ body {
 }
 
 @layer components {
+  .page-shell {
+    min-height: 100vh;
+    background:
+      radial-gradient(ellipse 70% 50% at 75% -10%, rgba(103, 232, 249, .10), transparent 65%),
+      radial-gradient(ellipse 55% 45% at 0% 30%, rgba(167, 139, 250, .10), transparent 65%);
+  }
+
+  .surface-card {
+    background: linear-gradient(145deg, rgba(25, 28, 41, .88), rgba(13, 15, 22, .88));
+    border: 1px solid var(--glass-border);
+    border-radius: 1.25rem;
+    box-shadow: 0 18px 55px rgba(0, 0, 0, .24), inset 0 1px rgba(255,255,255,.04);
+  }
+
+  .control-input {
+    width: 100%;
+    min-height: 2.75rem;
+    border: 1px solid var(--glass-border);
+    border-radius: .75rem;
+    background: rgba(5, 7, 12, .55);
+    color: var(--foreground);
+    padding: .7rem .9rem;
+    transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+  }
+  .control-input::placeholder { color: #737b91; }
+  .control-input:focus { border-color: rgba(167,139,250,.75); box-shadow: 0 0 0 3px rgba(167,139,250,.14); outline: none; }
+
+  .btn-primary {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+    min-height: 2.75rem; padding: .65rem 1rem; border-radius: .75rem;
+    color: #08090d; font-weight: 700;
+    background: linear-gradient(135deg, #c4b5fd, #67e8f9);
+    box-shadow: 0 8px 24px rgba(103,232,249,.18);
+    transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+  }
+  .btn-primary:hover { transform: translateY(-1px); filter: brightness(1.06); box-shadow: 0 12px 30px rgba(103,232,249,.28); }
+  .btn-primary:active { transform: translateY(0); }
+
   /* GLASSMORPHISM UTILITIES */
   .glass-panel {
     background: var(--surface);
@@ -262,6 +322,12 @@ body {
   }
 }
 
+@media (max-width: 1023px) {
+  main.lg\:pl-56 { padding-left: 0; }
+  .mobile-bottom-nav { display: flex; }
+}
+@media (min-width: 1024px) { .mobile-bottom-nav { display: none; } }
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -332,6 +398,86 @@ body {
   color: #9ca3af !important;
 }
 
+/* Keep navigation and administration readable in the light theme. */
+.light aside,
+.light header,
+.light .mobile-bottom-nav {
+  color: #172033;
+  background: rgba(255, 255, 255, 0.94) !important;
+  border-color: rgba(15, 23, 42, 0.1) !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08) !important;
+}
+
+.light aside a,
+.light header a,
+.light header button,
+.light .mobile-bottom-nav a {
+  color: #334155;
+}
+
+.light aside a:hover,
+.light header a:hover,
+.light header button:hover {
+  color: #111827 !important;
+  background-color: rgba(99, 102, 241, 0.1) !important;
+}
+
+.light aside a[aria-current="page"],
+.light .mobile-bottom-nav a[aria-current="page"] {
+  color: #4338ca !important;
+  background: rgba(99, 102, 241, 0.12) !important;
+  border-color: rgba(99, 102, 241, 0.2) !important;
+}
+
+.light .surface-card,
+.light .glass-panel,
+.light .premium-card {
+  background: rgba(255, 255, 255, 0.94) !important;
+  color: #172033;
+  border-color: rgba(15, 23, 42, 0.1) !important;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08) !important;
+}
+
+.light .surface-card h1,
+.light .surface-card h2,
+.light .surface-card h3,
+.light .surface-card p,
+.light .surface-card label,
+.light .surface-card th,
+.light .surface-card td,
+.light .glass-panel h1,
+.light .glass-panel h2,
+.light .glass-panel h3,
+.light .glass-panel p,
+.light .glass-panel label {
+  color: #172033;
+}
+
+.light .surface-card .text-foreground-muted,
+.light .glass-panel .text-foreground-muted,
+.light .surface-card .text-foreground-light,
+.light .glass-panel .text-foreground-light {
+  color: #64748b !important;
+}
+
+.light .surface-card input,
+.light .surface-card textarea,
+.light .surface-card select,
+.light .glass-panel input,
+.light .glass-panel textarea,
+.light .glass-panel select {
+  background: #ffffff !important;
+  color: #172033 !important;
+  border-color: rgba(15, 23, 42, 0.16) !important;
+}
+
+.light .surface-card input::placeholder,
+.light .surface-card textarea::placeholder,
+.light .glass-panel input::placeholder,
+.light .glass-panel textarea::placeholder {
+  color: #64748b !important;
+}
+
 .light option {
   background-color: #f8f9fa !important;
   color: #050505 !important;
@@ -356,4 +502,3 @@ body {
 .light .text-gradient-orange {
   /* These use -webkit-text-fill-color: transparent, so color override doesn't affect them */
 }
-

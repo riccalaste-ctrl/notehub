@@ -73,6 +73,12 @@ export default function Footer() {
           <Link href="/cookie-policy" className="text-foreground-muted hover:text-white transition-colors">
             Cookie Policy
           </Link>
+          <Link href="/service-rules" className="text-foreground-muted hover:text-white transition-colors">
+            Regole del servizio
+          </Link>
+          <Link href="/contact-reporting" className="text-foreground-muted hover:text-white transition-colors">
+            Contatti e segnalazioni
+          </Link>
         </div>
 
         <p className="text-xs text-foreground-muted/50 text-center mt-6 tracking-widest uppercase">

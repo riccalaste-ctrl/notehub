@@ -92,10 +92,10 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div className="page-shell">
       <Header breadcrumbs={[{ label: 'Dashboard' }]} onOpenUpload={() => setUploadModalOpen(true)} />
 
-      <main className="lg:pl-56 pt-16">
+      <main className="lg:pl-56 pt-16 pb-20 lg:pb-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <motion.div
@@ -104,6 +104,7 @@ export default function DashboardPage() {
             transition={{ duration: 0.7, ease: [0.25, 1, 0.5, 1] }}
             className="mb-10 mt-6"
           >
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300/80">Workspace condiviso · Preview</p>
             <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-white mb-2">
               Benvenuto su <span className="text-gradient-purple">SKAKK-UP</span>
             </h1>

@@ -155,7 +155,7 @@ export default function MateriePage() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div className="page-shell">
       <Header
         breadcrumbs={getBreadcrumbs().map(crumb => ({
           label: crumb.label,
@@ -163,16 +163,17 @@ export default function MateriePage() {
         }))}
       />
 
-      <main className="lg:pl-56 pt-16">
+      <main className="lg:pl-56 pt-16 pb-20 lg:pb-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Step 1: Subject Cards */}
           {!selectedSubject && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <h1 className="text-3xl font-semibold text-white mb-2 mt-6">
-                Materie
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300/80 mb-3 mt-6">Libreria</p>
+              <h1 className="text-3xl lg:text-4xl font-bold text-white mb-2">
+                Esplora le materie
               </h1>
-              <p className="text-foreground-muted mb-8">
-                Seleziona una materia per visualizzare i professori
+              <p className="text-foreground-muted mb-8 max-w-xl">
+                Seleziona una disciplina per trovare appunti, risorse e materiali condivisi dalla community.
               </p>
 
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">

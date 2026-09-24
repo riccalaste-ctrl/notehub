@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 import { supabaseAdmin } from '@/lib/supabase';
+import { isPreviewMode, previewSettings } from '@/lib/preview-data';
 
 export async function GET() {
+  if (isPreviewMode) {
+    return NextResponse.json({ settings: previewSettings });
+  }
+
   try {
     const { data, error } = await supabaseAdmin
       .from('site_settings')

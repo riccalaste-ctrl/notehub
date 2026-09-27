@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GraduationCap, LayoutGrid, BookOpen, Lightbulb, Plus, Menu, X, Search, Compass, ChevronRight, FileText, LogOut, ShieldCheck } from 'lucide-react';
+import { LayoutGrid, BookOpen, Lightbulb, Menu, X, Compass, ChevronRight, FileText, LogOut, ShieldCheck } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -77,12 +77,9 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
             <button aria-label="Apri navigazione" onClick={() => setSidebarOpen(true)} className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
               <Menu className="size-5 text-foreground" />
             </button>
-            <Link href="/" className="size-8 rounded-neu flex justify-center items-center p-0.5">
+            <Link href="/" aria-label="Home" className="size-9 rounded-neu flex justify-center items-center p-0.5 shrink-0">
               <Image src="/logo.svg" alt="SKAKK-UP" width={36} height={36} className="w-full h-full" />
             </Link>
-            <span className="font-semibold text-base tracking-tight text-foreground">
-              SKAKK-UP
-            </span>
           </div>
 
           {/* Breadcrumbs */}
@@ -106,7 +103,7 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <ThemeToggle />
             {isAuthenticated ? (
               <button
@@ -198,14 +195,6 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
         )}
       </AnimatePresence>
 
-      <nav aria-label="Navigazione principale mobile" className="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-40 hidden items-center justify-around border-t border-white/10 bg-[#0d0f16]/95 px-2 pb-[env(safe-area-inset-bottom)] pt-2 backdrop-blur-2xl lg:hidden">
-        {navItems.slice(0, 4).map(({ label, href, icon: Icon }) => {
-          const active = pathname === href || (href !== '/' && pathname?.startsWith(href));
-          return <Link key={href} href={href} aria-label={label} aria-current={active ? 'page' : undefined} className={`flex min-w-0 flex-1 flex-col items-center gap-1 rounded-lg py-1.5 text-[10px] font-semibold transition-colors ${active ? 'text-cyan-300' : 'text-foreground-muted'}`}>
-            <Icon className="size-4" /> <span className="truncate">{label === 'I miei appunti' ? 'Appunti' : label}</span>
-          </Link>;
-        })}
-      </nav>
     </>
   );
 }

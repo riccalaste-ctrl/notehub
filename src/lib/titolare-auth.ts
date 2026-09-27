@@ -111,12 +111,13 @@ export function recordTitolarFailure(request: NextRequest) {
 }
 export function clearTitolarFailures(request: NextRequest) { attempts.delete(key(request)); }
 export async function verifyTitolarPassword(password: string) {
+  if (previewEnabled() && previewPassword) return safeEqual(password, previewPassword);
+
   const storedHash = await configuredPasswordHash();
   if (storedHash) return verifyHash(password, storedHash);
 
   const bootstrapPassword = configuredPassword();
   if (bootstrapPassword) return safeEqual(password, bootstrapPassword);
-  if (previewPassword) return safeEqual(password, previewPassword);
   throw new Error('Configure TITOLARE_ACCESS_PASSWORD or ADMIN_PASSWORD server-side');
 }
 export async function changeTitolarPassword(currentPassword: string, nextPassword: string) {

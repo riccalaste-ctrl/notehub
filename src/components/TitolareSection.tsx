@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Download, ExternalLink, KeyRound, Pencil, ShieldCheck, X } from 'lucide-react';
 
 type Data = {
-  owner: { display_name: string; email: string; role: string; valid_from: string };
+  owner: { display_name: string; email: string; role: string; valid_from: string } | null;
   history: Array<Record<string, string | null>>;
   audit: Array<Record<string, string>>;
 };
@@ -27,7 +27,7 @@ export default function TitolareSection() {
     if (!response.ok) { const body = await response.json().catch(() => ({})); setError(body.error || 'Autenticazione non riuscita'); setLoading(false); return; }
     const result = await fetch('/api/admin/titolare');
     if (!result.ok) { setError((await result.json().catch(() => ({}))).error || 'Dati non disponibili'); setLoading(false); return; }
-    const loaded = await result.json(); setData(loaded); setOwnerForm({ display_name: loaded.owner.display_name, email: loaded.owner.email }); setPassword(''); setLoading(false);
+    const loaded = await result.json(); setData(loaded); setOwnerForm({ display_name: loaded.owner?.display_name || '', email: loaded.owner?.email || '' }); setPassword(''); setLoading(false);
   };
 
   const requestOwnerChange = (event: React.FormEvent) => {
@@ -50,7 +50,7 @@ export default function TitolareSection() {
     if (refreshed.ok) {
       const loaded = await refreshed.json();
       setData(loaded);
-      setOwnerForm({ display_name: loaded.owner.display_name, email: loaded.owner.email });
+      setOwnerForm({ display_name: loaded.owner?.display_name || '', email: loaded.owner?.email || '' });
     }
     setShowConsent(false);
     setConsentAccepted(false);
@@ -81,7 +81,7 @@ export default function TitolareSection() {
     </div>
 
     <div className="glass-panel p-6 border border-amber-300/20">
-      <div className="flex items-center justify-between gap-3"><div><p className="text-xs uppercase tracking-wider text-amber-200/70">Record corrente</p><p className="text-2xl text-white font-semibold mt-2">{data.owner.display_name}</p><p className="text-foreground-muted">{data.owner.email} · {data.owner.role}</p><p className="text-xs text-foreground-muted mt-3">Valido dal {new Date(data.owner.valid_from).toLocaleDateString('it-IT')}</p></div><Pencil className="text-amber-300" size={20} /></div>
+      <div className="flex items-center justify-between gap-3"><div><p className="text-xs uppercase tracking-wider text-amber-200/70">Record corrente</p>{data.owner ? <><p className="text-2xl text-white font-semibold mt-2">{data.owner.display_name}</p><p className="text-foreground-muted">{data.owner.email} · {data.owner.role}</p><p className="text-xs text-foreground-muted mt-3">Valido dal {new Date(data.owner.valid_from).toLocaleDateString('it-IT')}</p></> : <p className="text-sm text-foreground-muted mt-2">Nessun Titolare ancora registrato. Il primo inserimento creerà il record corrente.</p>}</div><Pencil className="text-amber-300" size={20} /></div>
       <form onSubmit={requestOwnerChange} className="grid md:grid-cols-[1fr_1fr_auto] gap-3 mt-6">
         <input aria-label="Nome e cognome del titolare" className="control-input" value={ownerForm.display_name} onChange={(e) => setOwnerForm({ ...ownerForm, display_name: e.target.value })} required />
         <input aria-label="Email del titolare" type="email" className="control-input" value={ownerForm.email} onChange={(e) => setOwnerForm({ ...ownerForm, email: e.target.value })} required />

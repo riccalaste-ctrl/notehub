@@ -188,7 +188,7 @@ export default function GoogleDriveUploader({
       onError(message);
       setUploading(false);
     }
-  }, [selectedFile, subjectId, professorId, uploaderName, serviceRulesAccepted, onSuccess, onError]);
+  }, [selectedFile, subjectId, professorId, serviceRulesAccepted, onSuccess, onError]);
 
   return (
     <div className="space-y-4">

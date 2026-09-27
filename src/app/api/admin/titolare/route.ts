@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { DEVELOPER_EMAILS } from '@/lib/constants';
 import { getPreviewTitolarData, recordPreviewTitolarAccess, updatePreviewTitolar, verifyTitolarToken, TITOLARE_COOKIE } from '@/lib/titolare-auth';
 
 async function authorized() {
   const titular = await verifyTitolarToken((await cookies()).get(TITOLARE_COOKIE)?.value);
   if (!titular) return null;
-  return { actor: { email: titular.email, role: 'admin' as const }, titular };
+  return { actor: { email: titular.email.trim().toLowerCase(), role: 'admin' as const }, titular };
 }
 
 export async function GET(request: NextRequest) {
@@ -59,6 +60,10 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
   const displayName = typeof body.display_name === 'string' ? body.display_name.trim() : '';
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+  const consentAccepted = body.consent_accepted === true;
+  const actorEmail = auth.actor.email;
+  const developerTestAccount = DEVELOPER_EMAILS.some((item) => item.toLowerCase() === actorEmail);
+
   if (displayName.length < 2 || displayName.length > 120) {
     return NextResponse.json({ error: 'Inserisci un nome titolare valido' }, { status: 400 });
   }
@@ -66,8 +71,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Inserisci un indirizzo email valido' }, { status: 400 });
   }
 
+  if (!developerTestAccount && email !== actorEmail) {
+    return NextResponse.json({
+      error: 'Per assumere il ruolo di Titolare devi inserire la stessa email dell’account istituzionale con cui stai effettuando la modifica.',
+    }, { status: 403 });
+  }
+
+  if (!consentAccepted) {
+    return NextResponse.json({
+      error: 'Devi leggere e accettare l’accordo di assunzione dell’incarico prima di confermare il nuovo Titolare.',
+    }, { status: 400 });
+  }
+
   if (process.env.PREVIEW_BYPASS_AUTH === 'true' && process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1' && process.env.NETLIFY !== 'true') {
-    return NextResponse.json(updatePreviewTitolar(displayName, email, auth.actor.email));
+    return NextResponse.json(updatePreviewTitolar(displayName, email, actorEmail, true));
   }
 
   const { supabaseAdmin: supabase } = await import('@/lib/supabase');
@@ -75,8 +92,9 @@ export async function POST(request: NextRequest) {
   const { data: next, error } = await supabase.rpc('change_titular_owner', {
     p_display_name: displayName,
     p_email: email,
-    p_actor_email: auth.actor.email,
+    p_actor_email: actorEmail,
     p_ip: ip,
+    p_consent_accepted: true,
   });
 
   if (error) {

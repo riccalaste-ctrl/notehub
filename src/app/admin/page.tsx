@@ -27,11 +27,13 @@ import {
   XCircle,
   Settings,
   Flag,
+  Ban,
 } from 'lucide-react';
 import { buildInstitutionDisclaimer } from '@/lib/user-session-client';
 import { DEVELOPER_EMAILS } from '@/lib/constants';
 import { previewProfessors, previewSubjects, previewUploads, previewSubjectProfessors, previewSettings, previewReports } from '@/lib/preview-data';
 import TitolareSection from '@/components/TitolareSection';
+import BlockedUsersSection from '@/components/BlockedUsersSection';
 
 interface Subject {
   id: string;
@@ -115,7 +117,7 @@ interface AuditLog {
   created_at: string;
 }
 
-type Tab = 'dashboard' | 'subjects' | 'professors' | 'uploads' | 'reports' | 'consigli' | 'subject-professors' | 'settings' | 'cleanup' | 'titolare';
+type Tab = 'dashboard' | 'subjects' | 'professors' | 'uploads' | 'reports' | 'consigli' | 'subject-professors' | 'settings' | 'cleanup' | 'blocked-users' | 'titolare';
 
 function formatBytes(bytes: number) {
   if (!bytes) return '0 B';
@@ -778,6 +780,7 @@ export default function AdminPage() {
               { id: 'consigli' as const, label: 'Consigli', icon: Lightbulb },
               { id: 'settings' as const, label: 'Impostazioni', icon: Settings },
               { id: 'cleanup' as const, label: 'Pulizia DB', icon: Database },
+              { id: 'blocked-users' as const, label: 'Utenti bloccati', icon: Ban },
               { id: 'titolare' as const, label: 'Titolare', icon: Shield },
             ].map((tab) => {
               const Icon = tab.icon;
@@ -802,6 +805,7 @@ export default function AdminPage() {
       </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {activeTab === 'blocked-users' && <BlockedUsersSection />}
         {activeTab === 'titolare' && <TitolareSection />}
         {activeTab === 'dashboard' && (
           <div>

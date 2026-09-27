@@ -153,6 +153,7 @@ export function updatePreviewTitolar(
   displayName: string,
   email: string,
   actorEmail: string,
+  consentAccepted: boolean,
 ) {
   const now = new Date().toISOString();
   const previous = { ...previewOwner, valid_to: now, changed_at: now };
@@ -172,6 +173,7 @@ export function updatePreviewTitolar(
       source: 'preview',
       previous_owner_email: previous.email,
       previous_owner_name: previous.display_name,
+      consent_accepted: consentAccepted,
     },
   });
   return { owner: previewOwner, history: previewHistory, audit: previewAudit };

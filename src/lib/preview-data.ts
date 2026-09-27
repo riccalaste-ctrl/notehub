@@ -54,10 +54,10 @@ export const previewUploads = [
     subject_id: 'subject-fisica',
     professor_id: 'prof-bianchi',
     subject: { name: 'Fisica', slug: 'fisica' },
-    professor: { name: 'Prof.ssa Bianchi' },
+    professor_name: 'Prof.ssa Bianchi',
     subject_name: 'Fisica',
     subject_slug: 'fisica',
-    professor_name: 'Prof.ssa Bianchi',
+    professor: { name: 'Prof.ssa Bianchi' },
   },
   {
     id: 'upload-3',
@@ -68,10 +68,9 @@ export const previewUploads = [
     subject_id: 'subject-informatica',
     professor_id: 'prof-verdi',
     subject: { name: 'Informatica', slug: 'informatica' },
-    professor: { name: 'Prof. Verdi' },
-    subject_name: 'Informatica',
-    subject_slug: 'informatica',
     professor_name: 'Prof. Verdi',
+    subject_name: 'Informatica',
+    professor: { name: 'Prof. Verdi' },
   },
   {
     id: 'upload-4',
@@ -82,10 +81,9 @@ export const previewUploads = [
     subject_id: 'subject-italiano',
     professor_id: 'prof-bianchi',
     subject: { name: 'Italiano', slug: 'italiano' },
-    professor: { name: 'Prof.ssa Bianchi' },
-    subject_name: 'Italiano',
-    subject_slug: 'italiano',
     professor_name: 'Prof.ssa Bianchi',
+    subject_name: 'Italiano',
+    professor: { name: 'Prof.ssa Bianchi' },
   },
 ];
 
@@ -93,6 +91,7 @@ export const previewSettings: Record<string, string> = {
   admin_email: 'admin@notehub.local',
   support_email: 'support@notehub.local',
   consigli_email: 'consigli@notehub.local',
+  reports_email: 'segnalazioni@notehub.local',
   site_policy: 'NoteHub è un progetto indipendente creato per condividere materiale scolastico.',
   legal_project_name: 'NoteHub',
   legal_controller_name: '',
@@ -118,8 +117,20 @@ export const previewConsigliFiles = [
   },
 ];
 
-
-export const previewReports = [
+export const previewReports: Array<{
+  id: string;
+  upload_id: string;
+  reporter_email: string;
+  reason: string;
+  file_name: string;
+  uploader_name: string;
+  file_view_url: string;
+  file_download_url: string;
+  status: 'pending' | 'dismissed' | 'resolved_removed';
+  created_at: string;
+  email_sent_at: string;
+  email_error: string | null;
+}> = [
   {
     id: 'report-preview-1',
     upload_id: 'upload-1',

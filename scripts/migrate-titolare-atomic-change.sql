@@ -11,7 +11,7 @@ create or replace function public.change_titular_owner(
 )
 returns public.titular_records
 language plpgsql
-security definer
+security invoker
 set search_path = public
 as $$
 declare

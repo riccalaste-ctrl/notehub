@@ -101,7 +101,27 @@ export function recordTitolarFailure(request: NextRequest) {
 export function clearTitolarFailures(request: NextRequest) { attempts.delete(key(request)); }
 export async function verifyTitolarPassword(password: string) {
   const storedHash = await configuredPasswordHash();
-  if (storedHash) return verifyHash(password, storedHash);
+
+  // The database hash is authoritative once it exists. If an older/stale hash
+  // is present but TITOLARE_PASSWORD is configured, allow the configured
+  // password once and migrate that password into the DB hash. This fixes
+  // existing installations without leaving two valid passwords indefinitely.
+  if (storedHash) {
+    if (await verifyHash(password, storedHash)) return true;
+    if (previewPassword && safeEqual(password, previewPassword)) {
+      const migratedHash = await hashPassword(previewPassword);
+      const { error } = await supabaseAdmin
+        .from('site_settings')
+        .upsert(
+          { key: 'titolare_password_hash', value: migratedHash, updated_at: new Date().toISOString() },
+          { onConflict: 'key' },
+        );
+      if (error) throw error;
+      return true;
+    }
+    return false;
+  }
+
   if (!previewPassword) throw new Error('TITOLARE_PASSWORD must be configured server-side');
   return safeEqual(password, previewPassword);
 }

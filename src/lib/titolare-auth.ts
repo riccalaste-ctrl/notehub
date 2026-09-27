@@ -10,7 +10,7 @@ const WINDOW_MS = 15 * 60 * 1000;
 const MAX_ATTEMPTS = Number(process.env.TITOLARE_LOGIN_MAX_ATTEMPTS || '5');
 const attempts = new Map<string, { count: number; resetAt: number }>();
 const scrypt = promisify(nodeScrypt);
-let previewPassword = process.env.TITOLARE_ACCESS_PASSWORD?.trim() || process.env.TITOLARE_PASSWORD?.trim() || '';
+let previewPassword = process.env.TITOLARE_ACCESS_PASSWORD?.trim() || '';
 const TITOLARE_HASH_KEY = 'titolare_access_password_hash';
 const BOOTSTRAP_SUFFIX = '#Titolare2026';
 
@@ -86,7 +86,7 @@ async function configuredPasswordHash() {
 }
 
 function configuredPassword() {
-  const explicit = process.env.TITOLARE_ACCESS_PASSWORD?.trim() || process.env.TITOLARE_PASSWORD?.trim();
+  const explicit = process.env.TITOLARE_ACCESS_PASSWORD?.trim();
   if (explicit) return explicit;
   const adminPassword = process.env.ADMIN_PASSWORD?.trim();
   return adminPassword ? `${adminPassword}${BOOTSTRAP_SUFFIX}` : '';

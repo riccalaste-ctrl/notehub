@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { changeTitolarPassword, verifyTitolarToken, TITOLARE_COOKIE } from '@/lib/titolare-auth';
+import { changeTitolarPassword, verifyTitolarToken, TITOLARE_COOKIE, recordPreviewTitolarAccess } from '@/lib/titolare-auth';
 import { supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
     // Never accept an actor email from the request body or the client.
     const actorEmail = titular.email.trim().toLowerCase();
     if (process.env.PREVIEW_BYPASS_AUTH === 'true' && process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1' && process.env.NETLIFY !== 'true') {
+      recordPreviewTitolarAccess(actorEmail, 'TITOLARE_PASSWORD_CHANGED');
       return NextResponse.json({ success: true });
     }
 

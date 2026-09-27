@@ -40,18 +40,7 @@ const previewHistory = [
   { ...previewOwner, id: 'owner-history-1', valid_to: null, changed_at: '2025-09-01T00:00:00.000Z' },
   { id: 'owner-history-0', display_name: 'NoteHub founding team', email: 'team@notehub.local', role: 'Titolare', valid_from: '2025-01-15T00:00:00.000Z', valid_to: '2025-08-31T23:59:59.999Z', changed_at: '2025-08-31T23:59:59.999Z', source: 'preview' },
 ];
-const previewAudit: TitolarAudit[] = [
-  {
-    id: 'titolare-audit-1',
-    action: 'OWNER_VIEWED',
-    owner_id: previewOwner.id,
-    owner_email: previewOwner.email,
-    actor_email: 'system',
-    actor_account: 'system',
-    created_at: new Date().toISOString(),
-    metadata: { source: 'preview' },
-  },
-];
+const previewAudit: TitolarAudit[] = [];
 
 function previewEnabled() {
   return process.env.PREVIEW_BYPASS_AUTH === 'true' && process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1' && process.env.NETLIFY !== 'true';

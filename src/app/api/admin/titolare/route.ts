@@ -7,9 +7,11 @@ async function authorized() {
   if (!titular) return null;
   return { actor: { email: titular.email, role: 'admin' as const }, titular };
 }
+
 export async function GET(request: NextRequest) {
   const auth = await authorized();
   if (!auth) return NextResponse.json({ error: 'Autenticazione Titolare richiesta' }, { status: 401 });
+
   if (process.env.PREVIEW_BYPASS_AUTH === 'true' && process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1' && process.env.NETLIFY !== 'true') {
     recordPreviewTitolarAccess(auth.actor.email);
     const data = getPreviewTitolarData();
@@ -20,15 +22,18 @@ export async function GET(request: NextRequest) {
     }
     return NextResponse.json(data);
   }
-  // Use the server-only service role for append-only access logging; never
-  // import this branch in preview, where Supabase must remain untouched.
+
   const { supabaseAdmin: supabase } = await import('@/lib/supabase');
   const [owner, history, audit] = await Promise.all([
     supabase.from('titular_records').select('*').eq('is_current', true).single(),
     supabase.from('titular_history').select('*').order('valid_from', { ascending: false }),
     supabase.from('titular_audit_logs').select('*').order('created_at', { ascending: false }).limit(200),
   ]);
-  if (owner.error || history.error || audit.error) return NextResponse.json({ error: 'Tabelle titolare non disponibili: applicare la migrazione SQL manualmente.' }, { status: 503 });
+  if (owner.error || history.error || audit.error) {
+    console.error('[titolare] Failed to load titular data', { owner: owner.error?.message, history: history.error?.message, audit: audit.error?.message });
+    return NextResponse.json({ error: 'Tabelle titolare non disponibili: applicare la migrazione SQL manualmente.' }, { status: 503 });
+  }
+
   await supabase.from('titular_audit_logs').insert({
     action: request.nextUrl.searchParams.get('export') ? 'OWNER_EXPORTED' : 'OWNER_VIEWED',
     owner_id: owner.data?.id,
@@ -38,6 +43,7 @@ export async function GET(request: NextRequest) {
     ip: request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null,
     metadata: { access_log: true, export: request.nextUrl.searchParams.get('export') || null },
   });
+
   if (request.nextUrl.searchParams.get('export') === 'json') return NextResponse.json({ owner: owner.data, history: history.data, audit: audit.data, exported_at: new Date().toISOString() });
   if (request.nextUrl.searchParams.get('export') === 'csv') {
     const rows = [['created_at', 'action', 'owner_email', 'actor_email', 'actor_account'], ...(audit.data || []).map((x: any) => [x.created_at, x.action, x.owner_email, x.actor_email, x.actor_account])];
@@ -65,36 +71,23 @@ export async function POST(request: NextRequest) {
   }
 
   const { supabaseAdmin: supabase } = await import('@/lib/supabase');
-  const now = new Date().toISOString();
-  const { data: current, error: currentError } = await supabase
-    .from('titular_records')
-    .select('*')
-    .eq('is_current', true)
-    .single();
-  if (currentError) return NextResponse.json({ error: 'Titolare corrente non disponibile' }, { status: 503 });
-
-  const { error: historyError } = await supabase.from('titular_history').insert({
-    ...current,
-    valid_to: now,
-    changed_at: now,
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null;
+  const { data: next, error } = await supabase.rpc('change_titular_owner', {
+    p_display_name: displayName,
+    p_email: email,
+    p_actor_email: auth.actor.email,
+    p_ip: ip,
   });
-  if (historyError) return NextResponse.json({ error: 'Impossibile salvare lo storico precedente' }, { status: 503 });
 
-  const { data: next, error: updateError } = await supabase
-    .from('titular_records')
-    .update({ display_name: displayName, email, valid_from: now, created_at: now })
-    .eq('id', current.id)
-    .select()
-    .single();
-  if (updateError) return NextResponse.json({ error: 'Impossibile aggiornare il titolare' }, { status: 503 });
+  if (error) {
+    console.error('[titolare] Atomic owner change failed', {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    });
+    return NextResponse.json({ error: 'Impossibile aggiornare il Titolare. Lo storico precedente non è stato modificato.' }, { status: 503 });
+  }
 
-  await supabase.from('titular_audit_logs').insert({
-    action: 'OWNER_CHANGED',
-    owner_id: next.id,
-    owner_email: next.email,
-    actor_email: auth.actor.email,
-    actor_account: 'institutional_user',
-    metadata: { previous_owner_email: current.email, previous_owner_name: current.display_name },
-  });
   return NextResponse.json({ owner: next });
 }

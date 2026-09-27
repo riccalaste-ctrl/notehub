@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
   const { supabaseAdmin: supabase } = await import('@/lib/supabase');
   const [owner, history, audit] = await Promise.all([
-    supabase.from('titular_records').select('*').eq('is_current', true).single(),
+    supabase.from('titular_records').select('*').eq('is_current', true).maybeSingle(),
     supabase.from('titular_history').select('*').order('valid_from', { ascending: false }),
     supabase.from('titular_audit_logs').select('*').order('created_at', { ascending: false }).limit(200),
   ]);

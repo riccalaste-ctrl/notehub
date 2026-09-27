@@ -28,6 +28,7 @@ import {
   Settings,
   Flag,
   Ban,
+  ChevronRight,
 } from 'lucide-react';
 import { buildInstitutionDisclaimer } from '@/lib/user-session-client';
 import { DEVELOPER_EMAILS } from '@/lib/constants';
@@ -755,7 +756,7 @@ export default function AdminPage() {
             <div className="w-10 h-10 rounded-xl bg-neon-purple/20 flex items-center justify-center border border-neon-purple/30">
               <Shield className="size-5 text-neon-purple" />
             </div>
-            <h1 className="text-xl font-semibold text-white">SKAKK-UP Admin</h1>
+            <h1 className="text-xl font-semibold text-white">Admin</h1>
           </div>
           <button
             onClick={handleLogout}
@@ -769,7 +770,9 @@ export default function AdminPage() {
 
       <div className="surface-card rounded-none border-b border-white/10 mt-1">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav aria-label="Navigazione amministrazione" className="flex gap-5 overflow-x-auto custom-scrollbar">
+          <div className="relative">
+            <nav aria-label="Navigazione amministrazione" className="admin-tabs-scroll flex gap-5 overflow-x-auto custom-scrollbar pr-10" tabIndex={0}>
+
             {[
               { id: 'dashboard' as const, label: 'Dashboard', icon: LayoutDashboard },
               { id: 'subjects' as const, label: 'Materie', icon: BookOpen },
@@ -800,7 +803,14 @@ export default function AdminPage() {
                 </button>
               );
             })}
-          </nav>
+            </nav>
+            <div aria-hidden="true" className="pointer-events-none absolute right-0 top-0 bottom-0 flex items-center pl-8 pr-1 bg-gradient-to-r from-transparent via-[#12141d]/80 to-[#12141d]">
+              <span className="flex items-center gap-0.5 rounded-full border border-white/10 bg-white/5 px-1.5 py-1 text-[9px] uppercase tracking-[0.14em] text-foreground-muted shadow-lg backdrop-blur-md">
+                <span className="hidden sm:inline">scorri</span>
+                <ChevronRight className="size-3" />
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 

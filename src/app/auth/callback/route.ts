@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { isAllowedUserEmail } from '@/lib/user-session';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,12 +38,33 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL('/login?error=oauth_exchange_failed', requestUrl.origin));
     }
 
-    // Verify email is allowed
+    // Verify email is allowed and not blocked by an administrator.
     const { data: { user } } = await supabase.auth.getUser();
-    if (user && user.email && !(await isAllowedUserEmail(user.email))) {
+    if (user && user.email) {
+      const normalizedEmail = user.email.trim().toLowerCase();
+      const { data: blockedUser, error: blockedLookupError } = await supabaseAdmin
+        .from('blocked_users')
+        .select('id')
+        .eq('email', normalizedEmail)
+        .maybeSingle();
+
+      if (blockedLookupError) {
+        console.error('[AUTH] Blocklist lookup failed:', blockedLookupError.message);
+        await supabase.auth.signOut();
+        return NextResponse.redirect(new URL('/login?error=auth_unavailable', requestUrl.origin));
+      }
+
+      if (blockedUser) {
+        console.log('[AUTH] Blocked user denied:', normalizedEmail);
+        await supabase.auth.signOut();
+        return NextResponse.redirect(new URL('/login?error=account_blocked', requestUrl.origin));
+      }
+
+      if (!(await isAllowedUserEmail(normalizedEmail))) {
       console.log('[AUTH] User not allowed:', user.email);
       await supabase.auth.signOut();
-      return NextResponse.redirect(new URL('/login?error=invalid_domain', requestUrl.origin));
+        return NextResponse.redirect(new URL('/login?error=invalid_domain', requestUrl.origin));
+      }
     }
 
     console.log('[AUTH] Auth successful, redirecting to:', next);

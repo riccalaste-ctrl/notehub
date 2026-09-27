@@ -22,6 +22,10 @@ const allowedSettingKeys = [
   'legal_data_retention',
   'legal_minimum_age',
   'legal_policy_updated_at',
+  'privacy_policy_version',
+  'cookie_consent_version',
+  'terms_version',
+  'reports_email',
 ] as const;
 
 const settingSchema = z.object({

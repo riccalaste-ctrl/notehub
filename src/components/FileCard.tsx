@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { FileText, Download, Eye } from 'lucide-react';
+import ReportButton from './ReportButton';
 
 interface FileCardProps {
   file: {
@@ -10,6 +11,7 @@ interface FileCardProps {
     subject_name?: string;
     subject_slug?: string;
     professor_name?: string;
+    uploader_name?: string;
     created_at: string;
     mime_type: string;
     size_bytes: number;
@@ -19,11 +21,7 @@ interface FileCardProps {
   index?: number;
 }
 
-const gradientClasses = [
-  'gradient-mint',
-  'gradient-lavender',
-  'gradient-coral',
-];
+const gradientClasses = ['gradient-mint', 'gradient-lavender', 'gradient-coral'];
 
 function getFileGradient(mimeType: string) {
   if (mimeType.includes('pdf')) return 'gradient-coral';
@@ -48,15 +46,11 @@ function formatDate(dateString: string): string {
 
 export default function FileCard({ file, index = 0 }: FileCardProps) {
   const handleDownload = () => {
-    if (file.download_url) {
-      window.open(file.download_url, '_blank');
-    }
+    if (file.download_url) window.open(file.download_url, '_blank');
   };
 
   const handleView = () => {
-    if (file.view_url) {
-      window.open(file.view_url, '_blank');
-    }
+    if (file.view_url) window.open(file.view_url, '_blank');
   };
 
   return (
@@ -96,7 +90,7 @@ export default function FileCard({ file, index = 0 }: FileCardProps) {
         </div>
 
         <div className="mt-4">
-            <h3 className="font-semibold text-base text-foreground truncate mb-1" title={file.original_filename}>
+          <h3 className="font-semibold text-base text-foreground truncate mb-1" title={file.original_filename}>
             {file.original_filename}
           </h3>
           <div className="flex flex-wrap items-center gap-2 text-xs">
@@ -106,10 +100,19 @@ export default function FileCard({ file, index = 0 }: FileCardProps) {
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2 mt-3 text-xs text-foreground-light font-medium">
-            <span>{formatDate(file.created_at)}</span>
-            <span>·</span>
-            <span>{formatFileSize(file.size_bytes)}</span>
+          {file.uploader_name && (
+            <div className="mt-2 text-xs text-foreground-light">
+              Pubblicato da: <span className="font-semibold text-foreground">{file.uploader_name}</span>
+            </div>
+          )}
+
+          <div className="mt-3 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs text-foreground-light font-medium">
+              <span>{formatDate(file.created_at)}</span>
+              <span>·</span>
+              <span>{formatFileSize(file.size_bytes)}</span>
+            </div>
+            <ReportButton uploadId={file.id} fileName={file.original_filename} />
           </div>
         </div>
       </div>

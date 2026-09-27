@@ -11,6 +11,11 @@ const required = [
   ['src/app/api/admin/titolare/auth/route.ts', 'checkTitolarRateLimit'],
   ['src/app/api/admin/titolare/route.ts', 'export'],
   ['scripts/create-titolare-tables.sql', 'prevent_titular_audit_mutation'],
+  ['src/lib/moderation.ts', 'getModerationState'],
+  ['src/lib/rate-limit.ts', 'consumeRateLimit'],
+  ['src/app/api/reports/route.ts', 'reports_email'],
+  ['src/app/api/cron/audit-cleanup/route.ts', 'CRON_SECRET'],
+  ['scripts/security-redesign.sql', 'legal_consents'],
 ];
 for (const [file, text] of required) {
   if (!readFileSync(file, 'utf8').includes(text)) throw new Error(`Preview check failed: ${file}`);

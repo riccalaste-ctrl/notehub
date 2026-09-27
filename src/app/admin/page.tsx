@@ -26,10 +26,11 @@ import {
   Link as LinkIcon,
   XCircle,
   Settings,
+  Flag,
 } from 'lucide-react';
 import { buildInstitutionDisclaimer } from '@/lib/user-session-client';
 import { DEVELOPER_EMAILS } from '@/lib/constants';
-import { previewProfessors, previewSubjects, previewUploads, previewSubjectProfessors, previewSettings } from '@/lib/preview-data';
+import { previewProfessors, previewSubjects, previewUploads, previewSubjectProfessors, previewSettings, previewReports } from '@/lib/preview-data';
 import TitolareSection from '@/components/TitolareSection';
 
 interface Subject {
@@ -58,8 +59,27 @@ interface Upload {
   original_filename: string;
   subject?: { name: string };
   professor?: { name: string };
+  uploader_name?: string | null;
+  view_url?: string | null;
+  download_url?: string | null;
   created_at: string;
   size_bytes: number;
+}
+
+interface Report {
+  id: string;
+  upload_id: string;
+  reporter_email: string;
+  reason: string;
+  file_name: string;
+  uploader_name?: string | null;
+  file_view_url?: string | null;
+  file_download_url?: string | null;
+  status: 'pending' | 'dismissed' | 'resolved_removed';
+  email_sent_at?: string | null;
+  email_error?: string | null;
+  created_at: string;
+  upload?: Upload | null;
 }
 
 interface Consiglio {
@@ -95,7 +115,7 @@ interface AuditLog {
   created_at: string;
 }
 
-type Tab = 'dashboard' | 'subjects' | 'professors' | 'uploads' | 'consigli' | 'subject-professors' | 'settings' | 'cleanup' | 'titolare';
+type Tab = 'dashboard' | 'subjects' | 'professors' | 'uploads' | 'reports' | 'consigli' | 'subject-professors' | 'settings' | 'cleanup' | 'titolare';
 
 function formatBytes(bytes: number) {
   if (!bytes) return '0 B';
@@ -154,6 +174,7 @@ export default function AdminPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [professors, setProfessors] = useState<Professor[]>([]);
   const [uploads, setUploads] = useState<Upload[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
   const [consigli, setConsigli] = useState<Consiglio[]>([]);
   const [subjectProfessors, setSubjectProfessors] = useState<SubjectProfessor[]>([]);
   const [loading, setLoading] = useState(false);
@@ -167,7 +188,7 @@ export default function AdminPage() {
   const [criticalError, setCriticalError] = useState<{ title: string; message: string } | null>(null);
   const { toast, showToast, hideToast } = useToast();
   const [settings, setSettings] = useState<Record<string, string>>({});
-  const [settingsForm, setSettingsForm] = useState({ support_email: '', site_policy: '', allowed_external_emails: '', consigli_email: '' });
+  const [settingsForm, setSettingsForm] = useState({ support_email: '', site_policy: '', allowed_external_emails: '', consigli_email: '', reports_email: '' });
   const [legalForm, setLegalForm] = useState({
     legal_project_name: 'NoteHub',
     legal_controller_name: '',
@@ -194,12 +215,14 @@ export default function AdminPage() {
         professor: { name: upload.professor_name },
       })));
       setSubjectProfessors(previewSubjectProfessors);
+      setReports(previewReports);
       setSettings(previewSettings);
       setSettingsForm({
         support_email: previewSettings.support_email,
         site_policy: previewSettings.site_policy,
         allowed_external_emails: '',
         consigli_email: previewSettings.consigli_email,
+        reports_email: previewSettings.reports_email || previewSettings.admin_email || '',
       });
       setLegalForm({
         legal_project_name: previewSettings.legal_project_name || 'NoteHub',
@@ -217,7 +240,7 @@ export default function AdminPage() {
       return;
     }
     try {
-      const [subjectsRes, professorsRes, uploadsRes, consigliRes, spRes, settingsRes, auditRes] = await Promise.all([
+      const [subjectsRes, professorsRes, uploadsRes, consigliRes, spRes, settingsRes, auditRes, reportsRes] = await Promise.all([
         fetch('/api/admin/subjects'),
         fetch('/api/admin/professors'),
         fetch('/api/admin/uploads?limit=100'),
@@ -225,6 +248,7 @@ export default function AdminPage() {
         fetch('/api/admin/subject-professors'),
         fetch('/api/admin/settings'),
         fetch('/api/admin/audit-logs?limit=50'),
+        fetch('/api/admin/reports'),
       ]);
 
       if (subjectsRes.ok) {
@@ -264,6 +288,7 @@ export default function AdminPage() {
             .filter((e: string) => e && !DEVELOPER_EMAILS.includes(e))
             .join(','),
           consigli_email: data.settings?.consigli_email || '',
+          reports_email: data.settings?.reports_email || data.settings?.admin_email || '',
         });
         setLegalForm({
           legal_project_name: data.settings?.legal_project_name || 'NoteHub',
@@ -294,6 +319,11 @@ export default function AdminPage() {
       if (auditRes.ok) {
         const data = await auditRes.json();
         setAuditLogs(data.logs || []);
+      }
+
+      if (reportsRes.ok) {
+        const data = await reportsRes.json();
+        setReports(data.reports || []);
       }
     } catch (error) {
       console.error('Fetch error:', error);
@@ -346,6 +376,24 @@ export default function AdminPage() {
       setLoginError('Errore di connessione');
     } finally {
       setLoginLoading(false);
+    }
+  };
+
+  const resolveReport = async (id: string, action: 'remove' | 'dismiss') => {
+    const message = action === 'remove' ? 'Rimuovere definitivamente il documento segnalato?' : 'Archiviare la segnalazione senza rimuovere il documento?';
+    if (!confirm(message)) return;
+    try {
+      const res = await fetch('/api/admin/reports', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Operazione non riuscita');
+      showToast(action === 'remove' ? 'Documento rimosso e segnalazione chiusa' : 'Segnalazione archiviata', 'success');
+      await fetchData();
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Operazione non riuscita', 'error');
     }
   };
 
@@ -726,6 +774,7 @@ export default function AdminPage() {
               { id: 'professors' as const, label: 'Professori', icon: Users },
               { id: 'subject-professors' as const, label: 'Associazioni', icon: LinkIcon },
               { id: 'uploads' as const, label: 'File', icon: FileText },
+              { id: 'reports' as const, label: 'Segnalazioni', icon: Flag },
               { id: 'consigli' as const, label: 'Consigli', icon: Lightbulb },
               { id: 'settings' as const, label: 'Impostazioni', icon: Settings },
               { id: 'cleanup' as const, label: 'Pulizia DB', icon: Database },
@@ -1176,6 +1225,59 @@ export default function AdminPage() {
           </div>
         )}
 
+        {activeTab === 'reports' && (
+          <div>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-red-500/15 border border-red-400/20 flex items-center justify-center">
+                <Flag className="size-5 text-red-300" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-semibold text-white">Segnalazioni documenti</h2>
+                <p className="text-sm text-foreground-muted">Controlla il motivo, apri il documento, verifica chi lo ha pubblicato e decidi se rimuoverlo.</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {reports.length === 0 ? (
+                <div className="glass-panel p-10 text-center text-foreground-muted">Nessuna segnalazione.</div>
+              ) : reports.map((report) => (
+                <article key={report.id} className="glass-panel p-5 border border-white/10">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${report.status === 'pending' ? 'bg-amber-400/10 text-amber-300' : report.status === 'dismissed' ? 'bg-slate-400/10 text-slate-300' : 'bg-emerald-400/10 text-emerald-300'}`}>
+                          {report.status === 'pending' ? 'Da valutare' : report.status === 'dismissed' ? 'Archiviata' : 'Documento rimosso'}
+                        </span>
+                        <span className="text-xs text-foreground-muted">{formatDate(report.created_at)}</span>
+                      </div>
+                      <h3 className="mt-3 text-lg font-semibold text-white break-words">{report.file_name}</h3>
+                      <p className="mt-2 text-sm text-foreground-muted">Pubblicato da: <strong className="text-white">{report.uploader_name || 'Nome non disponibile'}</strong></p>
+                      <p className="mt-2 text-sm text-foreground-muted">Segnalato da: <span className="text-white">{report.reporter_email}</span></p>
+                      <div className="mt-4 rounded-xl bg-black/25 border border-white/5 p-4">
+                        <p className="text-xs uppercase tracking-wide text-foreground-muted mb-1">Motivo</p>
+                        <p className="text-sm text-white whitespace-pre-wrap break-words">{report.reason}</p>
+                      </div>
+                      {report.email_error && <p className="mt-3 text-xs text-amber-300">Avviso email: {report.email_error}</p>}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 shrink-0">
+                      {(report.file_view_url || report.upload?.view_url) && (
+                        <a href={report.file_view_url || report.upload?.view_url || '#'} target="_blank" rel="noreferrer" className="px-4 py-2 rounded-xl bg-cyan-300/10 border border-cyan-300/20 text-cyan-200 text-sm font-semibold">Apri documento</a>
+                      )}
+                      {report.status === 'pending' && (
+                        <>
+                          <button onClick={() => resolveReport(report.id, 'dismiss')} className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-semibold">Mantieni online</button>
+                          <button onClick={() => resolveReport(report.id, 'remove')} className="px-4 py-2 rounded-xl bg-red-500/10 border border-red-400/20 text-red-300 text-sm font-semibold">Rimuovi documento</button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
+
         {activeTab === 'consigli' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1">
@@ -1466,6 +1568,44 @@ export default function AdminPage() {
                       }
                     }}
                     className="px-6 py-3 bg-neon-blue/20 hover:bg-neon-blue/30 text-neon-blue border border-neon-blue/30 font-semibold rounded-xl transition-all"
+                  >
+                    Salva
+                  </button>
+                </div>
+              </div>
+
+              <div className="glass-panel p-6 border border-white/10">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <Flag className="size-5 text-red-300" />
+                  Email per le segnalazioni
+                </h3>
+                <p className="text-sm text-foreground-muted mb-4">
+                  A questo indirizzo verranno inviate automaticamente le segnalazioni dei documenti. La modifica è dinamica e non richiede un nuovo deploy.
+                </p>
+                <div className="flex gap-3">
+                  <input
+                    type="email"
+                    value={settingsForm.reports_email}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, reports_email: e.target.value })}
+                    placeholder="moderazione@esempio.it"
+                    className="flex-1 px-4 py-3 bg-black/50 border border-white/10 focus:border-red-400/40 focus:ring-1 focus:ring-red-400/30 rounded-xl text-white placeholder-foreground-muted outline-none transition-all"
+                  />
+                  <button
+                    onClick={async () => {
+                      try {
+                        const res = await fetch('/api/admin/settings', {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ key: 'reports_email', value: settingsForm.reports_email }),
+                        });
+                        if (!res.ok) throw new Error((await res.json()).error || 'Errore aggiornamento');
+                        showToast('Email segnalazioni aggiornata', 'success');
+                        await fetchData();
+                      } catch (error) {
+                        showToast(error instanceof Error ? error.message : 'Errore aggiornamento', 'error');
+                      }
+                    }}
+                    className="px-6 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-400/20 font-semibold rounded-xl transition-all"
                   >
                     Salva
                   </button>

@@ -1,6 +1,0 @@
-[build]
-  command = "npm run build"
-  publish = ".next"
-
-# Next.js routing is handled by the Netlify Next runtime. Do not rewrite
-# every route to a static index, which bypasses API/auth handlers.

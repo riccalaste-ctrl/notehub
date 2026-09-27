@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "preview": "next dev -p 3000",
+    "preview": "node scripts/start-preview.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "verify:preview": "node scripts/verify-preview.mjs",
-    "generate-password-hash": "node scripts/generate-password-hash.js"
+    "verify:preview": "npm run typecheck && node scripts/verify-preview.mjs",
+    "generate-password-hash": "node scripts/generate-password-hash.js",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

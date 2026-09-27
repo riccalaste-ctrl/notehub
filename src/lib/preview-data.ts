@@ -117,3 +117,21 @@ export const previewConsigliFiles = [
     created_at: previewCreatedAt(2),
   },
 ];
+
+
+export const previewReports = [
+  {
+    id: 'report-preview-1',
+    upload_id: 'upload-1',
+    reporter_email: 'studente@liceoscacchibari.it',
+    reason: 'Il documento contiene materiale che sembra non pertinente alla materia indicata.',
+    file_name: 'Derivate e integrali - formulario.pdf',
+    uploader_name: 'Marco Bianchi',
+    file_view_url: '#',
+    file_download_url: '#',
+    status: 'pending',
+    created_at: previewCreatedAt(0),
+    email_sent_at: new Date().toISOString(),
+    email_error: null,
+  },
+];

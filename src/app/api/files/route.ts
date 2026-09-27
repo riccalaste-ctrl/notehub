@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       .from('uploads')
       .select(`
         id, subject_id, professor_id, original_filename, download_url, view_url,
-        mime_type, size_bytes, created_at,
+        mime_type, size_bytes, created_at, uploader_name,
         subject:subjects(name, slug),
         professor:professors(name)
       `)

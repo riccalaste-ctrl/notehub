@@ -21,7 +21,6 @@ const CHUNK_SIZE = 3 * 1024 * 1024;
 interface GoogleDriveUploaderProps {
   subjectId: string;
   professorId: string;
-  uploaderName: string;
   serviceRulesAccepted: boolean;
   onSuccess: () => void;
   onError: (error: string) => void;
@@ -59,7 +58,7 @@ async function uploadChunkToServer(
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.error || `Chunk upload failed (${response.status})`);
+    throw new Error(data.error || `Caricamento del blocco non riuscito (${response.status})`);
   }
 
   return data;
@@ -68,7 +67,6 @@ async function uploadChunkToServer(
 export default function GoogleDriveUploader({
   subjectId,
   professorId,
-  uploaderName,
   serviceRulesAccepted,
   onSuccess,
   onError,
@@ -121,7 +119,6 @@ export default function GoogleDriveUploader({
         body: JSON.stringify({
           subjectId,
           professorId,
-          uploaderName,
           serviceRulesAccepted,
           originalFilename: selectedFile.name,
           mimeType: selectedFile.type,
@@ -186,7 +183,7 @@ export default function GoogleDriveUploader({
       setProgress(100);
       setTimeout(() => onSuccess(), 300);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Upload fallito';
+      const message = error instanceof Error ? error.message : 'Caricamento non riuscito';
       console.error('[Upload] Final error:', message);
       onError(message);
       setUploading(false);

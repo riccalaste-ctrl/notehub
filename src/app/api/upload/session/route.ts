@@ -12,13 +12,15 @@ import {
 } from '@/lib/google-drive';
 import { getAuthenticatedUserFromRequest } from '@/lib/user-session';
 import { isPreviewMode } from '@/lib/preview-data';
+import { getModerationState, getUploaderDisplayName } from '@/lib/moderation';
+import { consumeRateLimit } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
 const schema = z.object({
   subjectId: z.string().uuid(),
   professorId: z.string().uuid(),
-  uploaderName: z.string().max(100).optional().or(z.literal('')),
+
   originalFilename: z.string().min(1).max(255),
   mimeType: z.string().min(1).max(160),
   sizeBytes: z.number().int().positive().max(MAX_UPLOAD_SIZE_BYTES),
@@ -30,6 +32,16 @@ export async function POST(request: NextRequest) {
     const user = await getAuthenticatedUserFromRequest(request);
     if (!user) {
       return NextResponse.json({ error: 'Accesso non autorizzato' }, { status: 401 });
+    }
+
+    const rateLimit = consumeRateLimit(request, 'upload-session', { limit: 12, windowMs: 10 * 60 * 1000, identity: user.id });
+    if (rateLimit.limited) {
+      return NextResponse.json({ error: 'Troppi tentativi di upload. Riprova più tardi.' }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
+    }
+
+    const moderation = isPreviewMode ? { blocked: false, status: null, reason: null } : await getModerationState(user.email);
+    if (moderation.blocked) {
+      return NextResponse.json({ error: moderation.status === 'suspended' ? 'Account sospeso' : 'Account bannato', reason: moderation.reason || null }, { status: 403 });
     }
 
     console.log('[upload/session] Starting...');
@@ -44,7 +56,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { subjectId, professorId, uploaderName, originalFilename, mimeType, sizeBytes } = validation.data;
+    const { subjectId, professorId, originalFilename, mimeType, sizeBytes } = validation.data;
+    const uploaderName = getUploaderDisplayName(user);
     console.log('[upload/session] Validated:', { subjectId, professorId, originalFilename, mimeType, sizeBytes });
 
     if (!isAllowedUploadMimeType(mimeType)) {

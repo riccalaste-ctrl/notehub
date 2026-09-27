@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Plus, Shield } from 'lucide-react';
 import Link from 'next/link';
@@ -38,7 +38,6 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
   const [success, setSuccess] = useState(false);
   const [selectedProfessor, setSelectedProfessor] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('');
-  const [uploaderName, setUploaderName] = useState('');
   const [step, setStep] = useState(1);
   const [rulesAccepted, setRulesAccepted] = useState(false);
 
@@ -46,7 +45,6 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
     if (!isOpen) {
       setSelectedProfessor('');
       setSelectedSubject('');
-      setUploaderName('');
       setError('');
       setSuccess(false);
       setStep(1);
@@ -138,7 +136,7 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                       Ogni file caricato viene associato al tuo account
                     </p>
                     <p className="text-xs text-foreground-muted mt-1 leading-relaxed">
-                      Solo l&apos;autore puÃ² modificarlo o eliminarlo; l&apos;admin puÃ² rimuovere globalmente file segnalati.
+                      Solo l&apos;autore può modificarlo o eliminarlo; l&apos;admin può rimuovere globalmente i file segnalati.
                     </p>
                   </div>
                 </div>
@@ -166,18 +164,8 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
 
                   {step === 1 && (
                     <>
-                      <div>
-                        <label className="block text-sm font-medium text-foreground-muted mb-2">
-                          Il tuo nome <span className="text-foreground-muted/50 font-normal">(facoltativo)</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={uploaderName}
-                          onChange={(e) => setUploaderName(e.target.value)}
-                          placeholder="Anonimo"
-                          maxLength={100}
-                          className="w-full px-4 py-3 bg-black/50 border border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple rounded-xl text-white placeholder-foreground-muted outline-none transition-all"
-                        />
+                      <div className="rounded-xl border border-cyan-300/10 bg-cyan-300/5 p-4 text-sm text-foreground-muted">
+                        Il nome mostrato come autore viene ricavato automaticamente dall’account Google autenticato.
                       </div>
 
                       <div>
@@ -248,8 +236,7 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                         <GoogleDriveUploader
                           subjectId={selectedSubject}
                           professorId={selectedProfessor}
-                          uploaderName={uploaderName}
-                          serviceRulesAccepted={rulesAccepted}
+                            serviceRulesAccepted={rulesAccepted}
                           onSuccess={handleSuccess}
                           onError={handleError}
                         />

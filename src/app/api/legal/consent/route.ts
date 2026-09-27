@@ -11,7 +11,7 @@ async function getPolicyVersion() {
   const { data } = await supabaseAdmin
     .from('site_settings')
     .select('value')
-    .eq('key', 'legal_policy_updated_at')
+    .eq('key', 'privacy_policy_version')
     .maybeSingle();
 
   return data?.value?.trim() || 'policy-v1';
@@ -34,6 +34,18 @@ export async function POST(request: NextRequest) {
   const version = await getPolicyVersion();
   if (!body?.accepted || body.policyAccepted !== true || body.cookiesAccepted !== true || body.version !== version) {
     return NextResponse.json({ error: 'Versione policy non valida' }, { status: 400 });
+  }
+
+  if (!isPreviewMode) {
+    const { error } = await supabaseAdmin.from('legal_consents').upsert({
+      user_id: user.id,
+      email_snapshot: user.email || 'unknown',
+      policy_version: version,
+      privacy_accepted: true,
+      cookie_policy_accepted: true,
+      accepted_at: new Date().toISOString(),
+    }, { onConflict: 'user_id,policy_version' });
+    if (error) return NextResponse.json({ error: 'Impossibile salvare il consenso' }, { status: 500 });
   }
 
   const response = NextResponse.json({ accepted: true, version });

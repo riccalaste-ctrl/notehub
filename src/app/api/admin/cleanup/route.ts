@@ -66,10 +66,10 @@ export async function POST(request: NextRequest) {
   }
 
   // DEEP CLEANUP (only when admin explicitly requests with deep: true):
-  // 3. Audit logs older than 30 days
+  // 3. Audit logs older than 90 days
   if (deep) {
     try {
-      const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const cutoff = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
       if (!dryRun) {
         const { data: deleted, error } = await supabaseAdmin
           .from('audit_logs')

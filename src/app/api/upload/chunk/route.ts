@@ -5,6 +5,7 @@ import { getAuthenticatedUserFromRequest } from '@/lib/user-session';
 import { validateFileMagicBytes } from '@/lib/magic-bytes-validator';
 import { logSecurityEvent } from '@/lib/audit-logger';
 import { isPreviewMode } from '@/lib/preview-data';
+import { getModerationState } from '@/lib/moderation';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -14,6 +15,11 @@ export async function POST(request: NextRequest) {
     const user = await getAuthenticatedUserFromRequest(request);
     if (!user) {
       return NextResponse.json({ error: 'Accesso non autorizzato' }, { status: 401 });
+    }
+
+    const moderation = isPreviewMode ? { blocked: false, status: null, reason: null } : await getModerationState(user.email);
+    if (moderation.blocked) {
+      return NextResponse.json({ error: moderation.status === 'suspended' ? 'Account sospeso' : 'Account bannato', reason: moderation.reason || null }, { status: 403 });
     }
 
     const formData = await request.formData();

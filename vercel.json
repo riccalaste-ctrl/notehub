@@ -1,4 +1,10 @@
 {
+  "crons": [
+    {
+      "path": "/api/cron/audit-cleanup",
+      "schedule": "0 3 * * *"
+    }
+  ],
   "functions": {
     "src/app/api/upload/chunk/route.ts": {
       "maxDuration": 60

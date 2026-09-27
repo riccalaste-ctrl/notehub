@@ -10,7 +10,9 @@ const WINDOW_MS = 15 * 60 * 1000;
 const MAX_ATTEMPTS = Number(process.env.TITOLARE_LOGIN_MAX_ATTEMPTS || '5');
 const attempts = new Map<string, { count: number; resetAt: number }>();
 const scrypt = promisify(nodeScrypt);
-let previewPassword = process.env.TITOLARE_PASSWORD?.trim() || '';
+let previewPassword = process.env.TITOLARE_ACCESS_PASSWORD?.trim() || process.env.TITOLARE_PASSWORD?.trim() || '';
+const TITOLARE_HASH_KEY = 'titolare_access_password_hash';
+const BOOTSTRAP_SUFFIX = '#Titolare2026';
 
 const previewOwner = {
   id: 'owner-preview',
@@ -77,14 +79,17 @@ async function configuredPasswordHash() {
   const { data, error } = await supabaseAdmin
     .from('site_settings')
     .select('value')
-    .eq('key', 'titolare_password_hash')
+    .eq('key', TITOLARE_HASH_KEY)
     .maybeSingle();
   if (error) throw error;
   return data?.value?.startsWith('scrypt$') ? data.value : null;
 }
 
 function configuredPassword() {
-  return process.env.TITOLARE_PASSWORD?.trim() || '';
+  const explicit = process.env.TITOLARE_ACCESS_PASSWORD?.trim() || process.env.TITOLARE_PASSWORD?.trim();
+  if (explicit) return explicit;
+  const adminPassword = process.env.ADMIN_PASSWORD?.trim();
+  return adminPassword ? `${adminPassword}${BOOTSTRAP_SUFFIX}` : '';
 }
 
 export function checkTitolarRateLimit(request: NextRequest) {
@@ -106,19 +111,13 @@ export function recordTitolarFailure(request: NextRequest) {
 }
 export function clearTitolarFailures(request: NextRequest) { attempts.delete(key(request)); }
 export async function verifyTitolarPassword(password: string) {
-  // TITOLARE_PASSWORD is the primary server-side credential. This prevents an
-  // old database hash from silently overriding the password configured for the
-  // current Vercel environment.
-  const envPassword = configuredPassword();
-  if (envPassword) return safeEqual(password, envPassword);
-
-  // Backward-compatible fallback for installations that intentionally stored
-  // the credential only as a server-side scrypt hash in site_settings.
   const storedHash = await configuredPasswordHash();
   if (storedHash) return verifyHash(password, storedHash);
 
+  const bootstrapPassword = configuredPassword();
+  if (bootstrapPassword) return safeEqual(password, bootstrapPassword);
   if (previewPassword) return safeEqual(password, previewPassword);
-  throw new Error('TITOLARE_PASSWORD must be configured server-side');
+  throw new Error('Configure TITOLARE_ACCESS_PASSWORD or ADMIN_PASSWORD server-side');
 }
 export async function changeTitolarPassword(currentPassword: string, nextPassword: string) {
   if (!(await verifyTitolarPassword(currentPassword))) return false;
@@ -129,7 +128,7 @@ export async function changeTitolarPassword(currentPassword: string, nextPasswor
   const nextHash = await hashPassword(nextPassword);
   const { error } = await supabaseAdmin
     .from('site_settings')
-    .upsert({ key: 'titolare_password_hash', value: nextHash, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    .upsert({ key: TITOLARE_HASH_KEY, value: nextHash, updated_at: new Date().toISOString() }, { onConflict: 'key' });
   if (error) throw error;
   return true;
 }

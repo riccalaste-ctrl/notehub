@@ -93,7 +93,38 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  await supabase.auth.getSession();
+  const { data: { session } } = await supabase.auth.getSession();
+
+  // Re-check the server-side blocklist on authenticated user requests so an
+  // existing Google session cannot keep using the site after an admin ban.
+  if (session?.user?.email && !pathname.startsWith('/api/admin')) {
+    const normalizedEmail = session.user.email.trim().toLowerCase();
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (supabaseUrl && serviceKey) {
+      try {
+        const blockResponse = await fetch(
+          `${supabaseUrl}/rest/v1/blocked_users?select=id&email=eq.${encodeURIComponent(normalizedEmail)}&limit=1`,
+          { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }, cache: 'no-store' }
+        );
+        if (!blockResponse.ok) {
+          console.error('[AUTH] Blocklist check failed:', blockResponse.status);
+          if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Authentication unavailable' }, { status: 503 });
+          return NextResponse.redirect(new URL('/login?error=auth_unavailable', request.url));
+        }
+        const blockedRows = await blockResponse.json();
+        if (Array.isArray(blockedRows) && blockedRows.length > 0) {
+          await supabase.auth.signOut();
+          if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Account bloccato' }, { status: 403 });
+          return NextResponse.redirect(new URL('/login?error=account_blocked', request.url));
+        }
+      } catch (error) {
+        console.error('[AUTH] Blocklist check error:', error instanceof Error ? error.message : 'unknown');
+        if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Authentication unavailable' }, { status: 503 });
+        return NextResponse.redirect(new URL('/login?error=auth_unavailable', request.url));
+      }
+    }
+  }
 
   const isPublicAdminAPI =
     pathname === '/api/admin/login' ||
@@ -147,7 +178,6 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/api/user/');
 
   if (needsUserAuth && !isPublicPath) {
-    const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       if (pathname.startsWith('/api/')) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

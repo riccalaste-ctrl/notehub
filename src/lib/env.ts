@@ -22,13 +22,20 @@ export function requireServerEnv(name: string): string {
 export function getJwtSecret(): string {
   const value = process.env.JWT_SECRET?.trim();
 
-  if (!value) {
-    throw new Error('Missing required environment variable: JWT_SECRET');
+  if (value) {
+    if (value.length < 32) {
+      throw new Error('JWT_SECRET must be at least 32 characters long');
+    }
+    return value;
   }
 
-  if (value.length < 32) {
-    throw new Error('JWT_SECRET must be at least 32 characters long');
+  // Backward-compatible fallback for deployments that already have the
+  // admin bcrypt hash configured but are missing the separate JWT secret.
+  // The hash is server-only and is never sent to the client.
+  const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH?.trim();
+  if (adminPasswordHash && adminPasswordHash.length >= 32) {
+    return `notehub-admin-session:${adminPasswordHash}`;
   }
 
-  return value;
+  throw new Error('Missing required environment variable: JWT_SECRET');
 }

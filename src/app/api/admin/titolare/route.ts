@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const auth = await authorized();
-  if (!auth) return NextResponse.json({ error: 'Password admin e password titolare richieste' }, { status: 401 });
+  if (!auth) return NextResponse.json({ error: 'Autenticazione Titolare richiesta' }, { status: 401 });
 
   const body = await request.json().catch(() => ({}));
   const displayName = typeof body.display_name === 'string' ? body.display_name.trim() : '';

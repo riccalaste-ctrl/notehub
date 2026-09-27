@@ -23,16 +23,21 @@ export default function BlockedUsersSection() {
       setError('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Errore di connessione');
-    } finally { setLoadingList(false); }
+    } finally {
+      setLoadingList(false);
+    }
   }, []);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   const block = async (event: React.FormEvent) => {
     event.preventDefault();
     const normalized = email.trim().toLowerCase();
     if (!normalized) return;
-    setLoading(true); setError('');
+    setLoading(true);
+    setError('');
     try {
       const response = await fetch('/api/admin/blocked-users', {
         method: 'POST',
@@ -42,25 +47,33 @@ export default function BlockedUsersSection() {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Impossibile bloccare l’account');
-      setEmail(''); setReason(''); await load();
+      setEmail('');
+      setReason('');
+      await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Errore di connessione');
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const unblock = async (user: BlockedUser) => {
-    if (!confirm(\`Revocare il blocco per \${user.email}?\`)) return;
-    setLoading(true); setError('');
+    if (!confirm(`Revocare il blocco per ${user.email}?`)) return;
+    setLoading(true);
+    setError('');
     try {
-      const response = await fetch(\`/api/admin/blocked-users?email=\${encodeURIComponent(user.email)}\`, {
-        method: 'DELETE', credentials: 'same-origin',
+      const response = await fetch(`/api/admin/blocked-users?email=${encodeURIComponent(user.email)}`, {
+        method: 'DELETE',
+        credentials: 'same-origin',
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Impossibile revocare il blocco');
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Errore di connessione');
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -83,7 +96,7 @@ export default function BlockedUsersSection() {
         {loadingList ? <div className="p-8 text-sm text-foreground-muted">Caricamento…</div> : users.length === 0 ? <div className="p-8 text-sm text-foreground-muted">Nessun indirizzo bloccato.</div> : (
           <div className="divide-y divide-white/5">{users.map((user) => (
             <div key={user.id} className="px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div><p className="font-semibold text-white break-all">{user.email}</p><p className="text-xs text-foreground-muted mt-1">Bloccato il {new Date(user.created_at).toLocaleString('it-IT')}{user.reason ? \` · \${user.reason}\` : ''}</p></div>
+              <div><p className="font-semibold text-white break-all">{user.email}</p><p className="text-xs text-foreground-muted mt-1">Bloccato il {new Date(user.created_at).toLocaleString('it-IT')}{user.reason ? ` · ${user.reason}` : ''}</p></div>
               <button onClick={() => void unblock(user)} disabled={loading} className="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-400/20 text-emerald-200 text-sm font-semibold flex items-center gap-2 disabled:opacity-50"><Trash2 size={15} />Revoca blocco</button>
             </div>
           ))}</div>

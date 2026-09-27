@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     owner_id: owner.data?.id,
     owner_email: owner.data?.email,
     actor_email: auth.actor.email,
-    actor_account: 'admin',
+    actor_account: 'institutional_user',
     ip: request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null,
     metadata: { access_log: true, export: request.nextUrl.searchParams.get('export') || null },
   });
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
     owner_id: next.id,
     owner_email: next.email,
     actor_email: auth.actor.email,
-    actor_account: 'admin',
+    actor_account: 'institutional_user',
     metadata: { previous_owner_email: current.email, previous_owner_name: current.display_name },
   });
   return NextResponse.json({ owner: next });

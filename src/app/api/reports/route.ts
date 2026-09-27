@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
   const { data: upload, error: uploadError } = await supabaseAdmin
     .from('uploads')
-    .select('id, original_filename, uploader_name, view_url, download_url')
+    .select('id, original_filename, uploader_name, owner_id, view_url, download_url')
     .eq('id', validation.data.uploadId)
     .maybeSingle();
 
@@ -50,6 +50,14 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
   const recipient = setting?.value?.trim().toLowerCase();
   if (!recipient) return NextResponse.json({ error: 'Email per le segnalazioni non configurata dall’Admin.' }, { status: 503 });
+
+  let uploaderEmail = 'Email non disponibile';
+  if (upload.owner_id) {
+    const { data: uploaderUser, error: uploaderError } = await supabaseAdmin.auth.admin.getUserById(upload.owner_id);
+    if (!uploaderError && uploaderUser?.user?.email) {
+      uploaderEmail = uploaderUser.user.email;
+    }
+  }
 
   const { data: report, error: insertError } = await supabaseAdmin
     .from('reports')
@@ -73,6 +81,7 @@ export async function POST(request: NextRequest) {
       reporterEmail: user.email || 'unknown',
       fileName: upload.original_filename,
       uploaderName: upload.uploader_name || 'Nome non disponibile',
+      uploaderEmail,
       reason: validation.data.reason,
       viewUrl: upload.view_url || '',
       downloadUrl: upload.download_url || '',

@@ -46,8 +46,8 @@ const previewAudit: TitolarAudit[] = [
     action: 'OWNER_VIEWED',
     owner_id: previewOwner.id,
     owner_email: previewOwner.email,
-    actor_email: 'admin@notehub.local',
-    actor_account: 'admin',
+    actor_email: 'system',
+    actor_account: 'system',
     created_at: new Date().toISOString(),
     metadata: { source: 'preview' },
   },
@@ -154,7 +154,7 @@ export function recordPreviewTitolarAccess(actorEmail: string, action = 'OWNER_V
     owner_id: previewOwner.id,
     owner_email: previewOwner.email,
     actor_email: actorEmail,
-    actor_account: 'admin',
+    actor_account: 'institutional_user',
     created_at: new Date().toISOString(),
     metadata: { source: 'preview', access_log: true },
   });
@@ -177,7 +177,7 @@ export function updatePreviewTitolar(
     owner_id: previewOwner.id,
     owner_email: email,
     actor_email: actorEmail,
-    actor_account: 'admin',
+    actor_account: 'institutional_user',
     created_at: now,
     metadata: {
       source: 'preview',

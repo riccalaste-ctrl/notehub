@@ -400,8 +400,7 @@ body {
 
 /* Keep navigation and administration readable in the light theme. */
 .light aside,
-.light header,
-.light .mobile-bottom-nav {
+.light header {
   color: #172033;
   background: rgba(255, 255, 255, 0.94) !important;
   border-color: rgba(15, 23, 42, 0.1) !important;
@@ -410,8 +409,7 @@ body {
 
 .light aside a,
 .light header a,
-.light header button,
-.light .mobile-bottom-nav a {
+.light header button {
   color: #334155;
 }
 
@@ -422,8 +420,7 @@ body {
   background-color: rgba(99, 102, 241, 0.1) !important;
 }
 
-.light aside a[aria-current="page"],
-.light .mobile-bottom-nav a[aria-current="page"] {
+.light aside a[aria-current="page"] {
   color: #4338ca !important;
   background: rgba(99, 102, 241, 0.12) !important;
   border-color: rgba(99, 102, 241, 0.2) !important;
@@ -528,4 +525,30 @@ body {
   .desktop-sidebar:focus-within ~ main {
     padding-left: 14rem;
   }
+}
+
+
+/* Admin tabs: keep the horizontal overflow discoverable without showing a heavy scrollbar. */
+.admin-tabs-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.18) transparent;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.admin-tabs-scroll::-webkit-scrollbar {
+  display: block;
+  height: 3px;
+}
+.admin-tabs-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.admin-tabs-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.18);
+  border-radius: 999px;
+}
+.light .admin-tabs-scroll {
+  scrollbar-color: rgba(15,23,42,.22) transparent;
+}
+.light .admin-tabs-scroll::-webkit-scrollbar-thumb {
+  background: rgba(15,23,42,.22);
 }

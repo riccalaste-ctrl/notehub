@@ -57,14 +57,35 @@ export default function PolicyConsentGate({ children }: { children: React.ReactN
   }, [isPolicyPage]);
 
   async function accept() {
+    if (!policyAccepted || !cookiesAccepted || saving) return;
+
     setSaving(true);
-    const response = await fetch('/api/legal/consent', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accepted: policyAccepted && cookiesAccepted, policyAccepted, cookiesAccepted, version }),
-    });
-    if (response.ok) setState('allowed');
-    setSaving(false);
+    try {
+      const response = await fetch('/api/legal/consent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accepted: true,
+          policyAccepted: true,
+          cookiesAccepted: true,
+          version: version || undefined,
+        }),
+        cache: 'no-store',
+      });
+
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        console.error('[POLICY] Impossibile salvare il consenso:', result);
+        return;
+      }
+
+      setState('allowed');
+    } catch (error) {
+      console.error('[POLICY] Errore durante il salvataggio del consenso:', error);
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function reject() {

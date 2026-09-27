@@ -74,13 +74,19 @@ async function verifyHash(password: string, encoded: string) {
   return timingSafeEqual(derived, Buffer.from(hashHex, 'hex'));
 }
 async function configuredPasswordHash() {
-  const { data } = await supabaseAdmin
+  const { data, error } = await supabaseAdmin
     .from('site_settings')
     .select('value')
     .eq('key', 'titolare_password_hash')
     .maybeSingle();
+  if (error) throw error;
   return data?.value?.startsWith('scrypt$') ? data.value : null;
 }
+
+function configuredPassword() {
+  return process.env.TITOLARE_PASSWORD?.trim() || '';
+}
+
 export function checkTitolarRateLimit(request: NextRequest) {
   const now = Date.now();
   const attempt = attempts.get(key(request));
@@ -100,38 +106,27 @@ export function recordTitolarFailure(request: NextRequest) {
 }
 export function clearTitolarFailures(request: NextRequest) { attempts.delete(key(request)); }
 export async function verifyTitolarPassword(password: string) {
+  // TITOLARE_PASSWORD is the primary server-side credential. This prevents an
+  // old database hash from silently overriding the password configured for the
+  // current Vercel environment.
+  const envPassword = configuredPassword();
+  if (envPassword) return safeEqual(password, envPassword);
+
+  // Backward-compatible fallback for installations that intentionally stored
+  // the credential only as a server-side scrypt hash in site_settings.
   const storedHash = await configuredPasswordHash();
+  if (storedHash) return verifyHash(password, storedHash);
 
-  // The database hash is authoritative once it exists. If an older/stale hash
-  // is present but TITOLARE_PASSWORD is configured, allow the configured
-  // password once and migrate that password into the DB hash. This fixes
-  // existing installations without leaving two valid passwords indefinitely.
-  if (storedHash) {
-    if (await verifyHash(password, storedHash)) return true;
-    if (previewPassword && safeEqual(password, previewPassword)) {
-      const migratedHash = await hashPassword(previewPassword);
-      const { error } = await supabaseAdmin
-        .from('site_settings')
-        .upsert(
-          { key: 'titolare_password_hash', value: migratedHash, updated_at: new Date().toISOString() },
-          { onConflict: 'key' },
-        );
-      if (error) throw error;
-      return true;
-    }
-    return false;
-  }
-
-  if (!previewPassword) throw new Error('TITOLARE_PASSWORD must be configured server-side');
-  return safeEqual(password, previewPassword);
+  if (previewPassword) return safeEqual(password, previewPassword);
+  throw new Error('TITOLARE_PASSWORD must be configured server-side');
 }
 export async function changeTitolarPassword(currentPassword: string, nextPassword: string) {
   if (!(await verifyTitolarPassword(currentPassword))) return false;
-  const nextHash = await hashPassword(nextPassword);
   if (previewEnabled()) {
     previewPassword = nextPassword;
     return true;
   }
+  const nextHash = await hashPassword(nextPassword);
   const { error } = await supabaseAdmin
     .from('site_settings')
     .upsert({ key: 'titolare_password_hash', value: nextHash, updated_at: new Date().toISOString() }, { onConflict: 'key' });

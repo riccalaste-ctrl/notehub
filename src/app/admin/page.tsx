@@ -28,7 +28,6 @@ import {
   Settings,
   Flag,
   Ban,
-  ChevronRight,
 } from 'lucide-react';
 import { buildInstitutionDisclaimer } from '@/lib/user-session-client';
 import { DEVELOPER_EMAILS } from '@/lib/constants';
@@ -804,12 +803,6 @@ export default function AdminPage() {
               );
             })}
             </nav>
-            <div aria-hidden="true" className="pointer-events-none absolute right-0 top-0 bottom-0 flex items-center pl-8 pr-1 bg-gradient-to-r from-transparent via-[#12141d]/80 to-[#12141d]">
-              <span className="flex items-center gap-0.5 rounded-full border border-white/10 bg-white/5 px-1.5 py-1 text-[9px] uppercase tracking-[0.14em] text-foreground-muted shadow-lg backdrop-blur-md">
-                <span className="hidden sm:inline">scorri</span>
-                <ChevronRight className="size-3" />
-              </span>
-            </div>
           </div>
         </div>
       </div>

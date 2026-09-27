@@ -38,11 +38,11 @@ export async function verifyConfiguredAdminPassword(password: string) {
     return bcrypt.compare(password, passwordHash);
   }
 
-  if (!isLocalPreview()) {
-    throw new Error('ADMIN_PASSWORD_HASH must be configured');
-  }
-  const previewPassword = process.env.ADMIN_PASSWORD?.trim();
-  return previewPassword ? timingSafeStringEqual(password, previewPassword) : false;
+  // Backward-compatible support for deployments that still store the
+  // server-only admin password directly in ADMIN_PASSWORD. Prefer
+  // ADMIN_PASSWORD_HASH for new deployments.
+  const configuredPassword = process.env.ADMIN_PASSWORD?.trim();
+  return configuredPassword ? timingSafeStringEqual(password, configuredPassword) : false;
 }
 
 export function checkAdminLoginRateLimit(request: NextRequest) {

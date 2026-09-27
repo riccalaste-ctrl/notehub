@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { getUserFromToken } from '@/lib/auth';
 import { changeTitolarPassword, verifyTitolarToken, TITOLARE_COOKIE } from '@/lib/titolare-auth';
 
 export async function POST(request: NextRequest) {
-  const actor = await getUserFromToken();
   const titular = await verifyTitolarToken((await cookies()).get(TITOLARE_COOKIE)?.value);
-  const preview = process.env.PREVIEW_BYPASS_AUTH === 'true' && process.env.NODE_ENV !== 'production' && process.env.VERCEL !== '1' && process.env.NETLIFY !== 'true';
-  if ((!actor || actor.role !== 'admin') && !preview) return NextResponse.json({ error: 'Password admin richiesta' }, { status: 401 });
   if (!titular) return NextResponse.json({ error: 'Autenticazione Titolare richiesta' }, { status: 401 });
 
   const body = await request.json().catch(() => ({}));

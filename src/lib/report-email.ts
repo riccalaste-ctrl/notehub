@@ -7,6 +7,7 @@ export async function sendReportEmail(input: {
   reporterEmail: string;
   fileName: string;
   uploaderName: string;
+  uploaderEmail: string;
   reason: string;
   viewUrl: string;
   downloadUrl: string;
@@ -22,6 +23,7 @@ export async function sendReportEmail(input: {
       <p>Un utente ha segnalato un documento sulla piattaforma.</p>
       <p><strong>Documento:</strong> ${escapeHtml(input.fileName)}</p>
       <p><strong>Pubblicato da:</strong> ${escapeHtml(input.uploaderName || 'Nome non disponibile')}</p>
+      <p><strong>Email del pubblicatore:</strong> ${escapeHtml(input.uploaderEmail || 'Email non disponibile')}</p>
       <p><strong>Segnalato da:</strong> ${escapeHtml(input.reporterEmail)}</p>
       <p><strong>Motivo:</strong><br/>${escapeHtml(input.reason)}</p>
       <p><a href="${escapeHtml(input.viewUrl)}">Apri il documento</a></p>

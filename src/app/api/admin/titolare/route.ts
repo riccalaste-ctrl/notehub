@@ -35,15 +35,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Tabelle titolare non disponibili: applicare la migrazione SQL manualmente.' }, { status: 503 });
   }
 
-  await supabase.from('titular_audit_logs').insert({
-    action: request.nextUrl.searchParams.get('export') ? 'OWNER_EXPORTED' : 'OWNER_VIEWED',
-    owner_id: owner.data?.id,
-    owner_email: owner.data?.email,
-    actor_email: auth.actor.email,
-    actor_account: 'institutional_user',
-    ip: request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null,
-    metadata: { access_log: true, export: request.nextUrl.searchParams.get('export') || null },
-  });
+  if (owner.data) {
+    await supabase.from('titular_audit_logs').insert({
+      action: request.nextUrl.searchParams.get('export') ? 'OWNER_EXPORTED' : 'OWNER_VIEWED',
+      owner_id: owner.data.id,
+      owner_email: owner.data.email,
+      actor_email: auth.actor.email,
+      actor_account: 'institutional_user',
+      ip: request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null,
+      metadata: { access_log: true, export: request.nextUrl.searchParams.get('export') || null },
+    });
+  }
 
   if (request.nextUrl.searchParams.get('export') === 'json') return NextResponse.json({ owner: owner.data, history: history.data, audit: audit.data, exported_at: new Date().toISOString() });
   if (request.nextUrl.searchParams.get('export') === 'csv') {

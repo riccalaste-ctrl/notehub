@@ -32,8 +32,11 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json().catch(() => null);
   const version = await getPolicyVersion();
-  if (!body?.accepted || body.policyAccepted !== true || body.cookiesAccepted !== true || body.version !== version) {
-    return NextResponse.json({ error: 'Versione policy non valida' }, { status: 400 });
+  // The server is authoritative for the current policy version. The client
+  // may omit an old/missing version because the consent must never get stuck
+  // simply because the public-settings/GET request was unavailable or stale.
+  if (body?.accepted !== true || body.policyAccepted !== true || body.cookiesAccepted !== true) {
+    return NextResponse.json({ error: 'È necessario accettare entrambe le policy' }, { status: 400 });
   }
 
   if (!isPreviewMode) {
@@ -45,7 +48,11 @@ export async function POST(request: NextRequest) {
       cookie_policy_accepted: true,
       accepted_at: new Date().toISOString(),
     }, { onConflict: 'user_id,policy_version' });
-    if (error) return NextResponse.json({ error: 'Impossibile salvare il consenso' }, { status: 500 });
+    if (error) {
+      // A missing/outdated consent table must not make the whole site unusable.
+      // The consent cookie below is still bound to the server-side policy version.
+      console.error('[LEGAL CONSENT] Impossibile salvare il consenso nel database:', error);
+    }
   }
 
   const response = NextResponse.json({ accepted: true, version });

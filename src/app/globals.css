@@ -516,15 +516,8 @@ body {
     opacity: 1;
   }
 
-  .desktop-sidebar:hover ~ header,
-  .desktop-sidebar:focus-within ~ header {
-    left: 14rem;
-  }
-
-  .desktop-sidebar:hover ~ main,
-  .desktop-sidebar:focus-within ~ main {
-    padding-left: 14rem;
-  }
+  /* The desktop sidebar expands as an overlay. Keep the page and header fixed
+     so opening it never shifts the content horizontally. */
 }
 
 

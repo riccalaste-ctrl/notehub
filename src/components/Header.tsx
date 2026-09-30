@@ -36,7 +36,7 @@ export default function Header({ onOpenUpload, currentSection, breadcrumbs }: He
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="desktop-sidebar hidden lg:flex fixed left-0 top-0 bottom-0 z-40 flex-col items-center gap-8 w-[4.5rem] hover:w-56 h-full p-3 hover:p-5 bg-[#0d0f16]/90 backdrop-blur-3xl border-r border-white/10 shadow-2xl transition-[width,padding] duration-300 group">
+      <aside className="desktop-sidebar hidden lg:flex fixed left-0 top-0 bottom-0 z-50 flex-col items-center gap-8 w-[4.5rem] hover:w-56 h-full p-3 hover:p-5 bg-[#0d0f16]/90 backdrop-blur-3xl border-r border-white/10 shadow-2xl transition-[width,padding] duration-300 group">
         <Link href="/" aria-label="Home" className="flex items-center gap-2 w-full justify-center group-hover:justify-start overflow-hidden">
           <div className="size-9 rounded-xl flex justify-center items-center p-1 bg-gradient-to-br from-violet-300 to-cyan-300 shadow-lg shadow-cyan-500/10">
             <Image src="/logo.svg" alt="SKAKK-UP" width={36} height={36} className="w-full h-full" />

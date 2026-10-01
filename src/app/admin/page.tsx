@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Toast, { useToast } from '@/components/Toast';
 import ErrorAlert from '@/components/ErrorAlert';
@@ -166,6 +166,7 @@ export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
+  const adminAccessLoggedRef = useRef(false);
 
   useEffect(() => {
     if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('notehub_admin_logged_in')) {
@@ -333,8 +334,18 @@ export default function AdminPage() {
   }, [preview]);
 
   useEffect(() => {
-    if (isAuthenticated) fetchData();
-  }, [isAuthenticated, fetchData]);
+    if (!isAuthenticated) return;
+
+    fetchData();
+
+    if (preview || adminAccessLoggedRef.current) return;
+    adminAccessLoggedRef.current = true;
+
+    void fetch('/api/admin/access-log', {
+      method: 'POST',
+      credentials: 'same-origin',
+    }).catch(() => {});
+  }, [isAuthenticated, fetchData, preview]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

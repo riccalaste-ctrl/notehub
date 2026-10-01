@@ -25,7 +25,7 @@ export async function GET() {
     ...rows.map((row) => {
       const who = row.actor_email || 'system';
       const target = row.target_type ? `${row.target_type}:${row.target_id || '-'}` : '-';
-      return `${row.created_at} | ${who} | ${row.action} | ${target}`;
+      return `${row.created_at} | Admin email: ${who} | ${row.action} | ${target}`;
     }),
   ];
 

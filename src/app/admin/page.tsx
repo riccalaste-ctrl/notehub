@@ -336,15 +336,21 @@ export default function AdminPage() {
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    fetchData();
+    const loadAdminSection = async () => {
+      if (!preview && !adminAccessLoggedRef.current) {
+        adminAccessLoggedRef.current = true;
+        try {
+          await fetch('/api/admin/access-log', {
+            method: 'POST',
+            credentials: 'same-origin',
+          });
+        } catch {}
+      }
 
-    if (preview || adminAccessLoggedRef.current) return;
-    adminAccessLoggedRef.current = true;
+      await fetchData();
+    };
 
-    void fetch('/api/admin/access-log', {
-      method: 'POST',
-      credentials: 'same-origin',
-    }).catch(() => {});
+    void loadAdminSection();
   }, [isAuthenticated, fetchData, preview]);
 
   useEffect(() => {

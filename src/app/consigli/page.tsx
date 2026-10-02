@@ -101,7 +101,7 @@ export default function ConsigliPage() {
               })}
             </div>
           ) : (
-            <div className="rounded-[1.7rem] border border-dashed border-white/10 bg-white/[0.025] px-6 py-16 text-center"><div className="mx-auto grid size-16 place-items-center rounded-2xl border border-white/10 bg-white/[0.04]"><Lightbulb className="size-7 text-white/25"/></div><h2 className="mt-5 text-xl font-bold text-white">Nessun consiglio disponibile</h2><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-white/40">I contenuti verranno aggiunti gradualmente dall'amministrazione.</p></div>
+            <div className="rounded-[1.7rem] border border-dashed border-white/10 bg-white/[0.025] px-6 py-16 text-center"><div className="mx-auto grid size-16 place-items-center rounded-2xl border border-white/10 bg-white/[0.04]"><Lightbulb className="size-7 text-white/25"/></div><h2 className="mt-5 text-xl font-bold text-white">Nessun consiglio disponibile</h2><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-white/40">I contenuti verranno aggiunti gradualmente dall&apos;amministrazione.</p></div>
           )}
         </div>
         <Footer />

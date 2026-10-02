@@ -1,18 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { CalendarDays, Filter, Search, SlidersHorizontal, X } from 'lucide-react';
 
-interface Subject {
-  id: string;
-  name: string;
-  slug: string;
-}
-
-interface Professor {
-  id: string;
-  name: string;
-}
-
+interface Subject { id: string; name: string; slug: string; }
+interface Professor { id: string; name: string; }
 interface SearchFilters {
   search: string;
   subjectId: string;
@@ -20,7 +12,6 @@ interface SearchFilters {
   dateFrom: string;
   dateTo: string;
 }
-
 interface SearchBarProps {
   subjects: Subject[];
   professors: Professor[];
@@ -30,111 +21,99 @@ interface SearchBarProps {
 
 export default function SearchBar({ subjects, professors, filters, onFilterChange }: SearchBarProps) {
   const [localFilters, setLocalFilters] = useState(filters);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
-  useEffect(() => {
-    setLocalFilters(filters);
-  }, [filters]);
+  useEffect(() => setLocalFilters(filters), [filters]);
 
   const handleChange = useCallback((key: keyof SearchFilters, value: string) => {
-    const newFilters = { ...localFilters, [key]: value };
-    setLocalFilters(newFilters);
-    onFilterChange(newFilters);
+    const next = { ...localFilters, [key]: value };
+    setLocalFilters(next);
+    onFilterChange(next);
   }, [localFilters, onFilterChange]);
 
   const clearFilters = useCallback(() => {
-    const emptyFilters: SearchFilters = {
-      search: '',
-      subjectId: '',
-      professorId: '',
-      dateFrom: '',
-      dateTo: '',
-    };
-    setLocalFilters(emptyFilters);
-    onFilterChange(emptyFilters);
+    const empty = { search: '', subjectId: '', professorId: '', dateFrom: '', dateTo: '' };
+    setLocalFilters(empty);
+    onFilterChange(empty);
   }, [onFilterChange]);
 
-  const hasFilters = Object.values(localFilters).some(v => v !== '');
+  const activeCount = Object.entries(localFilters).filter(([key, value]) => key !== 'search' && value !== '').length;
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 mb-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="lg:col-span-2">
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-            Cerca
-          </label>
-          <div className="relative">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              type="text"
-              value={localFilters.search}
-              onChange={(e) => handleChange('search', e.target.value)}
-              placeholder="Nome file..."
-              className="w-full pl-10 pr-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-            Materia
-          </label>
-          <select
-            value={localFilters.subjectId}
-            onChange={(e) => handleChange('subjectId', e.target.value)}
-            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-          >
-            <option value="">Tutte</option>
-            {subjects.map((subject) => (
-              <option key={subject.id} value={subject.id}>
-                {subject.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-            Professore
-          </label>
-          <select
-            value={localFilters.professorId}
-            onChange={(e) => handleChange('professorId', e.target.value)}
-            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-          >
-            <option value="">Tutti</option>
-            {professors.map((professor) => (
-              <option key={professor.id} value={professor.id}>
-                {professor.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-            Data
-          </label>
+    <section className="search-shell mb-7">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+        <div className="relative min-w-0 flex-1">
+          <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-cyan-200/60" />
           <input
-            type="date"
-            value={localFilters.dateFrom}
-            onChange={(e) => handleChange('dateFrom', e.target.value)}
-            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            aria-label="Cerca risorse"
+            type="search"
+            value={localFilters.search}
+            onChange={(e) => handleChange('search', e.target.value)}
+            placeholder="Cerca appunti, argomenti, file..."
+            className="search-main-input w-full pl-12 pr-4"
           />
+          {localFilters.search && (
+            <button aria-label="Cancella ricerca" onClick={() => handleChange('search', '')} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-foreground-muted hover:bg-white/10 hover:text-white">
+              <X className="size-4" />
+            </button>
+          )}
         </div>
+
+        <button
+          type="button"
+          onClick={() => setFiltersOpen((open) => !open)}
+          className={`filter-trigger ${filtersOpen || activeCount ? 'is-active' : ''}`}
+          aria-expanded={filtersOpen}
+        >
+          <SlidersHorizontal className="size-4" />
+          Filtri
+          {activeCount > 0 && <span className="filter-count">{activeCount}</span>}
+        </button>
       </div>
 
-      {hasFilters && (
-        <div className="mt-4 flex justify-end">
-          <button
-            onClick={clearFilters}
-            className="px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400"
-          >
-            Pulisci filtri
-          </button>
+      {filtersOpen && (
+        <div className="mt-4 grid gap-3 border-t border-white/[0.07] pt-4 md:grid-cols-2 xl:grid-cols-4">
+          <label className="filter-field">
+            <span>Materia</span>
+            <select value={localFilters.subjectId} onChange={(e) => handleChange('subjectId', e.target.value)}>
+              <option value="">Tutte le materie</option>
+              {subjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.name}</option>)}
+            </select>
+          </label>
+          <label className="filter-field">
+            <span>Professore</span>
+            <select value={localFilters.professorId} onChange={(e) => handleChange('professorId', e.target.value)}>
+              <option value="">Tutti i professori</option>
+              {professors.map((professor) => <option key={professor.id} value={professor.id}>{professor.name}</option>)}
+            </select>
+          </label>
+          <label className="filter-field">
+            <span>Da</span>
+            <span className="relative">
+              <CalendarDays className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-foreground-muted" />
+              <input type="date" value={localFilters.dateFrom} onChange={(e) => handleChange('dateFrom', e.target.value)} className="pl-9" />
+            </span>
+          </label>
+          <label className="filter-field">
+            <span>A</span>
+            <span className="relative">
+              <CalendarDays className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-foreground-muted" />
+              <input type="date" value={localFilters.dateTo} onChange={(e) => handleChange('dateTo', e.target.value)} className="pl-9" />
+            </span>
+          </label>
+          <div className="md:col-span-2 xl:col-span-4 flex items-center justify-between gap-3 pt-1">
+            <div className="flex items-center gap-2 text-xs text-foreground-muted">
+              <Filter className="size-3.5" />
+              {activeCount ? `${activeCount} filtri attivi` : 'Nessun filtro aggiuntivo'}
+            </div>
+            {(activeCount > 0 || localFilters.search) && (
+              <button type="button" onClick={clearFilters} className="text-xs font-semibold text-cyan-200 hover:text-white">
+                Reimposta tutto
+              </button>
+            )}
+          </div>
         </div>
       )}
-    </div>
+    </section>
   );
 }

@@ -613,3 +613,32 @@ main h1{text-wrap:balance}
 .legal-grid{display:grid;gap:1rem;margin-top:2rem}.legal-grid section{border:1px solid rgba(255,255,255,.07);border-radius:1.25rem;background:rgba(255,255,255,.025);padding:1.25rem}.legal-grid svg{width:1.2rem;color:#67e8f9}.legal-grid h2{margin:.8rem 0 .45rem;font-size:1rem;color:#fff}.legal-grid p,.legal-grid li{font-size:.9rem;line-height:1.7;color:rgba(255,255,255,.56)}.legal-grid ul{padding-left:1.1rem}
 .legal-nav{display:flex;flex-wrap:wrap;gap:.6rem;border-top:1px solid rgba(255,255,255,.07);margin-top:2rem;padding-top:1.5rem}.legal-nav a{border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:.6rem .8rem;color:rgba(255,255,255,.6);font-size:.78rem;font-weight:700}.legal-nav a:hover{color:#fff;border-color:rgba(139,92,246,.3)}
 @media (max-width:640px){.auth-card,.legal-card{padding:1.35rem;border-radius:1.5rem}.legal-stage{padding:1rem}}
+
+
+/* --- SKAKK-UP finishing layer: shared product chrome --- */
+::selection{background:rgba(124,108,255,.35);color:#fff}
+button,a,input,textarea,select{transition-timing-function:cubic-bezier(.22,1,.36,1)}
+main{isolation:isolate}
+main>div{position:relative}
+main>div:before{content:"";position:absolute;pointer-events:none;z-index:-1;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.018),transparent 22%);border-radius:2rem}
+.mobile-bottom-nav{background:rgba(7,9,20,.82)!important;border-top:1px solid rgba(148,163,184,.14)!important;backdrop-filter:blur(24px) saturate(150%)!important}
+.mobile-bottom-nav a[aria-current="page"]{background:linear-gradient(135deg,rgba(124,108,255,.18),rgba(39,211,216,.08))!important;border-color:rgba(124,108,255,.22)!important}
+header .size-9{filter:drop-shadow(0 8px 20px rgba(124,108,255,.18))}
+header a,aside a{will-change:transform}
+aside img{border-radius:11px}
+aside>a:first-child{padding:.35rem}
+aside>a:first-child img{filter:drop-shadow(0 8px 20px rgba(39,211,216,.15))}
+main .glass-panel .glass-panel,main .premium-card .premium-card{box-shadow:none!important}
+.admin-tabs-scroll{background:rgba(255,255,255,.018)!important;border:1px solid rgba(148,163,184,.10);border-radius:18px}
+.admin-tabs-scroll>*[aria-selected="true"]{background:linear-gradient(135deg,rgba(124,108,255,.22),rgba(39,211,216,.08))!important;color:#fff!important;border-color:rgba(124,108,255,.25)!important}
+[role=dialog] .control-input,[role=dialog] select{background:rgba(3,6,15,.78)!important}
+[role=dialog] .btn-primary{min-height:44px}
+footer{position:relative}
+footer a:focus-visible,header a:focus-visible,aside a:focus-visible{outline-offset:4px}
+@media(max-width:640px){
+  main .fixed.right-6.bottom-6{right:1rem;bottom:5.5rem}
+  main .fixed.right-6.bottom-6 button{min-height:3.15rem;padding-inline:1rem}
+  .search-shell{border-radius:1.25rem}
+}
+.light .mobile-bottom-nav{background:rgba(255,255,255,.9)!important}
+.light .admin-tabs-scroll{background:rgba(15,23,42,.025)!important}

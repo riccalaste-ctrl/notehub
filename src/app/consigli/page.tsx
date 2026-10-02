@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Lightbulb, FileText, User, Mail } from 'lucide-react';
+import { ArrowUpRight, FileText, Lightbulb, Mail, UserRound } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Toast, { useToast } from '@/components/Toast';
@@ -14,12 +14,8 @@ interface Consiglio {
   professor_id: string;
   published: boolean;
   created_at: string;
-  professor?: {
-    id: string;
-    name: string;
-  };
+  professor?: { id: string; name: string };
 }
-
 interface ConsiglioFile {
   id: string;
   consiglio_id: string;
@@ -34,181 +30,82 @@ export default function ConsigliPage() {
   const [consigli, setConsigli] = useState<Consiglio[]>([]);
   const [consigliFiles, setConsigliFiles] = useState<Record<string, ConsiglioFile[]>>({});
   const [loading, setLoading] = useState(true);
-  const [consigliEmail, setConsigliEmail] = useState<string>('');
+  const [consigliEmail, setConsigliEmail] = useState('');
   const { toast, showToast, hideToast } = useToast();
 
   useEffect(() => {
     const loadData = async () => {
-      fetch('/api/public/settings')
-        .then((res) => res.json())
-        .then((data) => setConsigliEmail(data.settings?.consigli_email || ''))
-        .catch(() => {});
-
+      fetch('/api/public/settings').then((res) => res.json()).then((data) => setConsigliEmail(data.settings?.consigli_email || '')).catch(() => {});
       const filesRes = await fetch('/api/public/consigli-files').catch(() => null);
       const consigliRes = await fetch('/api/consigli');
-
       if (consigliRes.ok) {
         const data = await consigliRes.json();
-        const published = (data.consigli || []).filter((c: Consiglio) => c.published);
-        setConsigli(published);
-
+        setConsigli((data.consigli || []).filter((c: Consiglio) => c.published));
         if (filesRes?.ok) {
           const fd = await filesRes.json();
-          const filesByConsiglio: Record<string, ConsiglioFile[]> = {};
-          (fd.files || []).forEach((f: ConsiglioFile) => {
-            if (!filesByConsiglio[f.consiglio_id]) filesByConsiglio[f.consiglio_id] = [];
-            filesByConsiglio[f.consiglio_id].push(f);
-          });
-          setConsigliFiles(filesByConsiglio);
+          const grouped: Record<string, ConsiglioFile[]> = {};
+          (fd.files || []).forEach((f: ConsiglioFile) => { if (!grouped[f.consiglio_id]) grouped[f.consiglio_id] = []; grouped[f.consiglio_id].push(f); });
+          setConsigliFiles(grouped);
         }
       }
-
       setLoading(false);
     };
-
     loadData();
   }, []);
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div className="page-shell">
       <Header breadcrumbs={[{ label: 'Consigli' }]} />
-
       <main className="lg:pl-[4.5rem] pt-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-10 mt-6"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-neon-purple to-neon-blue flex items-center justify-center shadow-[0_0_20px_rgba(157,78,221,0.4)]">
-                <Lightbulb className="size-6 text-white" />
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+          <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative mb-10 overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.035] p-6 shadow-[0_30px_100px_rgba(0,0,0,.2)] sm:p-9">
+            <div className="pointer-events-none absolute -right-20 -top-24 size-72 rounded-full bg-violet-500/15 blur-3xl" />
+            <div className="pointer-events-none absolute bottom-0 left-1/3 size-52 rounded-full bg-cyan-400/10 blur-3xl" />
+            <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+              <div>
+                <span className="inline-flex items-center gap-2 rounded-full border border-pink-300/15 bg-pink-300/5 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[.16em] text-pink-200"><Lightbulb className="size-3.5" /> Editoriale SKAKK-UP</span>
+                <h1 className="mt-5 max-w-3xl text-4xl font-black tracking-[-.04em] text-white sm:text-5xl">Idee che aiutano a studiare meglio.</h1>
+                <p className="mt-4 max-w-2xl text-base leading-7 text-white/50">Trucchi per lo studio, informazioni sui professori e suggerimenti pratici per organizzare il tuo lavoro.</p>
               </div>
-              <h1 className="text-3xl font-semibold text-white tracking-tight">
-                Consigli & Suggerimenti
-              </h1>
+              <div className="rounded-2xl border border-white/8 bg-black/15 p-4 lg:w-72">
+                <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-white/35">In evidenza</p>
+                <p className="mt-2 text-2xl font-bold text-white">{consigli.length}</p>
+                <p className="text-xs text-white/40">contenuti pubblicati</p>
+              </div>
             </div>
-            <p className="text-base text-foreground-muted">
-              Trucchi per lo studio, info sui professori e consigli per organizzarti al meglio
-            </p>
-            {consigliEmail ? (
-              <div className="mt-6 p-5 rounded-2xl bg-black/40 border border-white/5 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-neon-blue/10 border border-neon-blue/20">
-                  <Mail className="size-5 text-neon-blue" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-white">Hai un consiglio da condividere?</p>
-                  <p className="text-sm text-foreground-muted mt-1">
-                    Scrivici a:{' '}
-                    <a href={`mailto:${consigliEmail}`} className="text-neon-blue hover:text-white transition-colors font-medium">
-                      {consigliEmail}
-                    </a>
-                  </p>
-                </div>
-              </div>
-            ) : null}
-          </motion.div>
+          </motion.section>
+
+          {consigliEmail && (
+            <a href={`mailto:${consigliEmail}`} className="group mb-8 flex items-center justify-between gap-4 rounded-2xl border border-cyan-300/15 bg-cyan-300/[0.035] p-4 transition hover:border-cyan-300/30 hover:bg-cyan-300/[0.06]">
+              <div className="flex items-center gap-3"><div className="grid size-11 place-items-center rounded-xl border border-cyan-300/15 bg-cyan-300/10"><Mail className="size-5 text-cyan-200" /></div><div><p className="text-sm font-bold text-white">Hai un consiglio da condividere?</p><p className="text-xs text-white/40">Scrivici a <span className="font-semibold text-cyan-200">{consigliEmail}</span></p></div></div>
+              <ArrowUpRight className="size-5 text-white/30 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-cyan-200" />
+            </a>
+          )}
 
           {loading ? (
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="glass-panel p-6 animate-pulse border border-white/5">
-                  <div className="h-4 bg-white/10 rounded-lg w-1/3 mb-4" />
-                  <div className="h-3 bg-white/10 rounded-lg w-2/3 mb-2" />
-                  <div className="h-3 bg-white/10 rounded-lg w-full" />
-                </div>
-              ))}
-            </div>
-          ) : consigli.length > 0 ? (
-            <div className="space-y-4">
-              {consigli.map((consiglio, index) => {
-                const files = consigliFiles[consiglio.id] || [];
-                return (
-                  <motion.div
-                    key={consiglio.id}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="glass-panel p-6 relative overflow-hidden group"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-neon-purple/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <div className="flex items-start gap-4 relative z-10">
-                      <div className="w-12 h-12 rounded-xl bg-neon-purple/20 border border-neon-purple/30 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                        <Lightbulb className="size-6 text-neon-purple" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-semibold text-white mb-2">
-                          {consiglio.title}
-                        </h3>
-                        <p className="text-sm text-foreground-muted leading-relaxed whitespace-pre-line">
-                          {consiglio.content}
-                        </p>
-                        {files.length > 0 && (
-                          <div className="mt-5 pt-4 border-t border-white/10">
-                            <p className="text-xs font-medium text-foreground-muted uppercase tracking-wider mb-3">File allegati</p>
-                            <div className="space-y-2">
-                              {files.map((file) => (
-                                <a
-                                  key={file.id}
-                                  href={file.view_url || file.download_url || '#'}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-neon-blue/30 transition-all group/file"
-                                >
-                                  <FileText className="size-4 text-neon-blue group-hover/file:scale-110 transition-transform" />
-                                  <span className="font-medium text-foreground-muted group-hover/file:text-white transition-colors truncate">
-                                    {file.original_filename}
-                                  </span>
-                                </a>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-3 mt-4 text-xs text-foreground-muted">
-                          {consiglio.professor && (
-                            <span className="flex items-center gap-1">
-                              <User className="size-3" />
-                              {consiglio.professor.name}
-                            </span>
-                          )}
-                          <span>
-                            {new Date(consiglio.created_at).toLocaleDateString('it-IT', {
-                              day: 'numeric',
-                              month: 'long',
-                              year: 'numeric',
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
+            <div className="grid gap-4 md:grid-cols-2">{[1,2,3,4].map((i)=><div key={i} className="h-64 animate-pulse rounded-[1.5rem] border border-white/8 bg-white/[0.035]" />)}</div>
+          ) : consigli.length ? (
+            <div className="grid gap-5 md:grid-cols-2">
+              {consigli.map((consiglio,index) => {
+                const files=consigliFiles[consiglio.id]||[];
+                return <motion.article key={consiglio.id} initial={{opacity:0,y:18}} animate={{opacity:1,y:0}} transition={{delay:index*.06}} className="group relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl transition hover:-translate-y-1 hover:border-violet-300/25">
+                  <div className="absolute -right-16 -top-16 size-40 rounded-full bg-violet-500/10 blur-3xl transition group-hover:bg-violet-500/15" />
+                  <div className="relative">
+                    <div className="flex items-start justify-between gap-4"><div className="grid size-11 place-items-center rounded-2xl border border-violet-300/15 bg-violet-400/10 text-violet-200"><Lightbulb className="size-5"/></div><span className="text-[10px] font-bold uppercase tracking-wider text-white/25">{new Date(consiglio.created_at).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'})}</span></div>
+                    <h2 className="mt-5 text-xl font-bold tracking-tight text-white">{consiglio.title}</h2>
+                    <p className="mt-3 whitespace-pre-line text-sm leading-7 text-white/50">{consiglio.content}</p>
+                    {files.length>0&&<div className="mt-5 space-y-2 border-t border-white/8 pt-4">{files.map(file=><a key={file.id} href={file.view_url||file.download_url||'#'} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between rounded-xl border border-white/7 bg-white/[0.025] p-3 transition hover:border-cyan-300/20 hover:bg-cyan-300/[0.04]"><span className="flex min-w-0 items-center gap-2"><FileText className="size-4 shrink-0 text-cyan-200"/><span className="truncate text-xs font-semibold text-white/60">{file.original_filename}</span></span><ArrowUpRight className="size-4 shrink-0 text-white/25"/></a>)}</div>}
+                    <div className="mt-5 flex items-center gap-3 text-[11px] text-white/35">{consiglio.professor&&<span className="flex items-center gap-1.5"><UserRound className="size-3.5"/>{consiglio.professor.name}</span>}<span className="h-1 w-1 rounded-full bg-white/20"/></div>
+                  </div>
+                </motion.article>;
               })}
             </div>
           ) : (
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="glass-panel p-10 text-center border border-white/10"
-            >
-              <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6 shadow-2xl">
-                <Lightbulb className="size-10 text-foreground-muted" />
-              </div>
-              <h2 className="text-xl font-semibold text-white mb-2">
-                Nessun consiglio disponibile
-              </h2>
-              <p className="text-sm text-foreground-muted max-w-md mx-auto leading-relaxed">
-                I consigli verranno aggiunti gradualmente dall&apos;amministrazione.
-                Torna a visitare questa pagina per scoprire nuovi suggerimenti!
-              </p>
-            </motion.div>
+            <div className="rounded-[1.7rem] border border-dashed border-white/10 bg-white/[0.025] px-6 py-16 text-center"><div className="mx-auto grid size-16 place-items-center rounded-2xl border border-white/10 bg-white/[0.04]"><Lightbulb className="size-7 text-white/25"/></div><h2 className="mt-5 text-xl font-bold text-white">Nessun consiglio disponibile</h2><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-white/40">I contenuti verranno aggiunti gradualmente dall'amministrazione.</p></div>
           )}
         </div>
-
         <Footer />
       </main>
-
       {toast && <Toast {...toast} onClose={hideToast} />}
     </div>
   );

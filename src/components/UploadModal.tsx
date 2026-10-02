@@ -103,7 +103,7 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                   <ShieldCheck className="mt-0.5 size-5 shrink-0 text-cyan-200" />
                   <div>
                     <p className="text-sm font-semibold text-white">Upload tracciato e protetto</p>
-                    <p className="mt-1 text-xs leading-relaxed text-white/45">Il file viene associato automaticamente al tuo account. Le operazioni di moderazione restano sotto il controllo dell'amministrazione.</p>
+                    <p className="mt-1 text-xs leading-relaxed text-white/45">Il file viene associato automaticamente al tuo account. Le operazioni di moderazione restano sotto il controllo dell&apos;amministrazione.</p>
                   </div>
                 </div>
               </div>
@@ -123,7 +123,7 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
                         <option value="">Seleziona professore</option>
                         {professors.map((professor) => <option key={professor.id} value={professor.id}>{professor.name}</option>)}
                       </select>
-                      <p className="mt-2 text-xs text-white/35">L'autore mostrato viene ricavato dall'account Google autenticato.</p>
+                      <p className="mt-2 text-xs text-white/35">L&apos;autore mostrato viene ricavato dall&apos;account Google autenticato.</p>
                     </div>
                   )}
 

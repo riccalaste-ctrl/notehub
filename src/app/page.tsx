@@ -2,39 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, FileText, Users, Clock, ChevronRight, Plus, TrendingUp } from 'lucide-react';
+import { ArrowUpRight, BookOpen, FileText, GraduationCap, Sparkles, Users, Plus, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Toast, { useToast } from '@/components/Toast';
 import UploadModal from '@/components/UploadModal';
-import { getSubjectIcon, getSubjectGradient } from '@/lib/subject-config';
+import { getSubjectIcon } from '@/lib/subject-config';
 
-interface Subject {
-  id: string;
-  name: string;
-  slug: string;
-  enabled: boolean;
-}
-
-interface Professor {
-  id: string;
-  name: string;
-}
-
-interface SubjectProfessor {
-  subject_id: string;
-  professor_id: string;
-  professor?: Professor;
-}
-
-interface Upload {
-  id: string;
-  original_filename: string;
-  subject_name?: string;
-  subject_slug?: string;
-  created_at: string;
-}
+interface Subject { id: string; name: string; slug: string; enabled: boolean; }
+interface Professor { id: string; name: string; }
+interface SubjectProfessor { subject_id: string; professor_id: string; professor?: Professor; }
+interface Upload { id: string; original_filename: string; subject_name?: string; subject_slug?: string; created_at: string; }
 
 export default function DashboardPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -43,257 +22,166 @@ export default function DashboardPage() {
   const [recentUploads, setRecentUploads] = useState<Upload[]>([]);
   const [uploadCounts, setUploadCounts] = useState<Record<string, number>>({});
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
-  const { toast, showToast, hideToast } = useToast();
-
-  const fetchCatalog = async () => {
-    try {
-      const catalogRes = await fetch('/api/public/catalog');
-      if (catalogRes.ok) {
-        const data = await catalogRes.json();
-        setSubjects(data.subjects || []);
-        setProfessors(data.professors || []);
-        setSubjectProfessors(data.subjectProfessors || []);
-      }
-    } catch (error) {
-      console.error('Catalog fetch error:', error);
-    }
-  };
-
-  const fetchUploads = async () => {
-    try {
-      const uploadsRes = await fetch('/api/files?limit=50');
-      if (uploadsRes.ok) {
-        const data = await uploadsRes.json();
-        setRecentUploads(data.uploads || []);
-
-        const counts: Record<string, number> = {};
-        (data.uploads || []).forEach((u: Upload) => {
-          if (u.subject_slug) {
-            counts[u.subject_slug] = (counts[u.subject_slug] || 0) + 1;
-          }
-        });
-        setUploadCounts(counts);
-      }
-    } catch (error) {
-      console.error('Uploads fetch error:', error);
-    }
-  };
+  const { toast, hideToast } = useToast();
 
   useEffect(() => {
-    fetchCatalog();
-    fetchUploads();
+    const load = async () => {
+      try {
+        const [catalogRes, uploadsRes] = await Promise.all([
+          fetch('/api/public/catalog'),
+          fetch('/api/files?limit=50'),
+        ]);
+        if (catalogRes.ok) {
+          const data = await catalogRes.json();
+          setSubjects(data.subjects || []);
+          setProfessors(data.professors || []);
+          setSubjectProfessors(data.subjectProfessors || []);
+        }
+        if (uploadsRes.ok) {
+          const data = await uploadsRes.json();
+          const uploads = data.uploads || [];
+          setRecentUploads(uploads);
+          const counts: Record<string, number> = {};
+          uploads.forEach((u: Upload) => {
+            if (u.subject_slug) counts[u.subject_slug] = (counts[u.subject_slug] || 0) + 1;
+          });
+          setUploadCounts(counts);
+        }
+      } catch (error) {
+        console.error('Dashboard data fetch error:', error);
+      }
+    };
+    load();
 
     const handleOpenUpload = () => setUploadModalOpen(true);
     window.addEventListener('open-upload', handleOpenUpload);
-
-    return () => {
-      window.removeEventListener('open-upload', handleOpenUpload);
-    };
+    return () => window.removeEventListener('open-upload', handleOpenUpload);
   }, []);
+
+  const totalFiles = Object.values(uploadCounts).reduce((sum, count) => sum + count, 0);
+  const activeSubjects = subjects.filter((subject) => subject.enabled);
 
   return (
     <div className="page-shell">
       <Header breadcrumbs={[{ label: 'Dashboard' }]} onOpenUpload={() => setUploadModalOpen(true)} />
 
-      <main className="lg:pl-[4.5rem] pt-16 pb-20 lg:pb-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
-            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            transition={{ duration: 0.7, ease: [0.25, 1, 0.5, 1] }}
-            className="mb-10 mt-6"
-          >
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300/80">Workspace condiviso · Preview</p>
-            <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-white mb-2">
-              Benvenuto su <span className="text-gradient-purple">SKAKK-UP</span>
-            </h1>
-            <p className="text-lg text-foreground-muted max-w-2xl">
-              Il tuo archivio condiviso per appunti e risorse scolastiche
-            </p>
-          </motion.div>
-
-          {/* Stats */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
+      <main className="lg:pl-[4.5rem] pt-16 pb-24 lg:pb-0">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 lg:py-10">
+          <motion.section
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12"
+            className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_82%_18%,rgba(0,229,255,.18),transparent_28%),radial-gradient(circle_at_15%_85%,rgba(168,85,247,.2),transparent_34%),rgba(10,10,18,.78)] p-7 sm:p-10 lg:p-12 shadow-[0_30px_100px_rgba(0,0,0,.28)]"
           >
-            <motion.div whileHover={{ scale: 1.02, y: -5 }} className="premium-card p-5 group relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="flex items-center gap-3 relative z-10">
-                <div className="size-12 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center shadow-[0_0_15px_rgba(99,102,241,0.2)]">
-                  <BookOpen className="size-6 text-indigo-400" />
-                </div>
-                <div>
-                  <p className="text-3xl font-bold text-white">{subjects.length}</p>
-                  <p className="text-sm text-foreground-muted">Materie</p>
-                </div>
+            <div className="absolute -right-24 -top-24 size-72 rounded-full border border-cyan-300/10" />
+            <div className="absolute -right-12 -top-12 size-48 rounded-full border border-pink-300/10" />
+            <div className="relative max-w-3xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/5 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[.18em] text-cyan-200">
+                <Sparkles className="size-3.5" /> Digital Agora
               </div>
-            </motion.div>
-            
-            <motion.div whileHover={{ scale: 1.02, y: -5 }} className="premium-card p-5 group relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="flex items-center gap-3 relative z-10">
-                <div className="size-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-                  <Users className="size-6 text-emerald-400" />
-                </div>
-                <div>
-                  <p className="text-3xl font-bold text-white">{professors.length}</p>
-                  <p className="text-sm text-foreground-muted">Professori</p>
-                </div>
+              <h1 className="mt-5 text-4xl font-black tracking-[-.04em] text-white sm:text-5xl lg:text-6xl">
+                Tutto ciò che ti serve per <span className="text-gradient-purple">studiare meglio.</span>
+              </h1>
+              <p className="mt-5 max-w-2xl text-base leading-7 text-foreground-muted sm:text-lg">
+                Esplora materiali condivisi, trova il professore giusto e continua il tuo percorso senza perdere tempo.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link href="/materie" className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-slate-950 transition-transform hover:-translate-y-0.5">
+                  Esplora le materie <ArrowUpRight className="size-4" />
+                </Link>
+                <button onClick={() => setUploadModalOpen(true)} className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-bold text-white backdrop-blur transition-colors hover:bg-white/10">
+                  <Plus className="size-4" /> Condividi una risorsa
+                </button>
               </div>
-            </motion.div>
+            </div>
+          </motion.section>
 
-            <motion.div whileHover={{ scale: 1.02, y: -5 }} className="premium-card p-5 group relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="flex items-center gap-3 relative z-10">
-                <div className="size-12 rounded-2xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.2)]">
-                  <FileText className="size-6 text-orange-400" />
-                </div>
-                <div>
-                  <p className="text-3xl font-bold text-white">
-                    {Object.values(uploadCounts).reduce((a, b) => a + b, 0)}
-                  </p>
-                  <p className="text-sm text-foreground-muted">File totali</p>
-                </div>
-              </div>
-            </motion.div>
-
-            <Link href="/consigli" className="block">
-              <motion.div whileHover={{ scale: 1.02, y: -5 }} className="premium-card p-5 h-full group relative overflow-hidden border-neon-purple/30">
-                <div className="absolute inset-0 bg-gradient-to-br from-neon-purple/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="flex items-center gap-3 relative z-10">
-                  <div className="size-12 rounded-2xl bg-neon-purple/20 border border-neon-purple/30 flex items-center justify-center shadow-neon-purple">
-                    <TrendingUp className="size-6 text-neon-purple" />
-                  </div>
-                  <div>
-                    <p className="text-lg font-bold text-white">Consigli</p>
-                    <p className="text-xs text-neon-purple mt-1 group-hover:translate-x-1 transition-transform">Scopri di più →</p>
-                  </div>
-                </div>
+          <section className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+            {[
+              { label: 'Materie', value: activeSubjects.length, icon: BookOpen, accent: 'text-cyan-300' },
+              { label: 'Professori', value: professors.length, icon: GraduationCap, accent: 'text-violet-300' },
+              { label: 'Risorse', value: totalFiles, icon: FileText, accent: 'text-pink-300' },
+              { label: 'Connessioni', value: subjectProfessors.length, icon: Users, accent: 'text-emerald-300' },
+            ].map(({ label, value, icon: Icon, accent }) => (
+              <motion.div key={label} whileHover={{ y: -3 }} className="premium-card p-5">
+                <Icon className={`mb-5 size-5 ${accent}`} />
+                <div className="text-2xl font-black text-white">{value}</div>
+                <div className="mt-1 text-xs font-semibold uppercase tracking-[.14em] text-foreground-muted">{label}</div>
               </motion.div>
-            </Link>
-          </motion.div>
+            ))}
+          </section>
 
-          {/* Subjects Grid */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mb-12"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold text-white">Esplora per Materia</h2>
-              <Link
-                href="/materie"
-                className="flex items-center gap-1 text-sm font-medium text-foreground-muted hover:text-white transition-colors group"
-              >
-                Vedi tutte <ChevronRight className="size-4 group-hover:translate-x-1 transition-transform" />
+          <section className="mt-12">
+            <div className="mb-5 flex items-end justify-between gap-4">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[.18em] text-cyan-300/80">Catalogo</p>
+                <h2 className="mt-1 text-2xl font-bold tracking-tight text-white">Esplora per materia</h2>
+              </div>
+              <Link href="/materie" className="hidden items-center gap-1 text-sm font-semibold text-foreground-muted hover:text-white sm:flex">
+                Vedi tutto <ArrowUpRight className="size-4" />
               </Link>
             </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {subjects.map((subject) => {
-                const icon = getSubjectIcon(subject.slug);
-                const count = uploadCounts[subject.slug] || 0;
-                // Add framer motion to link for 3D effect
-                return (
-                  <motion.div key={subject.id} whileHover={{ scale: 1.03, y: -5 }}>
-                    <Link
-                      href={`/materie/${subject.slug}`}
-                      className="glass-panel p-6 block group h-full relative overflow-hidden"
-                    >
-                      <div className="absolute -right-6 -top-6 size-24 bg-white/5 rounded-full blur-xl group-hover:bg-neon-blue/10 transition-colors duration-500" />
-                      <div className={`size-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white text-2xl font-bold mb-4 shadow-lg group-hover:scale-110 group-hover:bg-white/10 transition-all duration-300`}>
-                        {icon}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              {activeSubjects.map((subject, index) => (
+                <motion.div key={subject.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * .035 }} whileHover={{ y: -4 }}>
+                  <Link href={`/materie/${subject.slug}`} className="group relative block min-h-[150px] overflow-hidden rounded-3xl border border-white/10 bg-white/[.035] p-5 transition-colors hover:border-cyan-300/20 hover:bg-white/[.06]">
+                    <div className="absolute -right-8 -top-8 size-28 rounded-full bg-cyan-300/10 blur-2xl opacity-0 transition-opacity group-hover:opacity-100" />
+                    <div className="relative">
+                      <div className="mb-8 flex items-start justify-between">
+                        <div className="flex size-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-xl shadow-inner">{getSubjectIcon(subject.slug)}</div>
+                        <ArrowUpRight className="size-4 text-foreground-muted transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                       </div>
-                      <h3 className="font-semibold text-white text-base mb-1">
-                        {subject.name}
-                      </h3>
-                      <p className="text-sm text-foreground-muted">
-                        {count > 0 ? `${count} risorse` : 'Nessuna risorsa'}
-                      </p>
-                    </Link>
-                  </motion.div>
-                );
-              })}
+                      <h3 className="font-bold text-white">{subject.name}</h3>
+                      <p className="mt-1 text-xs text-foreground-muted">{uploadCounts[subject.slug] || 0} risorse disponibili</p>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
             </div>
-          </motion.div>
+          </section>
 
-          {/* Recent Files */}
           {recentUploads.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="mt-10"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-semibold text-white">Ultimi caricamenti</h2>
-                <Link
-                  href="/materie"
-                  className="flex items-center gap-1 text-sm font-medium text-foreground-muted hover:text-white transition-colors group"
-                >
-                  Esplora <ChevronRight className="size-4 group-hover:translate-x-1 transition-transform" />
+            <section className="mt-12">
+              <div className="mb-5 flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[.18em] text-pink-300/80">Attività</p>
+                  <h2 className="mt-1 text-2xl font-bold tracking-tight text-white">Ultime risorse</h2>
+                </div>
+                <Link href="/consigli" className="hidden items-center gap-1 text-sm font-semibold text-foreground-muted hover:text-white sm:flex">
+                  Consigli <TrendingUp className="size-4" />
                 </Link>
               </div>
-
-              <div className="space-y-3">
-                {recentUploads.slice(0, 5).map((upload) => (
-                  <motion.div key={upload.id} whileHover={{ x: 5 }}>
-                    <Link
-                      href={upload.subject_slug ? `/materie/${upload.subject_slug}` : '/materie'}
-                      className="glass-panel p-4 flex items-center justify-between group"
-                    >
-                      <div className="flex items-center gap-4 min-w-0">
-                        <div className="size-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-neon-blue/10 group-hover:border-neon-blue/30 transition-colors">
-                          <FileText className="size-5 text-foreground-muted group-hover:text-neon-blue transition-colors" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-base font-medium text-white truncate">
-                            {upload.original_filename}
-                          </p>
-                          {upload.subject_name && (
-                            <p className="text-sm text-foreground-muted">{upload.subject_name}</p>
-                          )}
-                        </div>
+              <div className="grid gap-3">
+                {recentUploads.slice(0, 6).map((upload) => (
+                  <Link key={upload.id} href={upload.subject_slug ? `/materie/${upload.subject_slug}` : '/materie'} className="group flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[.025] p-4 transition-all hover:-translate-y-0.5 hover:border-white/15 hover:bg-white/[.05]">
+                    <div className="flex min-w-0 items-center gap-4">
+                      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5">
+                        <FileText className="size-4 text-cyan-200" />
                       </div>
-                      <span className="text-xs font-mono text-foreground-muted flex-shrink-0 ml-4 bg-white/5 px-2 py-1 rounded-md">
-                        {new Date(upload.created_at).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit' })}
-                      </span>
-                    </Link>
-                  </motion.div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-white">{upload.original_filename}</p>
+                        <p className="mt-1 truncate text-xs text-foreground-muted">{upload.subject_name || 'Risorsa condivisa'}</p>
+                      </div>
+                    </div>
+                    <time className="shrink-0 text-[11px] font-medium text-foreground-muted">{new Date(upload.created_at).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' })}</time>
+                  </Link>
                 ))}
               </div>
-            </motion.div>
+            </section>
           )}
         </div>
         <Footer />
-
-        {/* Floating Upload Button */}
-        <div className="fixed right-6 bottom-6 z-30">
-          <motion.button
-            whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(157, 78, 221, 0.5)" }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setUploadModalOpen(true)}
-            className="flex items-center px-6 font-semibold rounded-full text-white h-14 bg-gradient-to-r from-neon-purple to-neon-blue border border-white/20 shadow-lg"
-          >
-            <Plus className="size-5 mr-2" />
-            Carica Risorsa
-          </motion.button>
-        </div>
       </main>
 
-      <UploadModal
-        isOpen={uploadModalOpen}
-        onClose={() => setUploadModalOpen(false)}
-        subjects={subjects}
-        professors={professors}
-        subjectProfessors={subjectProfessors}
-      />
+      <motion.button
+        whileHover={{ y: -3, scale: 1.02 }}
+        whileTap={{ scale: .98 }}
+        onClick={() => setUploadModalOpen(true)}
+        className="fixed bottom-5 right-5 z-30 inline-flex h-14 items-center gap-2 rounded-2xl border border-white/20 bg-gradient-to-r from-violet-600 to-cyan-500 px-5 font-bold text-white shadow-[0_14px_40px_rgba(0,0,0,.3)] lg:bottom-7 lg:right-7"
+      >
+        <Plus className="size-5" /> <span>Condividi</span>
+      </motion.button>
 
+      <UploadModal isOpen={uploadModalOpen} onClose={() => setUploadModalOpen(false)} subjects={subjects} professors={professors} subjectProfessors={subjectProfessors} />
       {toast && <Toast {...toast} onClose={hideToast} />}
     </div>
   );

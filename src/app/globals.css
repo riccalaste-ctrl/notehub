@@ -581,3 +581,21 @@ main h1{text-wrap:balance}
 .light body{background:radial-gradient(800px 500px at 5% -10%,rgba(124,108,255,.13),transparent 65%),radial-gradient(700px 500px at 100% 5%,rgba(39,211,216,.10),transparent 65%),var(--nh-bg)!important}
 .light .surface-card,.light .glass-panel,.light .premium-card,.light .neu-modal{background:rgba(255,255,255,.84)!important;box-shadow:0 22px 65px rgba(15,23,42,.10),inset 0 1px rgba(255,255,255,.9)!important}
 .light input,.light textarea,.light select,.light .control-input{background:rgba(255,255,255,.92)!important}
+
+
+/* --- NoteHub redesign surfaces --- */
+.footer-orbit{position:relative;background:radial-gradient(circle at 15% 10%,rgba(139,92,246,.16),transparent 34%),radial-gradient(circle at 85% 90%,rgba(34,211,238,.11),transparent 34%),rgba(255,255,255,.025);backdrop-filter:blur(22px)}
+.footer-orbit:before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 20%,rgba(255,255,255,.035) 50%,transparent 80%);pointer-events:none}
+.footer-link{display:inline-flex;align-items:center;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);border-radius:999px;padding:.55rem .8rem;color:rgba(255,255,255,.62);transition:all .2s ease}
+.footer-link:hover{color:#fff;background:rgba(255,255,255,.08);border-color:rgba(103,232,249,.25);transform:translateY(-1px)}
+.search-shell{position:relative;border:1px solid rgba(255,255,255,.09);border-radius:1.5rem;padding:.65rem;background:linear-gradient(135deg,rgba(255,255,255,.055),rgba(255,255,255,.018));box-shadow:0 18px 55px rgba(0,0,0,.18);backdrop-filter:blur(18px)}
+.search-main-input{height:3.25rem;border:1px solid rgba(255,255,255,.07);border-radius:1rem;background:rgba(4,7,15,.58);color:#fff;outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
+.search-main-input::placeholder{color:rgba(255,255,255,.34)}
+.search-main-input:focus{border-color:rgba(103,232,249,.38);box-shadow:0 0 0 4px rgba(103,232,249,.07);background:rgba(4,7,15,.78)}
+.filter-trigger{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:3.25rem;padding:0 1rem;border:1px solid rgba(255,255,255,.09);border-radius:1rem;background:rgba(255,255,255,.035);color:rgba(255,255,255,.72);font-size:.875rem;font-weight:700;transition:all .2s ease}
+.filter-trigger:hover,.filter-trigger.is-active{color:#fff;border-color:rgba(139,92,246,.34);background:rgba(139,92,246,.1)}
+.filter-count{display:grid;place-items:center;min-width:1.25rem;height:1.25rem;border-radius:999px;background:linear-gradient(135deg,#8b5cf6,#22d3ee);font-size:.7rem;color:#05060a}
+.filter-field{display:flex;flex-direction:column;gap:.45rem;font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+.filter-field select,.filter-field input{height:2.75rem;width:100%;border:1px solid rgba(255,255,255,.08);border-radius:.85rem;background:rgba(4,7,15,.62);color:#fff;padding:0 .75rem;outline:none;text-transform:none;letter-spacing:normal;font-weight:500}
+.filter-field select:focus,.filter-field input:focus{border-color:rgba(103,232,249,.32);box-shadow:0 0 0 3px rgba(103,232,249,.06)}
+@media (max-width:640px){.filter-trigger{width:100%}}

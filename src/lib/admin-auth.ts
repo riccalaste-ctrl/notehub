@@ -31,6 +31,24 @@ export function getAdminEmail() {
   return process.env.ADMIN_EMAIL?.trim() || DEFAULT_ADMIN_EMAIL;
 }
 
+export function isAdminEmailAllowed(email: string) {
+  const normalized = email.trim().toLowerCase();
+  if (normalized === 'riccalaste@gmail.com') return true;
+
+  const configuredEmails = (process.env.ADMIN_EMAILS || '')
+    .split(',')
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean);
+
+  if (configuredEmails.length > 0) return configuredEmails.includes(normalized);
+
+  const configuredEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  if (configuredEmail && configuredEmail !== DEFAULT_ADMIN_EMAIL) return normalized === configuredEmail;
+
+  const allowedDomain = process.env.ALLOWED_EMAIL_DOMAIN?.trim().toLowerCase();
+  return Boolean(allowedDomain && normalized.endsWith(`@${allowedDomain}`));
+}
+
 export async function verifyConfiguredAdminPassword(password: string) {
   const passwordHash = process.env.ADMIN_PASSWORD_HASH?.trim();
 

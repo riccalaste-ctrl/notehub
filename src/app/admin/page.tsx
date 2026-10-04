@@ -1799,7 +1799,7 @@ export default function AdminPage() {
               <div className="glass-panel p-6 border border-white/10">
                 <h3 className="text-lg font-semibold text-white mb-3">Audit Log</h3>
                 <p className="text-sm text-foreground-muted mb-4">
-                  Scarica il report PDF con tutti i log di audit disponibili, inclusi accessi Admin, caricamenti file e altre azioni sensibili. L'email completa dell'autore dell'azione viene mantenuta nel log.
+                  Scarica il report PDF con tutti i log di audit disponibili, inclusi accessi Admin, caricamenti file e altre azioni sensibili. L&apos;email completa dell&apos;autore dell&apos;azione viene mantenuta nel log.
                 </p>
                 <button
                   onClick={() => window.open('/api/admin/audit-logs/pdf', '_blank')}

@@ -250,7 +250,7 @@ export default function AdminPage() {
         fetch('/api/admin/consigli'),
         fetch('/api/admin/subject-professors'),
         fetch('/api/admin/settings'),
-        fetch('/api/admin/audit-logs?limit=50'),
+        fetch('/api/admin/audit-logs?limit=500'),
         fetch('/api/admin/reports'),
       ]);
 
@@ -1799,13 +1799,38 @@ export default function AdminPage() {
               <div className="glass-panel p-6 border border-white/10">
                 <h3 className="text-lg font-semibold text-white mb-3">Audit Log</h3>
                 <p className="text-sm text-foreground-muted mb-4">
-                  Scarica il report PDF con le ultime azioni sensibili registrate.
+                  Scarica il report PDF con tutti i log di audit disponibili, inclusi accessi Admin, caricamenti file e altre azioni sensibili. L'email completa dell'autore dell'azione viene mantenuta nel log.
                 </p>
                 <button
                   onClick={() => window.open('/api/admin/audit-logs/pdf', '_blank')}
                   className="px-6 py-3 bg-neon-blue/20 hover:bg-neon-blue/30 text-neon-blue border border-neon-blue/30 font-semibold rounded-xl transition-all"
                 >
                   Scarica Audit PDF
+                </button>
+                <button
+                  onClick={() => {
+                    const rows = auditLogs.map((log) => [
+                      new Date(log.created_at).toISOString(),
+                      log.actor_email || 'system',
+                      log.action,
+                      log.target_type,
+                      log.target_id || '',
+                    ]);
+                    const csv = [
+                      ['Data', 'Email', 'Azione', 'Tipo target', 'ID target'],
+                      ...rows,
+                    ].map((row) => row.map((value) => '"' + String(value).replace(/"/g, '""') + '"').join(',')).join('\\n');
+                    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'audit-logs-' + Date.now() + '.csv';
+                    link.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="ml-3 px-6 py-3 bg-neon-purple/20 hover:bg-neon-purple/30 text-neon-purple border border-neon-purple/30 font-semibold rounded-xl transition-all"
+                >
+                  Scarica Audit CSV
                 </button>
                 <div className="mt-5 space-y-2 max-h-64 overflow-auto custom-scrollbar">
                   {auditLogs.length === 0 ? (

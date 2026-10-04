@@ -10,8 +10,7 @@ export async function GET() {
   const { data, error } = await supabaseAdmin
     .from('audit_logs')
     .select('*')
-    .order('created_at', { ascending: false })
-    .limit(300);
+    .order('created_at', { ascending: false });
 
   if (error) {
     return NextResponse.json({ error: 'Failed to export audit logs' }, { status: 500 });
@@ -25,7 +24,7 @@ export async function GET() {
     ...rows.map((row) => {
       const who = row.actor_email || 'system';
       const target = row.target_type ? `${row.target_type}:${row.target_id || '-'}` : '-';
-      return `${row.created_at} | Admin email: ${who} | ${row.action} | ${target}`;
+      return `${row.created_at} | Email: ${who} | ${row.action} | ${target}`;
     }),
   ];
 

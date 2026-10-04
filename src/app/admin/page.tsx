@@ -163,6 +163,7 @@ export default function AdminPage() {
   const preview = process.env.NEXT_PUBLIC_PREVIEW_BYPASS_AUTH === 'true' &&
     process.env.NODE_ENV !== 'production';
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [adminEmail, setAdminEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
@@ -381,7 +382,7 @@ export default function AdminPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ email: adminEmail, password }),
       });
 
       if (res.ok) {
@@ -712,6 +713,11 @@ export default function AdminPage() {
 
             <form onSubmit={handleLogin} className="space-y-4 relative z-10">
               <div>
+                <label className="block text-sm font-semibold text-white mb-2">Email istituzionale</label>
+                <input type="email" value={adminEmail} onChange={(e) => { setAdminEmail(e.target.value); setLoginError(''); }} placeholder="nome.cognome@liceoscacchibari.it" className="w-full px-4 py-3 bg-black/50 border border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple rounded-xl text-white placeholder-foreground-muted outline-none transition-all mb-4" required disabled={loginLoading} autoComplete="username" />
+              </div>
+
+              <div>
                 <label className="block text-sm font-semibold text-white mb-2">Password</label>
                 <input
                   type="password"
@@ -736,7 +742,7 @@ export default function AdminPage() {
 
               <button
                 type="submit"
-                disabled={loginLoading || !password}
+                disabled={loginLoading || !adminEmail || !password}
                 className="w-full py-3 bg-gradient-to-r from-neon-purple to-neon-blue text-white font-semibold rounded-xl transition-all hover:shadow-[0_0_20px_rgba(157,78,221,0.4)] disabled:opacity-50"
               >
                 {loginLoading ? 'Verifica...' : 'Accedi'}

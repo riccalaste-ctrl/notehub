@@ -104,9 +104,9 @@ export default function AdminPasswordModal({ isOpen, onClose }: AdminPasswordMod
 
           <button
             type="submit"
-            disabled={!isPasswordFilled || loading}
+            disabled={!isFormFilled || loading}
             className={`w-full py-3 font-semibold rounded-lg transition-all ${
-              isPasswordFilled && !loading
+              isFormFilled && !loading
                 ? 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl'
                 : 'bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 cursor-not-allowed'
             }`}

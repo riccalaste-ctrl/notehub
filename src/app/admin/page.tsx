@@ -163,6 +163,7 @@ export default function AdminPage() {
   const preview = process.env.NEXT_PUBLIC_PREVIEW_BYPASS_AUTH === 'true' &&
     process.env.NODE_ENV !== 'production';
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [adminEmail, setAdminEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
@@ -250,7 +251,7 @@ export default function AdminPage() {
         fetch('/api/admin/consigli'),
         fetch('/api/admin/subject-professors'),
         fetch('/api/admin/settings'),
-        fetch('/api/admin/audit-logs?limit=50'),
+        fetch('/api/admin/audit-logs?limit=500'),
         fetch('/api/admin/reports'),
       ]);
 
@@ -381,7 +382,7 @@ export default function AdminPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ email: adminEmail, password }),
       });
 
       if (res.ok) {
@@ -712,6 +713,23 @@ export default function AdminPage() {
 
             <form onSubmit={handleLogin} className="space-y-4 relative z-10">
               <div>
+                <label className="block text-sm font-semibold text-white mb-2">Email istituzionale</label>
+                <input
+                  type="email"
+                  value={adminEmail}
+                  onChange={(e) => {
+                    setAdminEmail(e.target.value);
+                    setLoginError('');
+                  }}
+                  placeholder="nome.cognome@istituto.it"
+                  className="w-full px-4 py-3 bg-black/50 border border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple rounded-xl text-white placeholder-foreground-muted outline-none transition-all"
+                  required
+                  disabled={loginLoading}
+                  autoComplete="username"
+                />
+              </div>
+
+              <div>
                 <label className="block text-sm font-semibold text-white mb-2">Password</label>
                 <input
                   type="password"
@@ -736,7 +754,7 @@ export default function AdminPage() {
 
               <button
                 type="submit"
-                disabled={loginLoading || !password}
+                disabled={loginLoading || !adminEmail || !password}
                 className="w-full py-3 bg-gradient-to-r from-neon-purple to-neon-blue text-white font-semibold rounded-xl transition-all hover:shadow-[0_0_20px_rgba(157,78,221,0.4)] disabled:opacity-50"
               >
                 {loginLoading ? 'Verifica...' : 'Accedi'}
@@ -1799,13 +1817,38 @@ export default function AdminPage() {
               <div className="glass-panel p-6 border border-white/10">
                 <h3 className="text-lg font-semibold text-white mb-3">Audit Log</h3>
                 <p className="text-sm text-foreground-muted mb-4">
-                  Scarica il report PDF con le ultime azioni sensibili registrate.
+                  Scarica il report PDF con tutti i log di audit disponibili, inclusi accessi Admin, caricamenti file e altre azioni sensibili. L&apos;email completa dell&apos;autore dell&apos;azione viene mantenuta nel log.
                 </p>
                 <button
                   onClick={() => window.open('/api/admin/audit-logs/pdf', '_blank')}
                   className="px-6 py-3 bg-neon-blue/20 hover:bg-neon-blue/30 text-neon-blue border border-neon-blue/30 font-semibold rounded-xl transition-all"
                 >
                   Scarica Audit PDF
+                </button>
+                <button
+                  onClick={() => {
+                    const rows = auditLogs.map((log) => [
+                      new Date(log.created_at).toISOString(),
+                      log.actor_email || 'system',
+                      log.action,
+                      log.target_type,
+                      log.target_id || '',
+                    ]);
+                    const csv = [
+                      ['Data', 'Email', 'Azione', 'Tipo target', 'ID target'],
+                      ...rows,
+                    ].map((row) => row.map((value) => '"' + String(value).replace(/"/g, '""') + '"').join(',')).join('\\n');
+                    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'audit-logs-' + Date.now() + '.csv';
+                    link.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="ml-3 px-6 py-3 bg-neon-purple/20 hover:bg-neon-purple/30 text-neon-purple border border-neon-purple/30 font-semibold rounded-xl transition-all"
+                >
+                  Scarica Audit CSV
                 </button>
                 <div className="mt-5 space-y-2 max-h-64 overflow-auto custom-scrollbar">
                   {auditLogs.length === 0 ? (

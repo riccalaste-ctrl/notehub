@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { requireAdmin } from '@/lib/auth';
 import { deleteFileFromDrive } from '@/lib/google-drive';
 import { logAuditEvent } from '@/lib/audit';
+import { getUserFromToken } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   const authError = await requireAdmin();
@@ -93,8 +94,10 @@ export async function DELETE(request: NextRequest) {
 
     if (error) throw error;
 
+    const admin = await getUserFromToken();
+
     await logAuditEvent({
-      actor_email: 'admin@notehub.local',
+      actor_email: admin?.email || null,
       action: 'upload_deleted_global',
       target_type: 'uploads',
       target_id: id,

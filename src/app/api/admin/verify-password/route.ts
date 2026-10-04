@@ -5,7 +5,7 @@ import { logAuditEvent } from '@/lib/audit';
 import {
   checkAdminLoginRateLimit,
   clearAdminLoginFailures,
-  isAdminEmailAllowed,
+  getAdminEmail,
   recordAdminLoginFailure,
   verifyConfiguredAdminPassword,
 } from '@/lib/admin-auth';
@@ -26,23 +26,24 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : '';
-    const password = body?.password;
+    const { password } = body;
 
-    if (!email || !password || typeof password !== 'string' || !isAdminEmailAllowed(email)) {
-      recordAdminLoginFailure(request);
-      await logAuditEvent({ actor_email: email || 'unknown', action: 'admin_login_failed', target_type: 'admin_auth' });
-      return NextResponse.json({ error: 'Email o password non valide' }, { status: 401 });
+    if (!password || typeof password !== 'string') {
+      return NextResponse.json({ error: 'Password richiesta' }, { status: 400 });
     }
 
     if (!(await verifyConfiguredAdminPassword(password))) {
       recordAdminLoginFailure(request);
-      await logAuditEvent({ actor_email: email, action: 'admin_login_failed', target_type: 'admin_auth' });
-      return NextResponse.json({ error: 'Email o password non valide' }, { status: 401 });
+      await logAuditEvent({
+        actor_email: 'unknown',
+        action: 'admin_login_failed',
+        target_type: 'admin_auth',
+      });
+      return NextResponse.json({ error: 'Password non valida' }, { status: 401 });
     }
 
     clearAdminLoginFailures(request);
-    const adminEmail = email;
+    const adminEmail = getAdminEmail();
     const jwt = await createJWT(adminEmail, 'admin');
 
     const cookie = serialize(ADMIN_JWT_COOKIE, jwt, {

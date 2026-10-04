@@ -5,7 +5,7 @@ import { setAdminCookie } from '@/lib/auth';
 import {
   checkAdminLoginRateLimit,
   clearAdminLoginFailures,
-  isAdminEmailAllowed,
+  getAdminEmail,
   recordAdminLoginFailure,
   verifyConfiguredAdminPassword,
 } from '@/lib/admin-auth';
@@ -40,7 +40,9 @@ export async function POST(request: NextRequest) {
     }
 
     const { email, password } = validation.data;
-    if (!isAdminEmailAllowed(email) || !(await verifyConfiguredAdminPassword(password))) {
+    const adminEmail = getAdminEmail();
+
+    if (email !== adminEmail || !(await verifyConfiguredAdminPassword(password))) {
       recordAdminLoginFailure(request);
       await logSecurityEvent('ADMIN_LOGIN_FAILED', {
         email,

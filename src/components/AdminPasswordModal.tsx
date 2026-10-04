@@ -8,12 +8,11 @@ interface AdminPasswordModalProps {
 }
 
 export default function AdminPasswordModal({ isOpen, onClose }: AdminPasswordModalProps) {
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const isFormFilled = email.length > 0 && password.length > 0;
+  const isPasswordFilled = password.length > 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +24,7 @@ export default function AdminPasswordModal({ isOpen, onClose }: AdminPasswordMod
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ password }),
       });
 
       const data = await res.json();
@@ -43,7 +42,6 @@ export default function AdminPasswordModal({ isOpen, onClose }: AdminPasswordMod
   };
 
   const handleClose = () => {
-    setEmail('');
     setPassword('');
     setError('');
     setLoading(false);
@@ -72,12 +70,11 @@ export default function AdminPasswordModal({ isOpen, onClose }: AdminPasswordMod
             </svg>
           </div>
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">Accesso Admin</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Inserisci email istituzionale e password</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Inserisci la password per accedere</p>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setError(''); }} placeholder="Email istituzionale" className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition mb-3" autoFocus autoComplete="username" />
             <input
               type="password"
               value={password}
@@ -87,9 +84,9 @@ export default function AdminPasswordModal({ isOpen, onClose }: AdminPasswordMod
               }}
               placeholder="Password"
               className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
-              autoComplete="current-password"
+              autoFocus
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && isFormFilled) {
+                if (e.key === 'Enter' && isPasswordFilled) {
                   handleSubmit(e);
                 }
               }}
@@ -104,9 +101,9 @@ export default function AdminPasswordModal({ isOpen, onClose }: AdminPasswordMod
 
           <button
             type="submit"
-            disabled={!isFormFilled || loading}
+            disabled={!isPasswordFilled || loading}
             className={`w-full py-3 font-semibold rounded-lg transition-all ${
-              isFormFilled && !loading
+              isPasswordFilled && !loading
                 ? 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl'
                 : 'bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 cursor-not-allowed'
             }`}

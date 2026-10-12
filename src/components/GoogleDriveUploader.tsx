@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
-import { Upload, Loader2, FileText } from 'lucide-react';
+import { Upload, Loader2, FileText, X, CheckCircle } from 'lucide-react';
 
 const ALLOWED_UPLOAD_MIME_TYPES = [
   'application/pdf',
@@ -26,12 +26,25 @@ interface GoogleDriveUploaderProps {
   onError: (error: string) => void;
 }
 
+interface QueuedFile {
+  file: File;
+  id: string;
+  status: 'pending' | 'uploading' | 'completed' | 'error';
+  progress: number;
+  error?: string;
+  driveFileId?: string;
+}
+
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 B';
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+function generateId(): string {
+  return Math.random().toString(36).substring(2, 15);
 }
 
 async function uploadChunkToServer(
@@ -64,6 +77,77 @@ async function uploadChunkToServer(
   return data;
 }
 
+async function uploadSingleFile(
+  file: File,
+  subjectId: string,
+  professorId: string,
+  serviceRulesAccepted: boolean,
+  onProgress: (progress: number) => void
+): Promise<string> {
+  const sessionRes = await fetch('/api/upload/session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      subjectId,
+      professorId,
+      serviceRulesAccepted,
+      originalFilename: file.name,
+      mimeType: file.type,
+      sizeBytes: file.size,
+    }),
+  });
+
+  const sessionData = await sessionRes.json();
+
+  if (!sessionRes.ok) {
+    throw new Error(sessionData.error || 'Impossibile creare la sessione di upload');
+  }
+
+  const { sessionId } = sessionData;
+
+  const totalSize = file.size;
+  const totalChunks = Math.ceil(totalSize / CHUNK_SIZE);
+
+  let driveFileId: string | null = null;
+
+  for (let i = 0; i < totalChunks; i++) {
+    const start = i * CHUNK_SIZE;
+    const end = Math.min(start + CHUNK_SIZE, totalSize);
+    const chunk = file.slice(start, end);
+
+    const result = await uploadChunkToServer(sessionId, chunk, i, totalChunks, start, end);
+
+    if (result.driveFileId) {
+      driveFileId = result.driveFileId;
+    }
+
+    const pct = Math.round(((i + 1) / totalChunks) * 100);
+    onProgress(pct);
+  }
+
+  if (!driveFileId) {
+    throw new Error('Google Drive non ha restituito un ID file');
+  }
+
+  const completeRes = await fetch('/api/upload/complete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sessionId,
+      driveFileId,
+      serviceRulesAccepted,
+    }),
+  });
+
+  const completeData = await completeRes.json();
+
+  if (!completeRes.ok) {
+    throw new Error(completeData.error || 'Impossibile completare il salvataggio del file');
+  }
+
+  return driveFileId;
+}
+
 export default function GoogleDriveUploader({
   subjectId,
   professorId,
@@ -71,9 +155,8 @@ export default function GoogleDriveUploader({
   onSuccess,
   onError,
 }: GoogleDriveUploaderProps) {
-  const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [queuedFiles, setQueuedFiles] = useState<QueuedFile[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateFile = (file: File): string | null => {
@@ -87,108 +170,106 @@ export default function GoogleDriveUploader({
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    const error = validateFile(file);
-    if (error) {
-      onError(error);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+    const newFiles: QueuedFile[] = [];
+    let hasError = false;
+
+    for (const file of files) {
+      const error = validateFile(file);
+      if (error) {
+        onError(`${file.name}: ${error}`);
+        hasError = true;
+        continue;
       }
-      return;
+      newFiles.push({
+        file,
+        id: generateId(),
+        status: 'pending',
+        progress: 0,
+      });
     }
 
-    setSelectedFile(file);
+    if (!hasError && newFiles.length > 0) {
+      setQueuedFiles(prev => [...prev, ...newFiles]);
+    }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
-  const handleUpload = useCallback(async () => {
-    if (!selectedFile) {
-      onError('Seleziona un file da caricare');
+  const removeFile = (id: string) => {
+    setQueuedFiles(prev => prev.filter(f => f.id !== id));
+  };
+
+  const clearCompleted = () => {
+    setQueuedFiles(prev => prev.filter(f => f.status !== 'completed'));
+  };
+
+  const handleUploadAll = useCallback(async () => {
+    const pendingFiles = queuedFiles.filter(f => f.status === 'pending');
+    if (pendingFiles.length === 0) {
+      onError('Nessun file da caricare');
       return;
     }
 
-    setUploading(true);
-    setProgress(5);
+    setIsUploading(true);
 
-    try {
-      console.log('[Upload] Creating session...');
-      const sessionRes = await fetch('/api/upload/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+    for (const queuedFile of pendingFiles) {
+      setQueuedFiles(prev =>
+        prev.map(f =>
+          f.id === queuedFile.id ? { ...f, status: 'uploading' as const, progress: 0 } : f
+        )
+      );
+
+      try {
+        const driveFileId = await uploadSingleFile(
+          queuedFile.file,
           subjectId,
           professorId,
           serviceRulesAccepted,
-          originalFilename: selectedFile.name,
-          mimeType: selectedFile.type,
-          sizeBytes: selectedFile.size,
-        }),
-      });
+          (progress) => {
+            setQueuedFiles(prev =>
+              prev.map(f =>
+                f.id === queuedFile.id ? { ...f, progress } : f
+              )
+            );
+          }
+        );
 
-      const sessionData = await sessionRes.json();
-      console.log('[Upload] Session response:', sessionRes.status, sessionData);
-
-      if (!sessionRes.ok) {
-        throw new Error(sessionData.error || 'Impossibile creare la sessione di upload');
+        setQueuedFiles(prev =>
+          prev.map(f =>
+            f.id === queuedFile.id
+              ? { ...f, status: 'completed' as const, progress: 100, driveFileId }
+              : f
+          )
+        );
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Caricamento non riuscito';
+        console.error('[Upload] Error:', message);
+        setQueuedFiles(prev =>
+          prev.map(f =>
+            f.id === queuedFile.id
+              ? { ...f, status: 'error' as const, error: message }
+              : f
+          )
+        );
       }
-
-      const { sessionId } = sessionData;
-
-      const totalSize = selectedFile.size;
-      const totalChunks = Math.ceil(totalSize / CHUNK_SIZE);
-      console.log('[Upload] File size:', totalSize, 'chunks:', totalChunks);
-
-      let driveFileId: string | null = null;
-
-      for (let i = 0; i < totalChunks; i++) {
-        const start = i * CHUNK_SIZE;
-        const end = Math.min(start + CHUNK_SIZE, totalSize);
-        const chunk = selectedFile.slice(start, end);
-        console.log(`[Upload] Uploading chunk ${i + 1}/${totalChunks} (${start}-${end})`);
-
-        const result = await uploadChunkToServer(sessionId, chunk, i, totalChunks, start, end);
-        console.log(`[Upload] Chunk ${i + 1} result:`, result);
-
-        if (result.driveFileId) {
-          driveFileId = result.driveFileId;
-        }
-
-        const pct = Math.round(((i + 1) / totalChunks) * 80) + 10;
-        setProgress(Math.min(pct, 90));
-      }
-
-      if (!driveFileId) {
-        throw new Error('Google Drive non ha restituito un ID file');
-      }
-
-      setProgress(95);
-
-      const completeRes = await fetch('/api/upload/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId,
-          driveFileId,
-          serviceRulesAccepted,
-        }),
-      });
-
-      const completeData = await completeRes.json();
-
-      if (!completeRes.ok) {
-        throw new Error(completeData.error || 'Impossibile completare il salvataggio del file');
-      }
-
-      setProgress(100);
-      setTimeout(() => onSuccess(), 300);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Caricamento non riuscito';
-      console.error('[Upload] Final error:', message);
-      onError(message);
-      setUploading(false);
     }
-  }, [selectedFile, subjectId, professorId, serviceRulesAccepted, onSuccess, onError]);
+
+    setIsUploading(false);
+
+    const allCompleted = queuedFiles.every(f => f.status === 'completed' || f.status === 'error');
+    if (allCompleted && queuedFiles.some(f => f.status === 'completed')) {
+      setTimeout(() => onSuccess(), 500);
+    }
+  }, [queuedFiles, subjectId, professorId, serviceRulesAccepted, onSuccess, onError]);
+
+  const hasPendingFiles = queuedFiles.some(f => f.status === 'pending');
+  const hasUploadingFiles = queuedFiles.some(f => f.status === 'uploading');
+  const allCompleted = queuedFiles.length > 0 && queuedFiles.every(f => f.status === 'completed');
 
   return (
     <div className="space-y-4">
@@ -196,73 +277,120 @@ export default function GoogleDriveUploader({
         ref={fileInputRef}
         type="file"
         accept={ALLOWED_EXTENSIONS}
+        multiple
         onChange={handleFileSelect}
-        disabled={uploading}
+        disabled={isUploading}
         className="hidden"
       />
 
       <button
         type="button"
         onClick={() => fileInputRef.current?.click()}
-        disabled={uploading}
+        disabled={isUploading}
         className="w-full px-4 py-8 neu-surface-pressed rounded-neu border-2 border-dashed border-neu-border premium-transition hover:border-[#FF8C42]/50 disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center gap-2"
       >
-        {selectedFile ? (
+        {queuedFiles.length === 0 ? (
+          <>
+            <Upload className="size-8 text-foreground-muted" />
+            <p className="text-sm font-semibold text-foreground">
+              Seleziona file
+            </p>
+            <p className="text-xs text-foreground-muted">
+              PDF, DOC, DOCX, JPG, PNG (max {formatFileSize(MAX_UPLOAD_SIZE_BYTES)} ciascuno)
+            </p>
+          </>
+        ) : (
           <>
             <div className="w-12 h-12 rounded-neu-xl bg-mint/20 flex items-center justify-center">
               <FileText className="size-6 text-mint-dark" />
             </div>
             <div className="text-center">
-              <p className="text-sm font-semibold text-foreground truncate max-w-xs">
-                {selectedFile.name}
+              <p className="text-sm font-semibold text-foreground">
+                {queuedFiles.length} file{queuedFiles.length !== 1 ? 'i' : ''} selezionato{queuedFiles.length !== 1 ? 'i' : ''}
               </p>
               <p className="text-xs text-foreground-light mt-1">
-                {formatFileSize(selectedFile.size)}
+                {queuedFiles.filter(f => f.status === 'completed').length} completati, {queuedFiles.filter(f => f.status !== 'completed').length} in coda
               </p>
             </div>
-            {!uploading && (
-              <p className="text-xs text-foreground-muted mt-1">
-                Clicca per cambiare file
-              </p>
-            )}
-          </>
-        ) : (
-          <>
-            <Upload className="size-8 text-foreground-muted" />
-            <p className="text-sm font-semibold text-foreground">
-              Seleziona un file
-            </p>
-            <p className="text-xs text-foreground-muted">
-              PDF, DOC, DOCX, JPG, PNG (max {formatFileSize(MAX_UPLOAD_SIZE_BYTES)})
-            </p>
           </>
         )}
       </button>
 
-      {uploading && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm text-foreground-light">
-            <Loader2 className="size-4 animate-spin" />
-            <span>Caricamento in corso... {progress}%</span>
-          </div>
-          <div className="w-full h-2 bg-neu-base rounded-full overflow-hidden">
+      {queuedFiles.length > 0 && (
+        <div className="space-y-2 max-h-60 overflow-y-auto">
+          {queuedFiles.map((queuedFile) => (
             <div
-              className="h-full bg-gradient-to-r from-[#FF8C42] to-[#FF6B35] rounded-full premium-transition"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+              key={queuedFile.id}
+              className="flex items-center gap-3 p-3 neu-surface-pressed rounded-neu border border-neu-border"
+            >
+              <div className="w-10 h-10 rounded-neu-xl bg-mint/20 flex items-center justify-center flex-shrink-0">
+                {queuedFile.status === 'completed' ? (
+                  <CheckCircle className="size-5 text-mint-dark" />
+                ) : queuedFile.status === 'error' ? (
+                  <X className="size-5 text-red-400" />
+                ) : (
+                  <FileText className="size-5 text-mint-dark" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">{queuedFile.file.name}</p>
+                <p className="text-xs text-foreground-muted">
+                  {formatFileSize(queuedFile.file.size)}
+                  {queuedFile.status === 'uploading' && ` • Caricamento... ${queuedFile.progress}%`}
+                  {queuedFile.status === 'completed' && ' • Completato'}
+                  {queuedFile.status === 'error' && ` • Errore: ${queuedFile.error}`}
+                </p>
+                {queuedFile.status === 'uploading' && (
+                  <div className="w-full h-1.5 bg-neu-base rounded-full overflow-hidden mt-1">
+                    <div
+                      className="h-full bg-gradient-to-r from-[#FF8C42] to-[#FF6B35] rounded-full premium-transition"
+                      style={{ width: `${queuedFile.progress}%` }}
+                    />
+                  </div>
+                )}
+              </div>
+              {(queuedFile.status === 'pending' || queuedFile.status === 'error') && !isUploading && (
+                <button
+                  type="button"
+                  onClick={() => removeFile(queuedFile.id)}
+                  className="p-2 text-foreground-muted hover:text-red-400 rounded-lg hover:bg-red-400/10 transition-colors flex-shrink-0"
+                  aria-label="Rimuovi file"
+                >
+                  <X className="size-4" />
+                </button>
+              )}
+            </div>
+          ))}
         </div>
       )}
 
-      {selectedFile && !uploading && (
+      {queuedFiles.some(f => f.status === 'completed') && (
         <button
           type="button"
-          onClick={handleUpload}
-          className="w-full py-3 text-sm font-semibold text-white gradient-primary rounded-neu premium-transition flex items-center justify-center gap-2"
+          onClick={clearCompleted}
+          className="w-full py-2 text-sm text-foreground-muted hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all"
+        >
+          Pulisci completati
+        </button>
+      )}
+
+      {(hasPendingFiles || hasUploadingFiles) && !allCompleted && (
+        <button
+          type="button"
+          onClick={handleUploadAll}
+          disabled={isUploading || hasUploadingFiles}
+          className="w-full py-3 text-sm font-semibold text-white gradient-primary rounded-neu premium-transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Upload className="size-4" />
-          Carica file
+          {isUploading || hasUploadingFiles ? 'Caricamento in corso...' : `Carica ${queuedFiles.filter(f => f.status === 'pending').length} file`}
         </button>
+      )}
+
+      {allCompleted && (
+        <div className="text-center py-4 text-neon-green">
+          <CheckCircle className="size-6 mx-auto mb-2" />
+          <p className="font-semibold">Tutti i file caricati con successo!</p>
+        </div>
       )}
     </div>
   );

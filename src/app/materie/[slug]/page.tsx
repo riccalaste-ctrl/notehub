@@ -55,6 +55,8 @@ export default function SubjectPage() {
   const [uploads, setUploads] = useState<Upload[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [directUploadProfessorId, setDirectUploadProfessorId] = useState<string>('');
+  const [directUploadSubjectId, setDirectUploadSubjectId] = useState<string>('');
   const [search, setSearch] = useState('');
   const [selectedProfessor, setSelectedProfessor] = useState<Professor | null>(null);
   const { toast, showToast, hideToast } = useToast();
@@ -179,24 +181,43 @@ export default function SubjectPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {filteredProfs.map((prof) => (
                   <motion.div key={prof.id} whileHover={{ scale: 1.02, y: -5 }}>
-                    <button
-                      onClick={() => setSelectedProfessor(prof)}
-                      className="glass-panel p-6 text-left block w-full group relative overflow-hidden"
-                    >
+                    <div className="glass-panel p-6 relative overflow-hidden">
                       <div className="absolute inset-0 bg-gradient-to-br from-neon-blue/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      <div className="flex items-center justify-between mb-4 relative z-10">
-                        <div className="size-12 rounded-xl bg-neon-blue/20 border border-neon-blue/30 flex items-center justify-center group-hover:scale-110 transition-transform">
-                          <GraduationCap className="size-6 text-neon-blue" />
+                      
+                      {/* Main card - click to view files */}
+                      <button
+                        onClick={() => setSelectedProfessor(prof)}
+                        className="flex flex-col h-full w-full text-left group relative z-10"
+                      >
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="size-12 rounded-xl bg-neon-blue/20 border border-neon-blue/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <GraduationCap className="size-6 text-neon-blue" />
+                          </div>
+                          <ChevronRight className="size-5 text-foreground-muted group-hover:text-neon-blue group-hover:translate-x-1 transition-all" />
                         </div>
-                        <ChevronRight className="size-5 text-foreground-muted group-hover:text-neon-blue group-hover:translate-x-1 transition-all" />
-                      </div>
-                      <h3 className="text-lg font-semibold text-white mb-1 relative z-10">
-                        {prof.name}
-                      </h3>
-                      <p className="text-sm text-foreground-muted relative z-10">
-                        Clicca per visualizzare i file
-                      </p>
-                    </button>
+                        <h3 className="text-lg font-semibold text-white mb-1">
+                          {prof.name}
+                        </h3>
+                        <p className="text-sm text-foreground-muted flex-1">
+                          Clicca per visualizzare i file
+                        </p>
+                      </button>
+
+                      {/* Direct upload button - bottom right */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDirectUploadProfessorId(prof.id);
+                          setDirectUploadSubjectId(subject.id);
+                          setUploadModalOpen(true);
+                        }}
+                        className="absolute bottom-4 right-4 p-2 rounded-xl bg-neon-purple/20 border border-neon-purple/30 text-neon-purple hover:bg-neon-purple/30 hover:text-white transition-all opacity-0 group-hover:opacity-100"
+                        title={`Carica direttamente in ${subject.name} - ${prof.name}`}
+                        aria-label={`Carica direttamente in ${subject.name} - ${prof.name}`}
+                      >
+                        <Plus className="size-4" />
+                      </button>
+                    </div>
                   </motion.div>
                 ))}
               </div>
@@ -298,6 +319,8 @@ export default function SubjectPage() {
         isOpen={uploadModalOpen}
         onClose={() => {
           setUploadModalOpen(false);
+          setDirectUploadProfessorId('');
+          setDirectUploadSubjectId('');
           if (selectedProfessor && subject) {
             fetchUploads();
           }
@@ -305,6 +328,8 @@ export default function SubjectPage() {
         subjects={allSubjects.filter((s) => s.enabled)}
         professors={professors}
         subjectProfessors={subjectProfessors}
+        preSelectedProfessorId={directUploadProfessorId}
+        preSelectedSubjectId={directUploadSubjectId}
       />
 
       {toast && <Toast {...toast} onClose={hideToast} />}

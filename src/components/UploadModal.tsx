@@ -30,9 +30,19 @@ interface UploadModalProps {
   subjects: Subject[];
   professors: Professor[];
   subjectProfessors: SubjectProfessor[];
+  preSelectedProfessorId?: string;
+  preSelectedSubjectId?: string;
 }
 
-export default function UploadModal({ isOpen, onClose, subjects, professors, subjectProfessors }: UploadModalProps) {
+export default function UploadModal({ 
+  isOpen, 
+  onClose, 
+  subjects, 
+  professors, 
+  subjectProfessors,
+  preSelectedProfessorId,
+  preSelectedSubjectId
+}: UploadModalProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -49,8 +59,13 @@ export default function UploadModal({ isOpen, onClose, subjects, professors, sub
       setSuccess(false);
       setStep(1);
       setRulesAccepted(false);
+    } else if (preSelectedProfessorId && preSelectedSubjectId) {
+      // Direct upload mode: pre-select and jump to step 3
+      setSelectedProfessor(preSelectedProfessorId);
+      setSelectedSubject(preSelectedSubjectId);
+      setStep(3);
     }
-  }, [isOpen]);
+  }, [isOpen, preSelectedProfessorId, preSelectedSubjectId]);
 
   const filteredSubjects = subjectProfessors
     .filter((sp) => sp.professor_id === selectedProfessor)

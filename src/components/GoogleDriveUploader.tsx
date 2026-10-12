@@ -16,7 +16,11 @@ const MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024;
 
 const ALLOWED_EXTENSIONS = '.pdf,.doc,.docx,.jpg,.jpeg,.png';
 
-const CHUNK_SIZE = 3 * 1024 * 1024;
+// Ottimizzazioni
+const SMALL_FILE_THRESHOLD = 5 * 1024 * 1024; // 5 MB -> simple upload (1 chunk)
+const LARGE_CHUNK_SIZE = 10 * 1024 * 1024;     // 10 MB per chunk grandi
+const MAX_CONCURRENT_FILES = 3;                 // max file in parallelo
+const MAX_CONCURRENT_CHUNKS = 4;                // max chunk in parallelo per file
 
 interface GoogleDriveUploaderProps {
   subjectId: string;
@@ -33,6 +37,7 @@ interface QueuedFile {
   progress: number;
   error?: string;
   driveFileId?: string;
+  strategy?: 'simple' | 'resumable';
 }
 
 function formatFileSize(bytes: number): string {
@@ -47,7 +52,32 @@ function generateId(): string {
   return Math.random().toString(36).substring(2, 15);
 }
 
-async function uploadChunkToServer(
+// ---------- API helpers ----------
+
+async function createUploadSession(
+  subjectId: string,
+  professorId: string,
+  serviceRulesAccepted: boolean,
+  file: File
+): Promise<string> {
+  const res = await fetch('/api/upload/session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      subjectId,
+      professorId,
+      serviceRulesAccepted,
+      originalFilename: file.name,
+      mimeType: file.type,
+      sizeBytes: file.size,
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Impossibile creare la sessione di upload');
+  return data.sessionId;
+}
+
+async function uploadChunk(
   sessionId: string,
   chunk: Blob,
   chunkIndex: number,
@@ -63,90 +93,93 @@ async function uploadChunkToServer(
   formData.append('chunkEnd', String(chunkEnd));
   formData.append('chunk', chunk);
 
-  const response = await fetch('/api/upload/chunk', {
-    method: 'POST',
-    body: formData,
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error || `Caricamento del blocco non riuscito (${response.status})`);
-  }
-
+  const res = await fetch('/api/upload/chunk', { method: 'POST', body: formData });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || `Caricamento blocco fallito (${res.status})`);
   return data;
 }
 
-async function uploadSingleFile(
+async function completeUpload(sessionId: string, driveFileId: string, serviceRulesAccepted: boolean): Promise<void> {
+  const res = await fetch('/api/upload/complete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sessionId, driveFileId, serviceRulesAccepted }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Impossibile completare il salvataggio');
+}
+
+// ---------- Upload strategies ----------
+
+// Simple: 1 chunk per file piccolo (< 5MB)
+async function uploadSmallFile(
   file: File,
   subjectId: string,
   professorId: string,
   serviceRulesAccepted: boolean,
-  onProgress: (progress: number) => void
+  onProgress: (p: number) => void
 ): Promise<string> {
-  const sessionRes = await fetch('/api/upload/session', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      subjectId,
-      professorId,
-      serviceRulesAccepted,
-      originalFilename: file.name,
-      mimeType: file.type,
-      sizeBytes: file.size,
-    }),
-  });
+  const sessionId = await createUploadSession(subjectId, professorId, serviceRulesAccepted, file);
+  onProgress(20);
 
-  const sessionData = await sessionRes.json();
+  const result = await uploadChunk(sessionId, file, 0, 1, 0, file.size);
+  onProgress(70);
 
-  if (!sessionRes.ok) {
-    throw new Error(sessionData.error || 'Impossibile creare la sessione di upload');
-  }
+  const driveFileId = result.driveFileId;
+  if (!driveFileId) throw new Error('Google Drive non ha restituito un ID file');
 
-  const { sessionId } = sessionData;
-
-  const totalSize = file.size;
-  const totalChunks = Math.ceil(totalSize / CHUNK_SIZE);
-
-  let driveFileId: string | null = null;
-
-  for (let i = 0; i < totalChunks; i++) {
-    const start = i * CHUNK_SIZE;
-    const end = Math.min(start + CHUNK_SIZE, totalSize);
-    const chunk = file.slice(start, end);
-
-    const result = await uploadChunkToServer(sessionId, chunk, i, totalChunks, start, end);
-
-    if (result.driveFileId) {
-      driveFileId = result.driveFileId;
-    }
-
-    const pct = Math.round(((i + 1) / totalChunks) * 100);
-    onProgress(pct);
-  }
-
-  if (!driveFileId) {
-    throw new Error('Google Drive non ha restituito un ID file');
-  }
-
-  const completeRes = await fetch('/api/upload/complete', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      sessionId,
-      driveFileId,
-      serviceRulesAccepted,
-    }),
-  });
-
-  const completeData = await completeRes.json();
-
-  if (!completeRes.ok) {
-    throw new Error(completeData.error || 'Impossibile completare il salvataggio del file');
-  }
-
+  await completeUpload(sessionId, driveFileId, serviceRulesAccepted);
+  onProgress(100);
   return driveFileId;
 }
+
+// Resumable con chunk paralleli per file grandi (≥ 5MB)
+async function uploadLargeFile(
+  file: File,
+  subjectId: string,
+  professorId: string,
+  serviceRulesAccepted: boolean,
+  onProgress: (p: number) => void
+): Promise<string> {
+  const sessionId = await createUploadSession(subjectId, professorId, serviceRulesAccepted, file);
+  onProgress(5);
+
+  const totalSize = file.size;
+  const totalChunks = Math.ceil(totalSize / LARGE_CHUNK_SIZE);
+  const chunkIndices = Array.from({ length: totalChunks }, (_, i) => i);
+
+  let driveFileId: string | null = null;
+  let completedChunks = 0;
+
+  // Processa chunk in batch paralleli
+  for (let batchStart = 0; batchStart < totalChunks; batchStart += MAX_CONCURRENT_CHUNKS) {
+    const batch = chunkIndices.slice(batchStart, batchStart + MAX_CONCURRENT_CHUNKS);
+
+    await Promise.all(
+      batch.map(async (i) => {
+        const start = i * LARGE_CHUNK_SIZE;
+        const end = Math.min(start + LARGE_CHUNK_SIZE, totalSize);
+        const chunk = file.slice(start, end);
+
+        const result = await uploadChunk(sessionId, chunk, i, totalChunks, start, end);
+        if (result.driveFileId) driveFileId = result.driveFileId;
+
+        completedChunks++;
+        const pct = 5 + Math.round((completedChunks / totalChunks) * 85);
+        onProgress(pct);
+      })
+    );
+  }
+
+  if (!driveFileId) throw new Error('Google Drive non ha restituito un ID file');
+
+  onProgress(95);
+  await completeUpload(sessionId, driveFileId, serviceRulesAccepted);
+  onProgress(100);
+  return driveFileId;
+}
+
+// ---------- Main component ----------
 
 export default function GoogleDriveUploader({
   subjectId,
@@ -188,16 +221,14 @@ export default function GoogleDriveUploader({
         id: generateId(),
         status: 'pending',
         progress: 0,
+        strategy: file.size < SMALL_FILE_THRESHOLD ? 'simple' : 'resumable',
       });
     }
 
     if (!hasError && newFiles.length > 0) {
       setQueuedFiles(prev => [...prev, ...newFiles]);
     }
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const removeFile = (id: string) => {
@@ -208,6 +239,7 @@ export default function GoogleDriveUploader({
     setQueuedFiles(prev => prev.filter(f => f.status !== 'completed'));
   };
 
+  // Processa file in parallelo (max MAX_CONCURRENT_FILES)
   const handleUploadAll = useCallback(async () => {
     const pendingFiles = queuedFiles.filter(f => f.status === 'pending');
     if (pendingFiles.length === 0) {
@@ -216,55 +248,53 @@ export default function GoogleDriveUploader({
     }
 
     setIsUploading(true);
+    let activeCount = 0;
+    let index = 0;
 
-    for (const queuedFile of pendingFiles) {
+    const processNext = async (): Promise<void> => {
+      if (index >= pendingFiles.length) return;
+
+      const queuedFile = pendingFiles[index++];
+      activeCount++;
+
       setQueuedFiles(prev =>
-        prev.map(f =>
-          f.id === queuedFile.id ? { ...f, status: 'uploading' as const, progress: 0 } : f
-        )
+        prev.map(f => f.id === queuedFile.id ? { ...f, status: 'uploading' as const, progress: 0 } : f)
       );
 
       try {
-        const driveFileId = await uploadSingleFile(
-          queuedFile.file,
-          subjectId,
-          professorId,
-          serviceRulesAccepted,
-          (progress) => {
-            setQueuedFiles(prev =>
-              prev.map(f =>
-                f.id === queuedFile.id ? { ...f, progress } : f
-              )
-            );
-          }
-        );
+        const driveFileId = queuedFile.strategy === 'simple'
+          ? await uploadSmallFile(queuedFile.file, subjectId, professorId, serviceRulesAccepted,
+              (p) => setQueuedFiles(prev => prev.map(f => f.id === queuedFile.id ? { ...f, progress: p } : f)))
+          : await uploadLargeFile(queuedFile.file, subjectId, professorId, serviceRulesAccepted,
+              (p) => setQueuedFiles(prev => prev.map(f => f.id === queuedFile.id ? { ...f, progress: p } : f)));
 
         setQueuedFiles(prev =>
-          prev.map(f =>
-            f.id === queuedFile.id
-              ? { ...f, status: 'completed' as const, progress: 100, driveFileId }
-              : f
-          )
+          prev.map(f => f.id === queuedFile.id ? { ...f, status: 'completed' as const, progress: 100, driveFileId } : f)
         );
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Caricamento non riuscito';
         console.error('[Upload] Error:', message);
         setQueuedFiles(prev =>
-          prev.map(f =>
-            f.id === queuedFile.id
-              ? { ...f, status: 'error' as const, error: message }
-              : f
-          )
+          prev.map(f => f.id === queuedFile.id ? { ...f, status: 'error' as const, error: message } : f)
         );
+      } finally {
+        activeCount--;
+        if (index < pendingFiles.length) await processNext();
+        else if (activeCount === 0) finishAll();
       }
-    }
+    };
 
-    setIsUploading(false);
+    const finishAll = () => {
+      setIsUploading(false);
+      const allDone = queuedFiles.every(f => f.status === 'completed' || f.status === 'error');
+      if (allDone && queuedFiles.some(f => f.status === 'completed')) {
+        setTimeout(() => onSuccess(), 500);
+      }
+    };
 
-    const allCompleted = queuedFiles.every(f => f.status === 'completed' || f.status === 'error');
-    if (allCompleted && queuedFiles.some(f => f.status === 'completed')) {
-      setTimeout(() => onSuccess(), 500);
-    }
+    // Avvia primi MAX_CONCURRENT_FILES
+    const starters = Math.min(MAX_CONCURRENT_FILES, pendingFiles.length);
+    await Promise.all(Array.from({ length: starters }, () => processNext()));
   }, [queuedFiles, subjectId, professorId, serviceRulesAccepted, onSuccess, onError]);
 
   const hasPendingFiles = queuedFiles.some(f => f.status === 'pending');
@@ -292,9 +322,7 @@ export default function GoogleDriveUploader({
         {queuedFiles.length === 0 ? (
           <>
             <Upload className="size-8 text-foreground-muted" />
-            <p className="text-sm font-semibold text-foreground">
-              Seleziona file
-            </p>
+            <p className="text-sm font-semibold text-foreground">Seleziona file</p>
             <p className="text-xs text-foreground-muted">
               PDF, DOC, DOCX, JPG, PNG (max {formatFileSize(MAX_UPLOAD_SIZE_BYTES)} ciascuno)
             </p>
@@ -333,7 +361,12 @@ export default function GoogleDriveUploader({
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{queuedFile.file.name}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium text-foreground truncate">{queuedFile.file.name}</p>
+                  <span className="text-xs px-2 py-0.5 rounded bg-white/5 text-foreground-muted">
+                    {queuedFile.strategy === 'simple' ? '⚡ Diretto' : '📦 A chunk'}
+                  </span>
+                </div>
                 <p className="text-xs text-foreground-muted">
                   {formatFileSize(queuedFile.file.size)}
                   {queuedFile.status === 'uploading' && ` • Caricamento... ${queuedFile.progress}%`}

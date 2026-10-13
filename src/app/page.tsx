@@ -15,6 +15,7 @@ interface Subject {
   name: string;
   slug: string;
   enabled: boolean;
+  upload_count?: number;
 }
 
 interface Professor {
@@ -50,7 +51,14 @@ export default function DashboardPage() {
       const catalogRes = await fetch('/api/public/catalog');
       if (catalogRes.ok) {
         const data = await catalogRes.json();
-        setSubjects(data.subjects || []);
+        const catalogSubjects: Subject[] = data.subjects || [];
+        setSubjects(catalogSubjects);
+        setUploadCounts(
+          catalogSubjects.reduce((counts, subject) => {
+            counts[subject.slug] = subject.upload_count ?? 0;
+            return counts;
+          }, {} as Record<string, number>)
+        );
         setProfessors(data.professors || []);
         setSubjectProfessors(data.subjectProfessors || []);
       }
@@ -66,13 +74,8 @@ export default function DashboardPage() {
         const data = await uploadsRes.json();
         setRecentUploads(data.uploads || []);
 
-        const counts: Record<string, number> = {};
-        (data.uploads || []).forEach((u: Upload) => {
-          if (u.subject_slug) {
-            counts[u.subject_slug] = (counts[u.subject_slug] || 0) + 1;
-          }
-        });
-        setUploadCounts(counts);
+        // The per-subject totals come from the catalog endpoint, which counts
+        // every resource in the database; this list is only for recent uploads.
       }
     } catch (error) {
       console.error('Uploads fetch error:', error);

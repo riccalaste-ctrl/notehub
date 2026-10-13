@@ -721,7 +721,7 @@ export default function AdminPage() {
                     setAdminEmail(e.target.value);
                     setLoginError('');
                   }}
-                  placeholder="nome.cognome@istituto.it"
+                  placeholder="cognome.nome@istituto.it"
                   className="w-full px-4 py-3 bg-black/50 border border-white/10 focus:border-neon-purple focus:ring-1 focus:ring-neon-purple rounded-xl text-white placeholder-foreground-muted outline-none transition-all"
                   required
                   disabled={loginLoading}

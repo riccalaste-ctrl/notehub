@@ -27,7 +27,12 @@ export async function GET(request: NextRequest) {
     }]));
   }
 
-  return NextResponse.json({ reports: (data || []).map((report) => ({ ...report, upload: uploads[report.upload_id] || null })) });
+  return NextResponse.json({ reports: (data || []).map((report) => ({
+    ...report,
+    file_view_url: report.upload_id ? `${request.nextUrl.origin}/api/uploads/${report.upload_id}/file` : '',
+    file_download_url: report.upload_id ? `${request.nextUrl.origin}/api/uploads/${report.upload_id}/file?download=1` : '',
+    upload: uploads[report.upload_id] || null,
+  })) });
 }
 
 export async function PATCH(request: NextRequest) {

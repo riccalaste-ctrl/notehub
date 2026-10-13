@@ -6,7 +6,7 @@ import { logAuditEvent } from '@/lib/audit';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const authError = await requireAdmin();
   if (authError) return authError;
 
@@ -20,7 +20,11 @@ export async function GET() {
       .from('uploads')
       .select('id, original_filename, uploader_name, view_url, download_url, drive_file_id, professor_id')
       .in('id', uploadIds);
-    uploads = Object.fromEntries((uploadRows || []).map((row) => [row.id, row]));
+    uploads = Object.fromEntries((uploadRows || []).map((row) => [row.id, {
+      ...row,
+      view_url: `/api/uploads/${row.id}/file`,
+      download_url: `/api/uploads/${row.id}/file?download=1`,
+    }]));
   }
 
   return NextResponse.json({ reports: (data || []).map((report) => ({ ...report, upload: uploads[report.upload_id] || null })) });

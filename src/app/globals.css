@@ -545,3 +545,546 @@ body {
 .light .admin-tabs-scroll::-webkit-scrollbar-thumb {
   background: rgba(15,23,42,.22);
 }
+
+
+/* ==========================================================================
+   NOTEHUB REDESIGN — Clean Academic Library
+   Shared design tokens and responsive polish for the entire application.
+   Dark mode intentionally uses absolute black (#000000) for the page canvas.
+   ========================================================================== */
+
+:root {
+  color-scheme: light dark;
+  --background: #f5f6f8;
+  --foreground: #171923;
+  --surface: #ffffff;
+  --surface-solid: #ffffff;
+  --surface-raised: #eef0f4;
+  --glass-border: rgba(17, 24, 39, 0.12);
+  --glass-highlight: rgba(17, 24, 39, 0.04);
+  --muted: #5f6675;
+  --muted-strong: #404655;
+  --accent: #4f46e5;
+  --accent-blue: #2563eb;
+}
+
+html.dark {
+  color-scheme: dark;
+  --background: #000000;
+  --foreground: #f5f5f7;
+  --surface: #080808;
+  --surface-solid: #080808;
+  --surface-raised: #111111;
+  --glass-border: #27272a;
+  --glass-highlight: #18181b;
+  --muted: #a1a1aa;
+  --muted-strong: #d4d4d8;
+  --accent: #818cf8;
+  --accent-blue: #60a5fa;
+  background: #000000 !important;
+}
+
+html.light {
+  color-scheme: light;
+  --background: #f5f6f8;
+  --foreground: #171923;
+  --surface: #ffffff;
+  --surface-solid: #ffffff;
+  --surface-raised: #eef0f4;
+  --glass-border: rgba(17, 24, 39, 0.12);
+  --glass-highlight: rgba(17, 24, 39, 0.04);
+  --muted: #5f6675;
+  --muted-strong: #404655;
+  --accent: #4f46e5;
+  --accent-blue: #2563eb;
+}
+
+html, body {
+  background-color: var(--background) !important;
+  color: var(--foreground);
+}
+
+.dark body,
+.dark .page-shell,
+html.dark body {
+  background: #000000 !important;
+  background-image: none !important;
+}
+
+.light body,
+.light .page-shell,
+html.light body {
+  background-color: #f5f6f8 !important;
+  background-image: none !important;
+}
+
+body {
+  min-width: 320px;
+  overflow-x: clip;
+  font-family: var(--font-inter), Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+
+.page-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--background) !important;
+  background-image: none !important;
+}
+
+.dark .page-shell,
+.dark main,
+.dark body {
+  background-color: #000000;
+}
+
+/* One quiet surface language instead of competing glass, neumorphic and glow styles. */
+.glass-panel,
+.premium-card,
+.surface-card,
+.neu-surface,
+.neu-card,
+.bento-card,
+.neu-bento-card,
+.gray-card {
+  background: var(--surface) !important;
+  background-image: none !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 1rem !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition: border-color 160ms ease, background-color 160ms ease !important;
+}
+
+.dark .glass-panel,
+.dark .premium-card,
+.dark .surface-card,
+.dark .neu-surface,
+.dark .neu-card,
+.dark .bento-card,
+.dark .neu-bento-card,
+.dark .gray-card {
+  background-color: #080808 !important;
+  color: #f5f5f7;
+}
+
+.light .glass-panel,
+.light .premium-card,
+.light .surface-card,
+.light .neu-surface,
+.light .neu-card,
+.light .bento-card,
+.light .neu-bento-card,
+.light .gray-card {
+  background-color: #ffffff !important;
+  color: #171923;
+  border-color: #e2e5eb !important;
+}
+
+.glass-panel:hover,
+.premium-card:hover,
+.surface-card:hover,
+.neu-surface:hover,
+.neu-card:hover,
+.bento-card:hover,
+.neu-bento-card:hover,
+.gray-card:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  border-color: var(--accent) !important;
+}
+
+.dark .glass-panel:hover,
+.dark .premium-card:hover,
+.dark .surface-card:hover {
+  background-color: #0d0d0d !important;
+}
+
+.light .glass-panel:hover,
+.light .premium-card:hover,
+.light .surface-card:hover {
+  background-color: #ffffff !important;
+}
+
+.page-shell .text-gradient,
+.page-shell .text-gradient-purple,
+.page-shell .text-gradient-blue,
+.page-shell .text-gradient-orange {
+  background: none !important;
+  background-image: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.page-shell .text-gradient { color: var(--foreground) !important; }
+.page-shell .text-gradient-purple { color: var(--accent) !important; }
+.page-shell .text-gradient-blue { color: var(--accent-blue) !important; }
+.page-shell .text-gradient-orange { color: #d97706 !important; }
+
+.dark .text-foreground-muted,
+.dark .text-foreground-light { color: #a1a1aa; }
+.light .text-foreground-muted { color: #5f6675 !important; }
+.light .text-foreground-light { color: #404655 !important; }
+
+*:focus-visible {
+  outline: 2px solid var(--accent-blue) !important;
+  outline-offset: 3px;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a {
+  touch-action: manipulation;
+}
+
+input,
+textarea,
+select {
+  min-width: 0;
+  max-width: 100%;
+  border-radius: 0.75rem;
+}
+
+.dark input,
+.dark textarea,
+.dark select,
+.dark .control-input,
+.dark .neu-input {
+  color: #f5f5f7 !important;
+  background-color: #090909 !important;
+  border-color: #303034 !important;
+}
+
+.light input,
+.light textarea,
+.light select,
+.light .control-input,
+.light .neu-input {
+  color: #171923 !important;
+  background-color: #ffffff !important;
+  border-color: #d7dbe3 !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted) !important;
+  opacity: 1;
+}
+
+.btn-primary {
+  color: #ffffff !important;
+  background: #4f46e5 !important;
+  background-image: none !important;
+  border: 1px solid #4f46e5 !important;
+  box-shadow: none !important;
+}
+.btn-primary:hover {
+  background: #4338ca !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.page-shell button[class*="bg-gradient-to-r"],
+.page-shell a[class*="bg-gradient-to-r"] {
+  background-image: none !important;
+}
+
+/* Desktop: stable navigation with labels always visible; no hover-only discovery. */
+@media (min-width: 1024px) {
+  .desktop-sidebar {
+    width: 16rem !important;
+    padding: 1.25rem !important;
+    align-items: stretch !important;
+    gap: 2rem !important;
+    background: #000000 !important;
+    border-right: 1px solid #27272a !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .desktop-sidebar .sidebar-label {
+    max-width: none !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+  }
+
+  .desktop-sidebar > a {
+    justify-content: flex-start !important;
+  }
+
+  .desktop-sidebar nav a {
+    min-height: 44px;
+    border-radius: 0.75rem !important;
+    transition: background-color 160ms ease, color 160ms ease !important;
+  }
+
+  .desktop-sidebar nav a[aria-current="page"] {
+    color: #c7d2fe !important;
+    background: #171717 !important;
+    border: 1px solid #333333 !important;
+    box-shadow: none !important;
+  }
+
+  .desktop-sidebar nav a:not([aria-current="page"]):hover {
+    background: #111111 !important;
+  }
+
+  header.fixed.top-0.z-40 {
+    left: 16rem !important;
+    background: #000000 !important;
+    border-bottom: 1px solid #27272a !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+
+  main[class*="lg:pl-"] {
+    padding-left: 16rem !important;
+  }
+
+  .light .desktop-sidebar,
+  .light header.fixed.top-0.z-40 {
+    background: #ffffff !important;
+    border-color: #e2e5eb !important;
+  }
+
+  .light .desktop-sidebar nav a[aria-current="page"] {
+    color: #3730a3 !important;
+    background: #eef2ff !important;
+    border-color: #c7d2fe !important;
+  }
+
+  .light .desktop-sidebar nav a:not([aria-current="page"]):hover {
+    background: #f3f4f6 !important;
+  }
+}
+
+/* Tablet: reclaim horizontal space and let cards adapt naturally. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  main[class*="lg:pl-"] { padding-left: 0 !important; }
+  .page-shell main > div.max-w-7xl {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+}
+
+/* Mobile first: compact rhythm, comfortable touch targets and no hidden content. */
+@media (max-width: 767px) {
+  body { font-size: 14px; }
+
+  header.fixed.top-0.z-40 {
+    left: 0 !important;
+    height: 60px;
+    background: var(--background) !important;
+    border-bottom: 1px solid var(--glass-border) !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+
+  header.fixed.top-0.z-40 > div {
+    height: 60px !important;
+    min-height: 60px !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    gap: 0.5rem;
+  }
+
+  header.fixed.top-0.z-40 a[href="/admin"] {
+    display: none !important;
+  }
+
+  header.fixed.top-0.z-40 a[href="/login"] {
+    padding: 0.5rem !important;
+    font-size: 0.8125rem !important;
+  }
+
+  header.fixed.top-0.z-40 button {
+    min-height: 40px;
+    min-width: 40px;
+  }
+
+  main[class*="lg:pl-"] {
+    padding-left: 0 !important;
+    padding-top: 60px !important;
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)) !important;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .page-shell main > div.max-w-7xl {
+    width: 100%;
+    max-width: 100%;
+    padding: 1.25rem 1rem 1.5rem !important;
+  }
+
+  .page-shell main > div.max-w-7xl > *:first-child {
+    margin-top: 0 !important;
+  }
+
+  .page-shell h1 {
+    font-size: clamp(1.7rem, 7vw, 2.15rem) !important;
+    line-height: 1.15 !important;
+    letter-spacing: -0.035em !important;
+    overflow-wrap: anywhere;
+  }
+
+  .page-shell h2 {
+    font-size: clamp(1.2rem, 5vw, 1.45rem) !important;
+    line-height: 1.25 !important;
+  }
+
+  .page-shell h3 {
+    overflow-wrap: anywhere;
+  }
+
+  .page-shell p {
+    overflow-wrap: anywhere;
+  }
+
+  .page-shell .grid {
+    gap: 0.75rem !important;
+  }
+
+  .page-shell .premium-card,
+  .page-shell .glass-panel,
+  .page-shell .surface-card {
+    border-radius: 0.9rem !important;
+  }
+
+  .page-shell main .premium-card,
+  .page-shell main .glass-panel {
+    padding: 0.875rem !important;
+  }
+
+  .page-shell main .premium-card .size-12 {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    border-radius: 0.75rem !important;
+    box-shadow: none !important;
+  }
+
+  .page-shell main .glass-panel .size-14 {
+    width: 2.75rem !important;
+    height: 2.75rem !important;
+    border-radius: 0.75rem !important;
+  }
+
+  .page-shell main .flex.items-center.justify-between {
+    gap: 0.75rem;
+  }
+
+  .page-shell main .fixed.right-6.bottom-6.z-30 {
+    right: 1rem !important;
+    bottom: calc(1rem + env(safe-area-inset-bottom)) !important;
+  }
+
+  .page-shell main .fixed.right-6.bottom-6.z-30 button {
+    min-height: 46px !important;
+    height: 46px !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    border-radius: 999px !important;
+    font-size: 0.8125rem !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  .page-shell .admin-tabs-scroll {
+    max-width: 100%;
+    padding-bottom: 0.25rem;
+  }
+
+  .page-shell table {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+
+  .page-shell th,
+  .page-shell td {
+    padding: 0.7rem 0.75rem !important;
+  }
+
+  .page-shell main .flex.gap-3,
+  .page-shell main .flex.gap-4 {
+    min-width: 0;
+  }
+
+  .page-shell main .glass-panel input,
+  .page-shell main .glass-panel textarea,
+  .page-shell main .glass-panel select,
+  .page-shell main input,
+  .page-shell main textarea,
+  .page-shell main select {
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+
+  .page-shell main button,
+  .page-shell main a[role="button"] {
+    min-height: 42px;
+  }
+
+  /* The mobile drawer is a real navigation surface, not a translucent overlay. */
+  div.fixed.left-0.top-0.bottom-0.z-50 {
+    width: min(86vw, 320px) !important;
+    padding: 1.125rem !important;
+    background: var(--surface-solid) !important;
+    border-right: 1px solid var(--glass-border) !important;
+    box-shadow: 12px 0 40px rgba(0, 0, 0, 0.28) !important;
+    backdrop-filter: none !important;
+  }
+
+  .dark div.fixed.left-0.top-0.bottom-0.z-50 {
+    background: #080808 !important;
+  }
+
+  .light div.fixed.left-0.top-0.bottom-0.z-50 {
+    background: #ffffff !important;
+  }
+
+  .page-shell footer {
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)) !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .page-shell main > div.max-w-7xl {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .page-shell .grid.grid-cols-2 {
+    gap: 0.625rem !important;
+  }
+
+  .page-shell main .premium-card,
+  .page-shell main .glass-panel {
+    padding: 0.75rem !important;
+  }
+
+  header.fixed.top-0.z-40 > div {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

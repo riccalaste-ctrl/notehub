@@ -37,8 +37,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to fetch user uploads' }, { status: 500 });
   }
 
+  const privateUploads = (data || []).map((upload) => ({
+    ...upload,
+    view_url: `/api/uploads/${upload.id}/file`,
+    download_url: `/api/uploads/${upload.id}/file?download=1`,
+  }));
+
   return NextResponse.json({
-    uploads: data || [],
+    uploads: privateUploads,
     offset,
     limit,
   });

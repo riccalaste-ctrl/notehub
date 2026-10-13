@@ -848,17 +848,17 @@ export default function AdminPage() {
             <nav aria-label="Navigazione amministrazione" className="admin-tabs-scroll flex gap-5 overflow-x-auto custom-scrollbar pr-10" tabIndex={0}>
 
             {[
-              { id: 'dashboard' as const, label: 'Dashboard', icon: LayoutDashboard },
-              { id: 'subjects' as const, label: 'Materie', icon: BookOpen },
-              { id: 'professors' as const, label: 'Professori', icon: Users },
-              { id: 'subject-professors' as const, label: 'Associazioni', icon: LinkIcon },
-              { id: 'uploads' as const, label: 'File', icon: FileText },
-              { id: 'reports' as const, label: 'Segnalazioni', icon: Flag },
-              { id: 'consigli' as const, label: 'Consigli', icon: Lightbulb },
-              { id: 'settings' as const, label: 'Impostazioni', icon: Settings },
-              { id: 'cleanup' as const, label: 'Pulizia DB', icon: Database },
-              { id: 'blocked-users' as const, label: 'Utenti bloccati', icon: Ban },
-              { id: 'titolare' as const, label: 'Titolare', icon: Shield },
+              { id: 'dashboard' as const, label: 'Panoramica', group: 'Generale', icon: LayoutDashboard },
+              { id: 'subjects' as const, label: 'Materie', group: 'Contenuti', icon: BookOpen },
+              { id: 'professors' as const, label: 'Professori', group: 'Contenuti', icon: Users },
+              { id: 'subject-professors' as const, label: 'Associazioni', group: 'Contenuti', icon: LinkIcon },
+              { id: 'uploads' as const, label: 'File caricati', group: 'Contenuti', icon: FileText },
+              { id: 'consigli' as const, label: 'Consigli', group: 'Contenuti', icon: Lightbulb },
+              { id: 'reports' as const, label: 'Segnalazioni', group: 'Moderazione', icon: Flag },
+              { id: 'blocked-users' as const, label: 'Utenti bloccati', group: 'Moderazione', icon: Ban },
+              { id: 'settings' as const, label: 'Impostazioni', group: 'Configurazione', icon: Settings },
+              { id: 'titolare' as const, label: 'Titolare', group: 'Configurazione', icon: Shield },
+              { id: 'cleanup' as const, label: 'Pulizia database', group: 'Sistema', icon: Database },
             ].map((tab) => {
               const Icon = tab.icon;
               return (
@@ -866,10 +866,11 @@ export default function AdminPage() {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   aria-current={activeTab === tab.id ? 'page' : undefined}
-                  className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-all whitespace-nowrap ${
+                  title={`${tab.group} · ${tab.label}`}
+                  className={`flex items-center gap-2 py-3 px-3 border-b-2 font-medium text-sm transition-all whitespace-nowrap rounded-t-lg ${
                     activeTab === tab.id
-                      ? 'border-cyan-300 text-cyan-300'
-                      : 'border-transparent text-foreground-muted hover:text-white hover:border-white/20'
+                      ? 'border-cyan-300 text-cyan-300 bg-cyan-300/5'
+                      : 'border-transparent text-foreground-muted hover:text-white hover:bg-white/5 hover:border-white/20'
                   }`}
                 >
                   <Icon className="size-4" />
@@ -1627,7 +1628,12 @@ export default function AdminPage() {
               <h2 className="text-2xl font-semibold text-white">Impostazioni Sito</h2>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-8">
+              <section aria-labelledby="settings-comms-heading" className="space-y-4">
+                <div className="border-b border-white/10 pb-3">
+                  <h3 id="settings-comms-heading" className="text-base font-semibold text-white">Comunicazioni e notifiche</h3>
+                  <p className="mt-1 text-sm text-foreground-muted">Indirizzi usati per i messaggi degli studenti e le segnalazioni.</p>
+                </div>
               <div className="glass-panel p-6 border border-white/10">
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                   <Mail className="size-5 text-neon-blue" />
@@ -1744,6 +1750,12 @@ export default function AdminPage() {
                 </div>
               </div>
 
+              </section>
+              <section aria-labelledby="settings-legal-heading" className="space-y-4">
+                <div className="border-b border-white/10 pb-3">
+                  <h3 id="settings-legal-heading" className="text-base font-semibold text-white">Privacy e informazioni legali</h3>
+                  <p className="mt-1 text-sm text-foreground-muted">Dati utilizzati nelle informative pubbliche del sito.</p>
+                </div>
               <div className="glass-panel p-6 border border-white/10">
                 <h3 className="text-lg font-semibold text-white mb-2">Informazioni legali pubbliche</h3>
                 <p className="text-sm text-foreground-muted mb-5">
@@ -1784,6 +1796,12 @@ export default function AdminPage() {
                 </div>
               </div>
 
+              </section>
+              <section aria-labelledby="settings-policy-heading" className="space-y-4">
+                <div className="border-b border-white/10 pb-3">
+                  <h3 id="settings-policy-heading" className="text-base font-semibold text-white">Policy del sito</h3>
+                  <p className="mt-1 text-sm text-foreground-muted">Testo mostrato agli utenti nel footer.</p>
+                </div>
               <div className="glass-panel p-6 border border-white/10">
                 <h3 className="text-lg font-semibold text-white mb-4">Policy & Responsabilità</h3>
                 <p className="text-sm text-foreground-muted mb-4">
@@ -1818,6 +1836,12 @@ export default function AdminPage() {
                 </button>
               </div>
 
+              </section>
+              <section aria-labelledby="settings-access-heading" className="space-y-4">
+                <div className="border-b border-white/10 pb-3">
+                  <h3 id="settings-access-heading" className="text-base font-semibold text-white">Accessi autorizzati</h3>
+                  <p className="mt-1 text-sm text-foreground-muted">Eccezioni temporanee al dominio istituzionale.</p>
+                </div>
               <div className="glass-panel p-6 border border-white/10">
                 <h3 className="text-lg font-semibold text-white mb-4">Email esterne consentite (temporanee)</h3>
                 <p className="text-sm text-foreground-muted mb-4">
@@ -1865,6 +1889,12 @@ export default function AdminPage() {
                 </button>
               </div>
 
+              </section>
+              <section aria-labelledby="settings-audit-heading" className="space-y-4">
+                <div className="border-b border-white/10 pb-3">
+                  <h3 id="settings-audit-heading" className="text-base font-semibold text-white">Registro delle attività</h3>
+                  <p className="mt-1 text-sm text-foreground-muted">Consulta ed esporta le operazioni amministrative.</p>
+                </div>
               <div className="glass-panel p-6 border border-white/10">
                 <h3 className="text-lg font-semibold text-white mb-3">Audit Log</h3>
                 <p className="text-sm text-foreground-muted mb-4">
@@ -1917,6 +1947,7 @@ export default function AdminPage() {
                   )}
                 </div>
               </div>
+              </section>
             </div>
           </div>
         )}

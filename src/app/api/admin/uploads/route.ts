@@ -46,7 +46,13 @@ export async function GET(request: NextRequest) {
 
     if (error) throw error;
 
-    return NextResponse.json({ uploads: data || [] });
+    const privateUploads = (data || []).map((upload) => ({
+      ...upload,
+      view_url: `/api/uploads/${upload.id}/file`,
+      download_url: `/api/uploads/${upload.id}/file?download=1`,
+    }));
+
+    return NextResponse.json({ uploads: privateUploads });
   } catch (error) {
     console.error('Error fetching uploads:', error);
     return NextResponse.json(

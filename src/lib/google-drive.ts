@@ -546,6 +546,25 @@ export async function verifyAndShareDriveFile(
     throw new Error('La dimensione del file Drive non coincide con la sessione');
   }
 
+  // Subject resources are intended to be opened by other authenticated NoteHub users,
+  // who may not be signed into the professor's Google account. Allow read access by link
+  // without making the file discoverable in Google Drive search.
+  const permissions = await drive.permissions.list({
+    fileId,
+    fields: 'permissions(id, type, role)',
+  });
+  const linkReaderExists = (permissions.data.permissions || []).some(
+    (permission) => permission.type === 'anyone' && permission.role === 'reader'
+  );
+
+  if (!linkReaderExists) {
+    await drive.permissions.create({
+      fileId,
+      requestBody: { type: 'anyone', role: 'reader', allowFileDiscovery: false },
+      fields: 'id, type, role',
+    });
+  }
+
   const sharedFile = await drive.files.get({
     fileId,
     fields: 'id, name, mimeType, size, webViewLink, webContentLink',

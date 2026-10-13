@@ -5,7 +5,6 @@ import { requireAdmin } from '@/lib/auth';
 import { getAuthorizedDriveForProfessor, verifyDriveFile } from '@/lib/google-drive';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 60;
 
 const bodySchema = z.object({
   offset: z.number().int().min(0).default(0),

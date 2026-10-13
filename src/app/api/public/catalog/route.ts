@@ -1,13 +1,17 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { isPreviewMode, previewProfessors, previewSubjectProfessors, previewSubjects } from '@/lib/preview-data';
+import { isPreviewMode, previewProfessors, previewSubjectProfessors, previewSubjects, previewUploads } from '@/lib/preview-data';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   if (isPreviewMode) {
+    const subjects = previewSubjects.map((subject) => ({
+      ...subject,
+      upload_count: previewUploads.filter((upload) => upload.subject_id === subject.id).length,
+    }));
     return NextResponse.json({
-      subjects: previewSubjects,
+      subjects,
       professors: previewProfessors,
       subjectProfessors: previewSubjectProfessors,
     });
@@ -38,6 +42,18 @@ export async function GET() {
     if (professorsResult.error) throw professorsResult.error;
     if (associationsResult.error) throw associationsResult.error;
 
+    const subjectsWithCounts = await Promise.all(
+      (subjectsResult.data || []).map(async (subject) => {
+        const { count, error } = await supabaseAdmin
+          .from('uploads')
+          .select('id', { count: 'exact', head: true })
+          .eq('subject_id', subject.id);
+
+        if (error) throw error;
+        return { ...subject, upload_count: count ?? 0 };
+      })
+    );
+
     const subjectProfessors = (associationsResult.data || []).map((association: any) => ({
       ...association,
       professor: Array.isArray(association.professor)
@@ -46,7 +62,7 @@ export async function GET() {
     }));
 
     return NextResponse.json({
-      subjects: subjectsResult.data || [],
+      subjects: subjectsWithCounts,
       professors: professorsResult.data || [],
       subjectProfessors,
     });

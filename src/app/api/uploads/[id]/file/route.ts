@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getAuthenticatedUserFromRequest } from '@/lib/user-session';
+import { getModerationState } from '@/lib/moderation';
+import { isPreviewMode } from '@/lib/preview-data';
 import { getAuthorizedDriveForProfessor, verifyDriveFile } from '@/lib/google-drive';
 
 export const dynamic = 'force-dynamic';
@@ -14,6 +16,13 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
   const user = await getAuthenticatedUserFromRequest(request);
   if (!user) {
     return NextResponse.json({ error: 'Accesso non autorizzato' }, { status: 401 });
+  }
+
+  if (!isPreviewMode) {
+    const moderation = await getModerationState(user.email);
+    if (moderation.blocked) {
+      return NextResponse.json({ error: 'Questo account non può accedere ai documenti.' }, { status: 403 });
+    }
   }
 
   const { id } = await params;

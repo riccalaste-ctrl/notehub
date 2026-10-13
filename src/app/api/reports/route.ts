@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
   const { data: upload, error: uploadError } = await supabaseAdmin
     .from('uploads')
-    .select('id, original_filename, uploader_name, owner_id, view_url, download_url')
+    .select('id, original_filename, uploader_name, owner_id')
     .eq('id', validation.data.uploadId)
     .maybeSingle();
 
@@ -67,8 +67,8 @@ export async function POST(request: NextRequest) {
       reason: validation.data.reason,
       file_name: upload.original_filename,
       uploader_name: upload.uploader_name || 'Nome non disponibile',
-      file_view_url: upload.view_url || '',
-      file_download_url: upload.download_url || '',
+      file_view_url: `${request.nextUrl.origin}/api/uploads/${upload.id}/file`,
+      file_download_url: `${request.nextUrl.origin}/api/uploads/${upload.id}/file?download=1`,
     })
     .select('id')
     .single();
@@ -83,8 +83,8 @@ export async function POST(request: NextRequest) {
       uploaderName: upload.uploader_name || 'Nome non disponibile',
       uploaderEmail,
       reason: validation.data.reason,
-      viewUrl: upload.view_url || '',
-      downloadUrl: upload.download_url || '',
+      viewUrl: `${request.nextUrl.origin}/api/uploads/${upload.id}/file`,
+      downloadUrl: `${request.nextUrl.origin}/api/uploads/${upload.id}/file?download=1`,
     });
     await supabaseAdmin.from('reports').update({ email_sent_at: new Date().toISOString(), email_error: null }).eq('id', report.id);
     return NextResponse.json({ success: true, emailSent: true });

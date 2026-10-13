@@ -522,7 +522,7 @@ export function getUploadSessionExpiry(): string {
   return new Date(Date.now() + UPLOAD_SESSION_TTL_MS).toISOString();
 }
 
-export async function verifyAndShareDriveFile(
+export async function verifyDriveFile(
   auth: InstanceType<typeof google.auth.OAuth2>,
   fileId: string,
   folderId: string,
@@ -546,31 +546,20 @@ export async function verifyAndShareDriveFile(
     throw new Error('La dimensione del file Drive non coincide con la sessione');
   }
 
-  // Subject resources are intended to be opened by other authenticated NoteHub users,
-  // who may not be signed into the professor's Google account. Allow read access by link
-  // without making the file discoverable in Google Drive search.
+  // Keep the source file private in Google Drive. NoteHub serves it through an
+  // authenticated proxy, so public "anyone with the link" permissions are unnecessary.
   const permissions = await drive.permissions.list({
     fileId,
     fields: 'permissions(id, type, role)',
   });
-  const linkReaderExists = (permissions.data.permissions || []).some(
-    (permission) => permission.type === 'anyone' && permission.role === 'reader'
-  );
 
-  if (!linkReaderExists) {
-    await drive.permissions.create({
-      fileId,
-      requestBody: { type: 'anyone', role: 'reader', allowFileDiscovery: false },
-      fields: 'id, type, role',
-    });
+  for (const permission of permissions.data.permissions || []) {
+    if (permission.type === 'anyone' && permission.id) {
+      await drive.permissions.delete({ fileId, permissionId: permission.id });
+    }
   }
 
-  const sharedFile = await drive.files.get({
-    fileId,
-    fields: 'id, name, mimeType, size, webViewLink, webContentLink',
-  });
-
-  return sharedFile.data;
+  return file.data;
 }
 
 export async function revokeProfessorDriveConnection(professorId: string): Promise<void> {

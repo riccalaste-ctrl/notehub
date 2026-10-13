@@ -182,6 +182,7 @@ export default function AdminPage() {
   const [consigli, setConsigli] = useState<Consiglio[]>([]);
   const [subjectProfessors, setSubjectProfessors] = useState<SubjectProfessor[]>([]);
   const [loading, setLoading] = useState(false);
+  const [privacyMigrationLoading, setPrivacyMigrationLoading] = useState(false);
   const [editingSubjectId, setEditingSubjectId] = useState<string | null>(null);
   const [editingProfessorId, setEditingProfessorId] = useState<string | null>(null);
   const [editingConsiglioId, setEditingConsiglioId] = useState<string | null>(null);
@@ -618,6 +619,45 @@ export default function AdminPage() {
     await fetch(`/api/admin/uploads?id=${id}`, { method: 'DELETE' });
     showToast('File eliminato', 'success');
     await fetchData();
+  };
+
+  const secureExistingDriveFiles = async () => {
+    if (!confirm('Rendere privati i file Drive già caricati? NoteHub rimuoverà i permessi pubblici "chiunque abbia il link" dai file registrati, mantenendo gli accessi espliciti già presenti.')) return;
+
+    setPrivacyMigrationLoading(true);
+    let offset = 0;
+    let processed = 0;
+    let secured = 0;
+    let failed = 0;
+
+    try {
+      for (let batch = 0; batch < 1000; batch += 1) {
+        const response = await fetch('/api/admin/drive-privacy-migration', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ offset, limit: 10 }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Migrazione privacy non riuscita');
+
+        processed += Number(result.processed || 0);
+        secured += Number(result.secured || 0);
+        failed += Number(result.failed || 0);
+        offset = Number(result.nextOffset || offset);
+
+        if (result.complete || Number(result.processed) === 0) break;
+      }
+
+      showToast(
+        `Privacy Drive: ${secured}/${processed} file protetti${failed ? `; ${failed} da verificare nella risposta API` : ''}`,
+        failed ? 'error' : 'success'
+      );
+      await fetchData();
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Migrazione privacy non riuscita', 'error');
+    } finally {
+      setPrivacyMigrationLoading(false);
+    }
   };
 
   const connectDrive = (professorId: string) => {
@@ -1214,11 +1254,22 @@ export default function AdminPage() {
 
         {activeTab === 'uploads' && (
           <div>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-neon-pink/20 border border-neon-pink/30 flex items-center justify-center">
-                <Database className="size-5 text-neon-pink" />
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-neon-pink/20 border border-neon-pink/30 flex items-center justify-center">
+                  <Database className="size-5 text-neon-pink" />
+                </div>
+                <h2 className="text-2xl font-semibold text-white">File Caricati ({uploads.length})</h2>
               </div>
-              <h2 className="text-2xl font-semibold text-white">File Caricati ({uploads.length})</h2>
+              <button
+                onClick={secureExistingDriveFiles}
+                disabled={privacyMigrationLoading || preview}
+                className="px-4 py-2.5 text-sm rounded-xl border border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:bg-emerald-400/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                title="Rimuove i permessi pubblici dai file Drive già registrati"
+              >
+                <Shield className="size-4" />
+                {privacyMigrationLoading ? 'Protezione file in corso…' : 'Proteggi file già caricati'}
+              </button>
             </div>
 
             <div className="glass-panel overflow-hidden border border-white/10">

@@ -81,14 +81,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const uploadsWithDetails = uploads?.map((upload) => {
-      return {
-        ...upload,
-        subject_name: upload.subject?.[0]?.name,
-        subject_slug: upload.subject?.[0]?.slug,
-        professor_name: upload.professor?.[0]?.name,
-      };
-    }) || [];
+    const uploadsWithDetails = uploads?.map((upload) => ({
+      ...upload,
+      // Never expose stored Google Drive URLs; all access goes through NoteHub auth.
+      view_url: `/api/uploads/${upload.id}/file`,
+      download_url: `/api/uploads/${upload.id}/file?download=1`,
+      subject_name: upload.subject?.[0]?.name,
+      subject_slug: upload.subject?.[0]?.slug,
+      professor_name: upload.professor?.[0]?.name,
+    })) || [];
 
     return NextResponse.json({
       uploads: uploadsWithDetails,

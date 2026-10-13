@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
 import { z } from 'zod';
 import { supabaseAdmin } from '@/lib/supabase';
 import {
   DriveNotConnectedError,
   getAuthorizedDriveForProfessor,
-  verifyAndShareDriveFile,
+  verifyDriveFile,
 } from '@/lib/google-drive';
 import { getAuthenticatedUserFromRequest } from '@/lib/user-session';
 import { logFileUpload } from '@/lib/audit-logger';
@@ -18,14 +19,6 @@ const completeUploadSchema = z.object({
   driveFileId: z.string().min(1).max(256),
   serviceRulesAccepted: z.literal(true),
 });
-
-function getPublicDownloadUrl(fileId: string): string {
-  return `https://drive.google.com/uc?id=${encodeURIComponent(fileId)}&export=download`;
-}
-
-function getPublicViewUrl(fileId: string): string {
-  return `https://drive.google.com/file/d/${encodeURIComponent(fileId)}/view?usp=sharing`;
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -95,16 +88,19 @@ export async function POST(request: NextRequest) {
     }
 
     const authorized = await getAuthorizedDriveForProfessor(session.professor_id);
-    const driveFile = await verifyAndShareDriveFile(
+    const driveFile = await verifyDriveFile(
       authorized.auth,
       driveFileId,
       session.drive_folder_id,
       Number(session.size_bytes)
     );
 
+    const uploadId = randomUUID();
+    const appOrigin = request.nextUrl.origin;
     const { data: upload, error: insertError } = await supabaseAdmin
       .from('uploads')
       .insert({
+        id: uploadId,
         subject_id: session.subject_id,
         professor_id: session.professor_id,
         owner_id: session.owner_id || user.id,
@@ -112,8 +108,8 @@ export async function POST(request: NextRequest) {
         drive_file_id: driveFileId,
         drive_folder_id: session.drive_folder_id,
         drive_connection_id: session.drive_connection_id,
-        download_url: getPublicDownloadUrl(driveFileId),
-        view_url: getPublicViewUrl(driveFileId),
+        download_url: `${appOrigin}/api/uploads/${uploadId}/file?download=1`,
+        view_url: `${appOrigin}/api/uploads/${uploadId}/file`,
         mime_type: driveFile.mimeType || session.mime_type,
         size_bytes: Number(driveFile.size || session.size_bytes),
         uploader_name: session.uploader_name || null,
